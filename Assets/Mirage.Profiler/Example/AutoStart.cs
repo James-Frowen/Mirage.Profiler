@@ -2,7 +2,7 @@ using Cysharp.Threading.Tasks;
 using Mirage.Sockets.Udp;
 using UnityEngine;
 
-namespace Mirage.Profiler.Example
+namespace Mirage.NetworkProfiler.Example
 {
     public class AutoStart : MonoBehaviour
     {

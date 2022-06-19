@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Mirage.Profiler.Example
+namespace Mirage.NetworkProfiler.Example
 {
     [RequireComponent(typeof(NetworkIdentity))]
     [RequireComponent(typeof(NetworkTransform))]
