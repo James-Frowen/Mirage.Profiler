@@ -1,9 +1,10 @@
 using UnityEngine;
+
 namespace Mirage.Profiler.Example
 {
     [RequireComponent(typeof(NetworkIdentity))]
     [RequireComponent(typeof(NetworkTransform))]
-    public class ProfilerPlayer : NetworkBehaviour
+    public class ExamplePlayer : NetworkBehaviour
     {
         [SerializeField] float _moveSpeed = 10;
         [SerializeField] float _rotateSpeed = 10;

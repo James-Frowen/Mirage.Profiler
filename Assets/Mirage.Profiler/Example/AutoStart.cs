@@ -1,9 +1,8 @@
 using Cysharp.Threading.Tasks;
-using Mirage.Profiler.Example;
 using Mirage.Sockets.Udp;
 using UnityEngine;
 
-namespace Mirage.Profiler
+namespace Mirage.Profiler.Example
 {
     public class AutoStart : MonoBehaviour
     {
@@ -26,7 +25,7 @@ namespace Mirage.Profiler
             prefab.SetActive(false);
             NetworkIdentity prefabIdentity = prefab.AddComponent<NetworkIdentity>();
             prefab.AddComponent<NetworkTransform>();
-            prefab.AddComponent<ProfilerPlayer>();
+            prefab.AddComponent<ExamplePlayer>();
             const int PREFAB_HASH = 1;
 
             var serverGO = new GameObject("server");
@@ -68,7 +67,8 @@ namespace Mirage.Profiler
 
         private void SetupProfiler(NetworkServer server)
         {
-            //
+            NetworkProfilerBehaviour profiler = server.gameObject.AddComponent<NetworkProfilerBehaviour>();
+            profiler.Server = server;
         }
     }
 }
