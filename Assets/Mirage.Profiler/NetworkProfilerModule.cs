@@ -17,8 +17,8 @@ namespace Mirage.Profiler
 
         private void Start()
         {
-            sentCounter = new CountRecorder(NetworkProfilerCounters.MessageSentCount);
-            receivedCounter = new CountRecorder(NetworkProfilerCounters.MessageReceivedCount);
+            sentCounter = new CountRecorder(Server, NetworkProfilerCounters.MessageSentCount);
+            receivedCounter = new CountRecorder(Server, NetworkProfilerCounters.MessageReceivedCount);
 
             receivedCounter.Debug = true;
 
@@ -69,16 +69,22 @@ namespace Mirage.Profiler
     class CountRecorder
     {
         readonly ProfilerCounter<int> profiler;
+        readonly object instance;
+
         int count;
         public bool Debug;
 
-        public CountRecorder(ProfilerCounter<int> profiler)
+        public CountRecorder(object instance, ProfilerCounter<int> profiler)
         {
+            this.instance = instance;
             this.profiler = profiler;
         }
 
         public void OnMessage(NetworkDiagnostics.MessageInfo obj)
         {
+            if (obj.instance != instance)
+                return;
+
             count += obj.count;
             if (Debug) UnityEngine.Debug.Log($"Message: {obj.count}");
         }
@@ -101,7 +107,7 @@ namespace Mirage.Profiler.ModuleGUI
         {
             new ProfilerCounterDescriptor(NetworkProfilerCounters.PLAYER_COUNT, NetworkProfilerCounters.Category),
             new ProfilerCounterDescriptor(NetworkProfilerCounters.MESSAGES_SENT, NetworkProfilerCounters.Category),
-            new ProfilerCounterDescriptor(NetworkProfilerCounters.MESSAGES_RECEIVED,  NetworkProfilerCounters.Category),
+            new ProfilerCounterDescriptor(NetworkProfilerCounters.MESSAGES_RECEIVED, NetworkProfilerCounters.Category),
         };
 
         public NetworkProfilerModule() : base(k_Counters) { }
