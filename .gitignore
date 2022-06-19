@@ -45,6 +45,7 @@ Mirage/packages
 .mfractor
 
 # Unity generated
+/[Uu]ser[Ss]ettings/
 Library
 Temp
 UnityPackageManager
