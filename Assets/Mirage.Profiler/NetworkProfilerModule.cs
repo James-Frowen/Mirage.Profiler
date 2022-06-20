@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Profiling;
 using Unity.Profiling.Editor;
 using UnityEditor;
@@ -12,13 +13,16 @@ namespace Mirage.NetworkProfiler
     {
         public NetworkServer Server;
 
-        CountRecorder sentCounter;
-        CountRecorder receivedCounter;
+        internal static CountRecorder sentCounter;
+        internal static CountRecorder receivedCounter;
 
+        
+        const int frameCount = 300; // todo find a way to get real frame count
         private void Start()
         {
-            sentCounter = new CountRecorder(Server, Counters.SentMessagesCount, Counters.SentMessagesBytes);
-            receivedCounter = new CountRecorder(Server, Counters.ReceiveMessagesCount, Counters.ReceiveMessagesBytes);
+
+            sentCounter = new CountRecorder(frameCount, Server, Counters.SentMessagesCount, Counters.SentMessagesBytes);
+            receivedCounter = new CountRecorder(frameCount, Server, Counters.ReceiveMessagesCount, Counters.ReceiveMessagesBytes);
 
             NetworkDiagnostics.InMessageEvent += receivedCounter.OnMessage;
             NetworkDiagnostics.OutMessageEvent += sentCounter.OnMessage;
@@ -37,13 +41,16 @@ namespace Mirage.NetworkProfiler
                 return;
 
             Counters.PlayerCount.Sample(Server.Players.Count);
-            sentCounter.Flush();
-            receivedCounter.Flush();
+            sentCounter.EndFrame();
+            receivedCounter.EndFrame();
+            Counters.InternalFrameCounter.Sample(Time.frameCount % frameCount);
         }
     }
 
     public class Names
     {
+        internal const string INTERNAL_FRAME_COUNTER = "INTERNAL_FRAME_COUNTER";
+
         public const string PLAYER_COUNT = "Player Count";
         public const string MESSAGES_SENT_COUNT = "Sent Messages";
         public const string MESSAGES_SENT_BYTES = "Sent Bytes";
@@ -54,6 +61,7 @@ namespace Mirage.NetworkProfiler
     {
         public static readonly ProfilerCategory Category = ProfilerCategory.Network;
 
+        internal static readonly ProfilerCounter<int> InternalFrameCounter;
         public static readonly ProfilerCounter<int> PlayerCount;
         public static readonly ProfilerCounter<int> SentMessagesCount;
         public static readonly ProfilerCounter<int> SentMessagesBytes;
@@ -65,6 +73,7 @@ namespace Mirage.NetworkProfiler
             ProfilerMarkerDataUnit count = ProfilerMarkerDataUnit.Count;
             ProfilerMarkerDataUnit bytes = ProfilerMarkerDataUnit.Bytes;
 
+            InternalFrameCounter = new ProfilerCounter<int>(Category, Names.INTERNAL_FRAME_COUNTER, count);
             PlayerCount = new ProfilerCounter<int>(Category, Names.PLAYER_COUNT, count);
             SentMessagesCount = new ProfilerCounter<int>(Category, Names.MESSAGES_SENT_COUNT, count);
             SentMessagesBytes = new ProfilerCounter<int>(Category, Names.MESSAGES_SENT_BYTES, bytes);
@@ -72,22 +81,33 @@ namespace Mirage.NetworkProfiler
             ReceiveMessagesBytes = new ProfilerCounter<int>(Category, Names.MESSAGES_RECEIVED_BYTES, bytes);
         }
     }
-
+    internal class Frame
+    {
+        public readonly List<NetworkDiagnostics.MessageInfo> Messages = new List<NetworkDiagnostics.MessageInfo>();
+        public int Bytes;
+    }
     class CountRecorder
     {
         readonly ProfilerCounter<int> profilerCount;
         readonly ProfilerCounter<int> profilerBytes;
         readonly object instance;
+        internal readonly Frame[] frames;
 
         int count;
         int bytes;
 
-        public CountRecorder(object instance, ProfilerCounter<int> profilerCount, ProfilerCounter<int> profilerBytes)
+
+        public CountRecorder(int bufferSize, object instance, ProfilerCounter<int> profilerCount, ProfilerCounter<int> profilerBytes)
         {
             this.instance = instance;
             this.profilerCount = profilerCount;
             this.profilerBytes = profilerBytes;
+            frames = new Frame[bufferSize];
+            for (int i = 0; i < frames.Length; i++)
+                frames[i] = new Frame();
         }
+
+
 
         public void OnMessage(NetworkDiagnostics.MessageInfo obj)
         {
@@ -99,14 +119,19 @@ namespace Mirage.NetworkProfiler
 
             count += obj.count;
             bytes += obj.bytes;
+            Frame frame = frames[Time.frameCount % frames.Length];
+            frame.Messages.Add(obj);
+            frame.Bytes++;
         }
 
-        public void Flush()
+        public void EndFrame()
         {
             profilerCount.Sample(count);
             profilerBytes.Sample(bytes);
             count = 0;
             bytes = 0;
+            Frame frame = frames[(Time.frameCount + 1) % frames.Length];
+            frame.Messages.Clear();
         }
     }
 }
@@ -141,6 +166,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         Label MessagesSentBytes;
         Label MessagesReceivedCount;
         Label MessagesReceivedBytes;
+        private VisualElement messageView;
 
         // Define a constructor for the view controller, which calls the base constructor with the Profiler Window passed from the module.
         public NetworkProfilerModuleViewController(ProfilerWindow profilerWindow) : base(profilerWindow) { }
@@ -148,12 +174,13 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         // Override CreateView to build the custom module details panel.
         protected override VisualElement CreateView()
         {
-            var view = new VisualElement();
-            PlayerCount = AddLabelWithPadding(view);
-            MessagesSentCount = AddLabelWithPadding(view);
-            MessagesSentBytes = AddLabelWithPadding(view);
-            MessagesReceivedCount = AddLabelWithPadding(view);
-            MessagesReceivedBytes = AddLabelWithPadding(view);
+            var root = new VisualElement();
+            VisualElement dataView = CreateDataView();
+
+            messageView = AddMessageView();
+            root.style.flexDirection = new StyleEnum<FlexDirection>(FlexDirection.Row);
+            root.Add(dataView);
+            root.Add(messageView);
 
             // Populate the label with the current data for the selected frame. 
             ReloadData();
@@ -161,9 +188,31 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             // Be notified when the selected frame index in the Profiler Window changes, so we can update the label.
             ProfilerWindow.SelectedFrameIndexChanged += OnSelectedFrameIndexChanged;
 
-            return view;
-
+            return root;
         }
+
+        void OnSelectedFrameIndexChanged(long selectedFrameIndex)
+        {
+            // Update the label with the current data for the newly selected frame.
+            ReloadData();
+        }
+
+        private VisualElement CreateDataView()
+        {
+            var dataView = new VisualElement();
+            PlayerCount = AddLabelWithPadding(dataView);
+            MessagesSentCount = AddLabelWithPadding(dataView);
+            MessagesSentBytes = AddLabelWithPadding(dataView);
+            MessagesReceivedCount = AddLabelWithPadding(dataView);
+            MessagesReceivedBytes = AddLabelWithPadding(dataView);
+            return dataView;
+        }
+
+        private static VisualElement AddMessageView()
+        {
+            return new VisualElement();
+        }
+
         static Label AddLabelWithPadding(VisualElement view)
         {
             var label = new Label() { style = { paddingTop = 8, paddingLeft = 8 } };
@@ -190,7 +239,10 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             SetText(MessagesSentBytes, Names.MESSAGES_SENT_BYTES);
             SetText(MessagesReceivedCount, Names.MESSAGES_RECEIVED_COUNT);
             SetText(MessagesReceivedBytes, Names.MESSAGES_RECEIVED_BYTES);
+
+            reloadMessages();
         }
+
         void SetText(Label label, string name)
         {
             int frame = (int)ProfilerWindow.selectedFrameIndex;
@@ -200,10 +252,60 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             label.text = $"{name}: {value}";
         }
 
-        void OnSelectedFrameIndexChanged(long selectedFrameIndex)
+
+
+        private void reloadMessages()
         {
-            // Update the label with the current data for the newly selected frame.
-            ReloadData();
+            messageView.Clear();
+
+            int count = 0;
+            Frame frame = default;
+            if (NetworkProfilerBehaviour.sentCounter != null)
+            {
+                var frameIndexStr = ProfilerDriver.GetFormattedCounterValue((int)ProfilerWindow.selectedFrameIndex, ProfilerCategory.Network.Name, Names.INTERNAL_FRAME_COUNTER);
+                int frameIndex = 0;
+                if (!string.IsNullOrEmpty(frameIndexStr))
+                    frameIndex = int.Parse(frameIndexStr);
+
+                frame = NetworkProfilerBehaviour.sentCounter.frames[frameIndex];
+                count = frame.Messages.Count;
+            }
+
+            if (count == 0)
+            {
+                var label = new Label() { style = { paddingTop = 8, paddingLeft = 8 } };
+                messageView.Add(label);
+                label.text = $"No messages";
+                return;
+            }
+
+            foreach (NetworkDiagnostics.MessageInfo message in frame.Messages)
+            {
+                var label = new Label() { style = { paddingTop = 8, paddingLeft = 8 } };
+                messageView.Add(label);
+                string text = CreateTextForMessageInfo(message);
+                label.text = text;
+            }
+        }
+
+        private static string CreateTextForMessageInfo(NetworkDiagnostics.MessageInfo message)
+        {
+            string fullName = message.message.GetType().FullName;
+            int bytes = message.bytes;
+            int count = message.count;
+            int totalBytes = bytes * count;
+
+            uint? netid = default;
+            if (message.message is RpcMessage rpc1)
+                netid = rpc1.netId;
+            if (message.message is ServerRpcMessage rpc2)
+                netid = rpc2.netId;
+            if (message.message is ServerRpcWithReplyMessage rpc3)
+                netid = rpc3.netId;
+
+            string netidText = netid.HasValue ? $"netid={netid.Value}" : string.Empty;
+            string text = $"{fullName} [{bytes}*{count}={totalBytes}] {netidText}";
+            return text;
         }
     }
 }
