@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Mirage.NetworkProfiler.ModuleGUI;
 using Unity.Profiling;
 using Unity.Profiling.Editor;
 using UnityEditor;
@@ -117,8 +118,10 @@ namespace Mirage.NetworkProfiler
                 return;
 #endif
 
+            // Debug.Log($"{Time.frameCount % frames.Length} {NetworkProfilerModuleViewController.CreateTextForMessageInfo(obj)}");
+
             count += obj.count;
-            bytes += obj.bytes;
+            bytes += obj.bytes * obj.count;
             Frame frame = frames[Time.frameCount % frames.Length];
             frame.Messages.Add(obj);
             frame.Bytes++;
@@ -269,6 +272,11 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
                 frame = NetworkProfilerBehaviour.sentCounter.frames[frameIndex];
                 count = frame.Messages.Count;
+
+
+                // var label = new Label() { style = { paddingTop = 8, paddingLeft = 8 } };
+                // messageView.Add(label);
+                // label.text = $"DebugIndex: {frameIndex}";
             }
 
             if (count == 0)
@@ -288,7 +296,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             }
         }
 
-        private static string CreateTextForMessageInfo(NetworkDiagnostics.MessageInfo message)
+        public static string CreateTextForMessageInfo(NetworkDiagnostics.MessageInfo message)
         {
             string fullName = message.message.GetType().FullName;
             int bytes = message.bytes;
@@ -296,15 +304,30 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             int totalBytes = bytes * count;
 
             uint? netid = default;
+            int? compIndex = default;
             if (message.message is RpcMessage rpc1)
+            {
                 netid = rpc1.netId;
+                compIndex = rpc1.componentIndex;
+            }
             if (message.message is ServerRpcMessage rpc2)
+            {
                 netid = rpc2.netId;
+                compIndex = rpc2.componentIndex;
+            }
             if (message.message is ServerRpcWithReplyMessage rpc3)
+            {
                 netid = rpc3.netId;
+                compIndex = rpc3.componentIndex;
+            }
+            if (message.message is UpdateVarsMessage vars)
+            {
+                netid = vars.netId;
+            }
 
             string netidText = netid.HasValue ? $"netid={netid.Value}" : string.Empty;
-            string text = $"{fullName} [{bytes}*{count}={totalBytes}] {netidText}";
+            string compIdText = compIndex.HasValue ? $"compId={compIndex.Value}" : string.Empty;
+            string text = $"{fullName} [{bytes}*{count}={totalBytes}] {netidText} {compIdText}";
             return text;
         }
     }
