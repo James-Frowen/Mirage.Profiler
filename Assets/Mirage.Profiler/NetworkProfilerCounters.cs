@@ -1,34 +1,40 @@
 using System.Collections.Generic;
 using Unity.Profiling;
-using Unity.Profiling.Editor;
-using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Mirage.NetworkProfiler
 {
-
     public class Names
     {
         internal const string INTERNAL_FRAME_COUNTER = "INTERNAL_FRAME_COUNTER";
 
         public const string PLAYER_COUNT = "Player Count";
-        public const string MESSAGES_SENT_COUNT = "Sent Messages";
-        public const string MESSAGES_SENT_BYTES = "Sent Bytes";
-        public const string MESSAGES_RECEIVED_COUNT = "Received Messages";
-        public const string MESSAGES_RECEIVED_BYTES = "Received Bytes";
+        public const string OBJECT_COUNT = "Object Count";
+
+        public const string SENT_COUNT = "Sent Messages";
+        public const string SENT_BYTES = "Sent Bytes";
+        public const string SENT_PER_SECOND = "Sent Per Second";
+
+        public const string RECEIVED_COUNT = "Received Messages";
+        public const string RECEIVED_BYTES = "Received Bytes";
+        public const string RECEIVED_PER_SECOND = "Received Per Second";
     }
     internal class Counters
     {
         public static readonly ProfilerCategory Category = ProfilerCategory.Network;
 
         internal static readonly ProfilerCounter<int> InternalFrameCounter;
+
         public static readonly ProfilerCounter<int> PlayerCount;
-        public static readonly ProfilerCounter<int> SentMessagesCount;
-        public static readonly ProfilerCounter<int> SentMessagesBytes;
-        public static readonly ProfilerCounter<int> ReceiveMessagesCount;
-        public static readonly ProfilerCounter<int> ReceiveMessagesBytes;
+        public static readonly ProfilerCounter<int> ObjectCount;
+
+        public static readonly ProfilerCounter<int> SentCount;
+        public static readonly ProfilerCounter<int> SentBytes;
+        public static readonly ProfilerCounter<int> SentPerSecond;
+
+        public static readonly ProfilerCounter<int> ReceiveCount;
+        public static readonly ProfilerCounter<int> ReceiveBytes;
+        public static readonly ProfilerCounter<int> ReceivePerSecond;
 
         static Counters()
         {
@@ -37,10 +43,14 @@ namespace Mirage.NetworkProfiler
 
             InternalFrameCounter = new ProfilerCounter<int>(Category, Names.INTERNAL_FRAME_COUNTER, count);
             PlayerCount = new ProfilerCounter<int>(Category, Names.PLAYER_COUNT, count);
-            SentMessagesCount = new ProfilerCounter<int>(Category, Names.MESSAGES_SENT_COUNT, count);
-            SentMessagesBytes = new ProfilerCounter<int>(Category, Names.MESSAGES_SENT_BYTES, bytes);
-            ReceiveMessagesCount = new ProfilerCounter<int>(Category, Names.MESSAGES_RECEIVED_COUNT, count);
-            ReceiveMessagesBytes = new ProfilerCounter<int>(Category, Names.MESSAGES_RECEIVED_BYTES, bytes);
+
+            SentCount = new ProfilerCounter<int>(Category, Names.SENT_COUNT, count);
+            SentBytes = new ProfilerCounter<int>(Category, Names.SENT_BYTES, bytes);
+            SentPerSecond = new ProfilerCounter<int>(Category, Names.SENT_PER_SECOND, bytes);
+
+            ReceiveCount = new ProfilerCounter<int>(Category, Names.RECEIVED_COUNT, count);
+            ReceiveBytes = new ProfilerCounter<int>(Category, Names.RECEIVED_BYTES, bytes);
+            ReceivePerSecond = new ProfilerCounter<int>(Category, Names.RECEIVED_PER_SECOND, bytes);
         }
     }
     internal class Frame
@@ -59,7 +69,7 @@ namespace Mirage.NetworkProfiler
         int bytes;
 
 
-        public CountRecorder(int bufferSize, object instance, ProfilerCounter<int> profilerCount, ProfilerCounter<int> profilerBytes)
+        public CountRecorder(int bufferSize, object instance, ProfilerCounter<int> profilerCount, ProfilerCounter<int> profilerBytes, ProfilerCounter<int> sentPerSecond)
         {
             this.instance = instance;
             this.profilerCount = profilerCount;

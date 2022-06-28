@@ -8,19 +8,36 @@ using UnityEngine.UIElements;
 namespace Mirage.NetworkProfiler.ModuleGUI
 {
     [System.Serializable]
-    [ProfilerModuleMetadata("Network Profiler")]
-    public class NetworkProfilerModule : ProfilerModule
+    [ProfilerModuleMetadata("Network Profiler Sent")]
+    public class NetworkProfilerSentModule : ProfilerModule
     {
         static readonly ProfilerCounterDescriptor[] k_Counters = new ProfilerCounterDescriptor[]
         {
-            new ProfilerCounterDescriptor(Names.PLAYER_COUNT, Counters.Category),
             new ProfilerCounterDescriptor(Names.MESSAGES_SENT_COUNT, Counters.Category),
             new ProfilerCounterDescriptor(Names.MESSAGES_SENT_BYTES, Counters.Category),
-            new ProfilerCounterDescriptor(Names.MESSAGES_RECEIVED_COUNT, Counters.Category),
-            new ProfilerCounterDescriptor(Names.MESSAGES_RECEIVED_BYTES, Counters.Category),
+            new ProfilerCounterDescriptor(Names.MESSAGES_SENT_PER_SECOND, Counters.Category),
         };
 
-        public NetworkProfilerModule() : base(k_Counters) { }
+        public NetworkProfilerSentModule() : base(k_Counters) { }
+
+        public override ProfilerModuleViewController CreateDetailsViewController()
+        {
+            return new NetworkProfilerModuleViewController(ProfilerWindow);
+        }
+    }
+
+    [System.Serializable]
+    [ProfilerModuleMetadata("Network Profiler Received")]
+    public class NetworkProfilerReceivedModule : ProfilerModule
+    {
+        static readonly ProfilerCounterDescriptor[] k_Counters = new ProfilerCounterDescriptor[]
+        {
+            new ProfilerCounterDescriptor(Names.MESSAGES_RECEIVED_COUNT, Counters.Category),
+            new ProfilerCounterDescriptor(Names.MESSAGES_RECEIVED_BYTES, Counters.Category),
+            new ProfilerCounterDescriptor(Names.MESSAGES_RECEIVED_PER_SECOND, Counters.Category),
+        };
+
+        public NetworkProfilerReceivedModule() : base(k_Counters) { }
 
         public override ProfilerModuleViewController CreateDetailsViewController()
         {
@@ -32,8 +49,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI
     {
         // Define a label, which will display the total particle count for tank trails in the selected frame.
         Label PlayerCount;
-        Label MessagesSentCount;
-        Label MessagesSentBytes;
+        Label CountLabel;
+        Label BytesLabel;
         Label MessagesReceivedCount;
         Label MessagesReceivedBytes;
         private VisualElement messageView;

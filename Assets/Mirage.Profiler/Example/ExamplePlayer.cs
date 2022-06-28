@@ -61,13 +61,13 @@ namespace Mirage.NetworkProfiler.Example
             SendInuts(_clientInputs);
         }
 
-        [ServerRpc]
+        //[ServerRpc]
         private void SendInuts(Vector2Int clientInputs)
         {
             _serverInputs = clientInputs;
         }
 
-        [ClientRpc]
+        //[ClientRpc]
         private void RpcCounter(int counter)
         {
             // empty
