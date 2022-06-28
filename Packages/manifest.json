@@ -2,7 +2,7 @@
   "dependencies": {
     "com.miragenet.mirage": "https://github.com/MirageNet/Mirage.git?path=/Assets/Mirage#c23d0d1e4babf4fcfdff77cdcd72950c5a0f3aac",
     "com.unity.profiling.core": "1.0.2",
-    "com.unity.collab-proxy": "1.15.17",
+    "com.unity.collab-proxy": "1.15.18",
     "com.unity.feature.development": "1.0.1",
     "com.unity.ide.rider": "3.0.14",
     "com.unity.ide.visualstudio": "2.0.15",
