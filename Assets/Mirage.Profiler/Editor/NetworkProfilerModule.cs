@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using Unity.Profiling;
 using Unity.Profiling.Editor;
 using UnityEditor;
@@ -216,4 +215,3 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         }
     }
 }
-#endif

@@ -1,5 +1,3 @@
-﻿#if UNITY_EDITOR
-
 namespace Mirage.NetworkProfiler.ModuleGUI
 {
     static class ModuleNames
@@ -12,4 +10,3 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         public const string RECEIVED = PREFIX + " Received";
     }
 }
-#endif
