@@ -15,7 +15,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             new ProfilerCounterDescriptor(Names.SENT_COUNT, Counters.Category),
             new ProfilerCounterDescriptor(Names.SENT_BYTES, Counters.Category),
             new ProfilerCounterDescriptor(Names.SENT_PER_SECOND, Counters.Category),
-            new ProfilerCounterDescriptor(Names.SENT_MARKER, Counters.Category),
         };
 
         public NetworkProfilerSentModule() : base(k_Counters) { }
