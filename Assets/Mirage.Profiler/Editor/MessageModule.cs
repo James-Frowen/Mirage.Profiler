@@ -10,7 +10,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 {
     [System.Serializable]
     [ProfilerModuleMetadata(ModuleNames.SENT)]
-    public class SentModule : ProfilerModule
+    public class SentModule : ProfilerModule, ICountRecorderProvider
     {
         static readonly ProfilerCounterDescriptor[] k_Counters = new ProfilerCounterDescriptor[]
         {
@@ -29,13 +29,18 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 Names.SENT_PER_SECOND
             );
 
-            return new MessageViewController(ProfilerWindow, names);
+            return new MessageViewController(ProfilerWindow, names, this);
+        }
+
+        CountRecorder ICountRecorderProvider.GetCountRecorder()
+        {
+            return NetworkProfilerBehaviour.sentCounter;
         }
     }
 
     [System.Serializable]
     [ProfilerModuleMetadata(ModuleNames.RECEIVED)]
-    public class ReceivedModule : ProfilerModule
+    public class ReceivedModule : ProfilerModule, ICountRecorderProvider
     {
         static readonly ProfilerCounterDescriptor[] k_Counters = new ProfilerCounterDescriptor[]
         {
@@ -54,25 +59,37 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 Names.RECEIVED_PER_SECOND
             );
 
-            return new MessageViewController(ProfilerWindow, names);
+            return new MessageViewController(ProfilerWindow, names, this);
+        }
+
+        CountRecorder ICountRecorderProvider.GetCountRecorder()
+        {
+            return NetworkProfilerBehaviour.receivedCounter;
         }
     }
 
-    public sealed class MessageViewController : ProfilerModuleViewController
+    internal interface ICountRecorderProvider
+    {
+        CountRecorder GetCountRecorder();
+    }
+
+    internal sealed class MessageViewController : ProfilerModuleViewController
     {
         readonly CounterNames _names;
+        readonly ICountRecorderProvider _counterProvider;
+        readonly Columns columns = new Columns();
 
         Label _countLabel;
         Label _bytesLabel;
         Label _perSecondLabel;
 
-        readonly Columns columns = new Columns();
         Table table;
         Toggle debugToggle;
 
-        public MessageViewController(ProfilerWindow profilerWindow, CounterNames names) : base(profilerWindow)
+        public MessageViewController(ProfilerWindow profilerWindow, CounterNames names, ICountRecorderProvider counterProvider) : base(profilerWindow)
         {
             _names = names;
+            _counterProvider = counterProvider;
         }
 
         protected override VisualElement CreateView()
@@ -232,7 +249,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
 
             messages = null;
-            if (NetworkProfilerBehaviour.sentCounter == null)
+            CountRecorder counter = _counterProvider.GetCountRecorder();
+            if (counter == null)
                 return false;
 
             string frameIndexStr = ProfilerDriver.GetFormattedCounterValue((int)ProfilerWindow.selectedFrameIndex, ProfilerCategory.Network.Name, Names.INTERNAL_FRAME_COUNTER);
@@ -240,7 +258,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             if (!string.IsNullOrEmpty(frameIndexStr))
                 frameIndex = int.Parse(frameIndexStr);
 
-            Frame frame = NetworkProfilerBehaviour.sentCounter.frames[frameIndex];
+            Frame frame = counter.frames[frameIndex];
             int count = frame.Messages.Count;
 
             messages = frame.Messages;
