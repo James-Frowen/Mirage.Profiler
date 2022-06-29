@@ -16,5 +16,8 @@ Thanks to https://github.com/JesusLuvsYooh/MirrorNetworkProfiler for some refere
 
 - [x] Send and received counters
 - [x] Bytes per second
-- [ ] Table for messages
+- [x] Table for messages
+- [ ] Flexable width of table
+- [ ] ScrollBar for table
+- [ ] Group by Message type
 - [ ] Saving messages so that they can be viewed outside of playmode

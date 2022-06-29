@@ -81,8 +81,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             IStyle style = label.style;
             style.width = column.Width;
 
-            style.paddingLeft = 10;
-            style.paddingRight = 10;
+            style.paddingLeft = 5;
+            style.paddingRight = 5;
             style.paddingTop = 5;
             style.paddingBottom = 5;
             style.borderRightColor = Color.white * .4f;

@@ -68,6 +68,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         readonly Columns columns = new Columns();
         Table table;
+        Toggle debugToggle;
 
         public MessageViewController(ProfilerWindow profilerWindow, CounterNames names) : base(profilerWindow)
         {
@@ -84,6 +85,19 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             root.Add(labels);
             labels.style.height = Length.Percent(100);
             labels.style.width = 180;
+            labels.style.minWidth = 180;
+            labels.style.maxWidth = 180;
+
+            debugToggle = new Toggle();
+            debugToggle.text = "Show Debug Messages";
+            debugToggle.value = false;
+            debugToggle.style.position = Position.Absolute;
+            debugToggle.style.bottom = 5;
+            debugToggle.style.left = 5;
+            debugToggle.style.unityTextAlign = TextAnchor.LowerLeft;
+            debugToggle.RegisterValueChangedCallback(DebugToggleChanged);
+            labels.Add(debugToggle);
+
             labels.style.borderRightColor = Color.white * .4f;//dark grey
             labels.style.borderRightWidth = 2;
 
@@ -99,6 +113,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             root.style.overflow = Overflow.Hidden;
             return root;
         }
+        void DebugToggleChanged(ChangeEvent<bool> _) => ReloadData();
 
         private VisualElement CreateLabels()
         {
@@ -158,7 +173,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         {
             table.Clear();
 
-            if (!TryGetMessages(out var messages))
+            if (!TryGetMessages(out List<NetworkDiagnostics.MessageInfo> messages))
             {
                 AddCantLoadLabel();
                 return;
@@ -170,14 +185,14 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 return;
             }
 
-            foreach (NetworkDiagnostics.MessageInfo message in messages)
+            foreach (NetworkDiagnostics.MessageInfo info in messages)
             {
                 Row row = table.AddRow();
-                row.AddElement(columns.FullName, message.message.GetType().FullName);
-                row.AddElement(columns.TotalBytes, message.bytes * message.count);
-                row.AddElement(columns.Count, message.count);
-                row.AddElement(columns.BytesPerMessage, message.bytes);
-                uint? netid = GetNetId(message);
+                row.AddElement(columns.FullName, info.message.GetType().FullName);
+                row.AddElement(columns.TotalBytes, info.bytes * info.count);
+                row.AddElement(columns.Count, info.count);
+                row.AddElement(columns.BytesPerMessage, info.bytes);
+                uint? netid = GetNetId(info.message);
                 string netidStr = netid.HasValue ? netid.ToString() : "";
                 row.AddElement(columns.NetId, netidStr);
             }
@@ -197,18 +212,20 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             Label ele = AddLabelWithPadding(row.VisualElement);
             ele.text = "No Messages";
         }
-        const bool DEBUG = true;
 
         private bool TryGetMessages(out List<NetworkDiagnostics.MessageInfo> messages)
         {
-            if (DEBUG) {
+            if (debugToggle.value)
+            {
                 messages = new List<NetworkDiagnostics.MessageInfo>();
 
-                messages.Add(new NetworkDiagnostics.MessageInfo());
-                messages.Add(new NetworkDiagnostics.MessageInfo());
-                messages.Add(new NetworkDiagnostics.MessageInfo());
-                messages.Add(new NetworkDiagnostics.MessageInfo());
-                messages.Add(new NetworkDiagnostics.MessageInfo());
+                for (int i = 0; i < 5; i++)
+                {
+                    messages.Add(new NetworkDiagnostics.MessageInfo(null, new RpcMessage { netId = (uint)i }, 20, 5));
+                    messages.Add(new NetworkDiagnostics.MessageInfo(null, new SpawnMessage { netId = (uint)i }, 80, 1));
+                    messages.Add(new NetworkDiagnostics.MessageInfo(null, new SpawnMessage { netId = (uint)i }, 60, 4));
+                    messages.Add(new NetworkDiagnostics.MessageInfo(null, new NetworkPingMessage { }, 4, 1));
+                }
 
                 return true;
             }
@@ -263,11 +280,14 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
     sealed class Columns : IEnumerable<ColumnInfo>
     {
-        public ColumnInfo FullName = new ColumnInfo("Message", 300);
-        public ColumnInfo TotalBytes = new ColumnInfo("Total Bytes", 150);
-        public ColumnInfo Count = new ColumnInfo("Count", 150);
-        public ColumnInfo BytesPerMessage = new ColumnInfo("Bytes Per Message", 150);
-        public ColumnInfo NetId = new ColumnInfo("Net id", 150);
+        const int NAME_WIDTH = 300;
+        const int OTHER_WIDTH = 100;
+
+        public ColumnInfo FullName = new ColumnInfo("Message", NAME_WIDTH);
+        public ColumnInfo TotalBytes = new ColumnInfo("Total Bytes", OTHER_WIDTH);
+        public ColumnInfo Count = new ColumnInfo("Count", OTHER_WIDTH);
+        public ColumnInfo BytesPerMessage = new ColumnInfo("Bytes", OTHER_WIDTH);
+        public ColumnInfo NetId = new ColumnInfo("Net id", OTHER_WIDTH);
 
         public IEnumerator<ColumnInfo> GetEnumerator()
         {
