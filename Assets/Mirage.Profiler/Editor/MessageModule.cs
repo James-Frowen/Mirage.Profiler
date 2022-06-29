@@ -3,6 +3,7 @@ using Unity.Profiling;
 using Unity.Profiling.Editor;
 using UnityEditor;
 using UnityEditorInternal;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Mirage.NetworkProfiler.ModuleGUI
@@ -76,10 +77,15 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         protected override VisualElement CreateView()
         {
             var root = new VisualElement();
-            VisualElement dataView = CreateDataView();
-
             root.style.flexDirection = new StyleEnum<FlexDirection>(FlexDirection.Row);
-            root.Add(dataView);
+            root.style.height = Length.Percent(100);
+
+            VisualElement labels = CreateLabels();
+            root.Add(labels);
+            labels.style.height = Length.Percent(100);
+            labels.style.width = 180;
+            labels.style.borderRightColor = Color.white * .4f;//dark grey
+            labels.style.borderRightWidth = 2;
 
             table = new Table(columns);
             root.Add(table.VisualElement);
@@ -90,11 +96,11 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             // Be notified when the selected frame index in the Profiler Window changes, so we can update the label.
             ProfilerWindow.SelectedFrameIndexChanged += OnSelectedFrameIndexChanged;
 
-
+            root.style.overflow = Overflow.Hidden;
             return root;
         }
 
-        private VisualElement CreateDataView()
+        private VisualElement CreateLabels()
         {
             var dataView = new VisualElement();
             _countLabel = AddLabelWithPadding(dataView);
@@ -152,27 +158,19 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         {
             table.Clear();
 
-            int count = 0;
-            Frame frame = default;
-            if (NetworkProfilerBehaviour.sentCounter != null)
+            if (!TryGetMessages(out var messages))
             {
-                string frameIndexStr = ProfilerDriver.GetFormattedCounterValue((int)ProfilerWindow.selectedFrameIndex, ProfilerCategory.Network.Name, Names.INTERNAL_FRAME_COUNTER);
-                int frameIndex = 0;
-                if (!string.IsNullOrEmpty(frameIndexStr))
-                    frameIndex = int.Parse(frameIndexStr);
-
-                frame = NetworkProfilerBehaviour.sentCounter.frames[frameIndex];
-                count = frame.Messages.Count;
-            }
-
-            if (count == 0)
-            {
-                Row row = table.AddRow();
-                row.AddElement(columns.FullName, "No messages");
+                AddCantLoadLabel();
                 return;
             }
 
-            foreach (NetworkDiagnostics.MessageInfo message in frame.Messages)
+            if (messages.Count == 0)
+            {
+                AddNoMessagesLabel();
+                return;
+            }
+
+            foreach (NetworkDiagnostics.MessageInfo message in messages)
             {
                 Row row = table.AddRow();
                 row.AddElement(columns.FullName, message.message.GetType().FullName);
@@ -183,6 +181,53 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 string netidStr = netid.HasValue ? netid.ToString() : "";
                 row.AddElement(columns.NetId, netidStr);
             }
+        }
+
+        private void AddCantLoadLabel()
+        {
+            Row row = table.AddRow();
+            Label ele = AddLabelWithPadding(row.VisualElement);
+            ele.style.color = Color.red;
+            ele.text = "Can not load messages! (Message list only visible in play mode)";
+        }
+
+        private void AddNoMessagesLabel()
+        {
+            Row row = table.AddRow();
+            Label ele = AddLabelWithPadding(row.VisualElement);
+            ele.text = "No Messages";
+        }
+        const bool DEBUG = true;
+
+        private bool TryGetMessages(out List<NetworkDiagnostics.MessageInfo> messages)
+        {
+            if (DEBUG) {
+                messages = new List<NetworkDiagnostics.MessageInfo>();
+
+                messages.Add(new NetworkDiagnostics.MessageInfo());
+                messages.Add(new NetworkDiagnostics.MessageInfo());
+                messages.Add(new NetworkDiagnostics.MessageInfo());
+                messages.Add(new NetworkDiagnostics.MessageInfo());
+                messages.Add(new NetworkDiagnostics.MessageInfo());
+
+                return true;
+            }
+
+
+            messages = null;
+            if (NetworkProfilerBehaviour.sentCounter == null)
+                return false;
+
+            string frameIndexStr = ProfilerDriver.GetFormattedCounterValue((int)ProfilerWindow.selectedFrameIndex, ProfilerCategory.Network.Name, Names.INTERNAL_FRAME_COUNTER);
+            int frameIndex = 0;
+            if (!string.IsNullOrEmpty(frameIndexStr))
+                frameIndex = int.Parse(frameIndexStr);
+
+            Frame frame = NetworkProfilerBehaviour.sentCounter.frames[frameIndex];
+            int count = frame.Messages.Count;
+
+            messages = frame.Messages;
+            return true;
         }
 
         static uint? GetNetId(object message)

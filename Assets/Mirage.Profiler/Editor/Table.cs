@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Mirage.NetworkProfiler.ModuleGUI
@@ -14,11 +15,16 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         {
             VisualElement = new VisualElement();
             Header = AddRow();
+            IStyle headerStyle = Header.VisualElement.style;
+            headerStyle.borderBottomColor = Color.white * .4f;
+            headerStyle.borderBottomWidth = 2;
 
             // add headers
             foreach (ColumnInfo c in columns)
             {
-                Header.AddElement(c, c.Header);
+                Label ele = Header.AddElement(c, c.Header);
+                IStyle eleStyle = ele.style;
+                eleStyle.unityFontStyleAndWeight = FontStyle.Bold;
             }
         }
 
@@ -72,7 +78,15 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         {
             var label = new Label();
             VisualElement.Add(label);
-            label.style.width = column.Width;
+            IStyle style = label.style;
+            style.width = column.Width;
+
+            style.paddingLeft = 10;
+            style.paddingRight = 10;
+            style.paddingTop = 5;
+            style.paddingBottom = 5;
+            style.borderRightColor = Color.white * .4f;
+            style.borderRightWidth = 2;
             return label;
         }
     }
