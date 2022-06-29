@@ -11,3 +11,10 @@ Thanks to https://github.com/JesusLuvsYooh/MirrorNetworkProfiler for some refere
 2) Add NetworkProfilerBehaviour to NetworkManager
 3) Open Unity's Profiler and select the "Network Profiler" module
 4) Press play, and start server
+
+## Development TODO
+
+- [x] Send and received counters
+- [x] Bytes per second
+- [ ] Table for messages
+- [ ] Saving messages so that they can be viewed outside of playmode
