@@ -87,6 +87,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             labels.style.width = 180;
             labels.style.minWidth = 180;
             labels.style.maxWidth = 180;
+            labels.style.borderRightColor = Color.white * .4f;//dark grey
+            labels.style.borderRightWidth = 3;
 
             debugToggle = new Toggle();
             debugToggle.text = "Show Debug Messages";
@@ -98,8 +100,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             debugToggle.RegisterValueChangedCallback(DebugToggleChanged);
             labels.Add(debugToggle);
 
-            labels.style.borderRightColor = Color.white * .4f;//dark grey
-            labels.style.borderRightWidth = 2;
 
             table = new Table(columns);
             root.Add(table.VisualElement);

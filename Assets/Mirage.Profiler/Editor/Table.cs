@@ -15,16 +15,16 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         {
             VisualElement = new VisualElement();
             Header = AddRow();
-            IStyle headerStyle = Header.VisualElement.style;
-            headerStyle.borderBottomColor = Color.white * .4f;
-            headerStyle.borderBottomWidth = 2;
 
             // add headers
             foreach (ColumnInfo c in columns)
             {
                 Label ele = Header.AddElement(c, c.Header);
                 IStyle eleStyle = ele.style;
+                // make header element thicker
                 eleStyle.unityFontStyleAndWeight = FontStyle.Bold;
+                eleStyle.borderBottomWidth = 3;
+                eleStyle.borderRightWidth = 3;
             }
         }
 
@@ -86,6 +86,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             style.paddingTop = 5;
             style.paddingBottom = 5;
             style.borderRightColor = Color.white * .4f;
+            style.borderBottomColor = Color.white * .4f;
+            style.borderBottomWidth = 1;
             style.borderRightWidth = 2;
             return label;
         }
