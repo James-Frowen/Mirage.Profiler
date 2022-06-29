@@ -13,6 +13,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         static readonly ProfilerCounterDescriptor[] s_Counters = new ProfilerCounterDescriptor[]
         {
             new ProfilerCounterDescriptor(Names.PLAYER_COUNT, Counters.Category),
+            new ProfilerCounterDescriptor(Names.CHARACTER_COUNT, Counters.Category),
             new ProfilerCounterDescriptor(Names.OBJECT_COUNT, Counters.Category),
         };
 
@@ -50,6 +51,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
     {
         // Define a label, which will display the total particle count for tank trails in the selected frame.
         Label PlayerLabel;
+        Label CharacterLabel;
         Label ObjectLabel;
 
         // Define a constructor for the view controller, which calls the base constructor with the Profiler Window passed from the module.
@@ -61,8 +63,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             var root = new VisualElement();
 
             PlayerLabel = AddLabelWithPadding(root);
+            CharacterLabel = AddLabelWithPadding(root);
             ObjectLabel = AddLabelWithPadding(root);
-            NetIdLabel = AddLabelWithPadding(root);
+
+            PlayerLabel.tooltip = Names.PLAYER_COUNT_TOOLTIP;
+            CharacterLabel.tooltip = Names.CHARACTER_COUNT_TOOLTIP;
+            ObjectLabel.tooltip = Names.OBJECT_COUNT_TOOLTIP;
 
             // Populate the label with the current data for the selected frame. 
             ReloadData();
@@ -94,6 +100,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         void ReloadData()
         {
             SetText(PlayerLabel, Names.PLAYER_COUNT);
+            SetText(CharacterLabel, Names.CHARACTER_COUNT);
             SetText(ObjectLabel, Names.OBJECT_COUNT);
         }
     }

@@ -21,15 +21,25 @@ namespace Mirage.NetworkProfiler
 
         const int frameCount = 300; // todo find a way to get real frame count
 
-        private void Awake()
+        private void Start()
         {
-            Server.Started.AddListener(ServerStarted);
-            Server.Stopped.AddListener(ServerStopped);
-            Client.Started.AddListener(ClientStarted);
-            Client.Disconnected.AddListener(ClientStopped);
+            if (Server != null)
+            {
+                Server.Started.AddListener(ServerStarted);
+                Server.Stopped.AddListener(ServerStopped);
+            }
 
-            NetworkDiagnostics.InMessageEvent += receivedCounter.OnMessage;
-            NetworkDiagnostics.OutMessageEvent += sentCounter.OnMessage;
+            if (Client != null)
+            {
+                Client.Started.AddListener(ClientStarted);
+                Client.Disconnected.AddListener(ClientStopped);
+            }
+
+            if (Server != null || Client != null)
+            {
+                NetworkDiagnostics.InMessageEvent += receivedCounter.OnMessage;
+                NetworkDiagnostics.OutMessageEvent += sentCounter.OnMessage;
+            }
         }
 
         private void ServerStarted()
@@ -83,12 +93,13 @@ namespace Mirage.NetworkProfiler
 
         private void LateUpdate()
         {
-            if (Server == null || !Server.Active)
+            if (_instance == null)
                 return;
 
             if (_instance == (object)Server)
             {
                 Counters.PlayerCount.Sample(Server.Players.Count);
+                Counters.PlayerCount.Sample(Server.NumberOfPlayers);
                 Counters.ObjectCount.Sample(Server.World.SpawnedIdentities.Count);
             }
 

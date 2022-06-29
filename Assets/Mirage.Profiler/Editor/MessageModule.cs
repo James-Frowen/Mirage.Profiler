@@ -7,55 +7,86 @@ using UnityEngine.UIElements;
 namespace Mirage.NetworkProfiler.ModuleGUI
 {
     [System.Serializable]
-    [ProfilerModuleMetadata("Network Profiler Sent")]
+    [ProfilerModuleMetadata(ModuleNames.SENT)]
     public class NetworkProfilerSentModule : ProfilerModule
     {
         static readonly ProfilerCounterDescriptor[] k_Counters = new ProfilerCounterDescriptor[]
         {
-            new ProfilerCounterDescriptor(Names.MESSAGES_SENT_COUNT, Counters.Category),
-            new ProfilerCounterDescriptor(Names.MESSAGES_SENT_BYTES, Counters.Category),
-            new ProfilerCounterDescriptor(Names.MESSAGES_SENT_PER_SECOND, Counters.Category),
+            new ProfilerCounterDescriptor(Names.SENT_COUNT, Counters.Category),
+            new ProfilerCounterDescriptor(Names.SENT_BYTES, Counters.Category),
+            new ProfilerCounterDescriptor(Names.SENT_PER_SECOND, Counters.Category),
+            new ProfilerCounterDescriptor(Names.SENT_MARKER, Counters.Category),
         };
 
         public NetworkProfilerSentModule() : base(k_Counters) { }
 
         public override ProfilerModuleViewController CreateDetailsViewController()
         {
-            return new NetworkProfilerModuleViewController(ProfilerWindow);
+            var names = new ViewNames(
+                Names.SENT_COUNT,
+                Names.SENT_BYTES,
+                Names.SENT_PER_SECOND
+            );
+
+            return new NetworkProfilerModuleViewController(ProfilerWindow, names);
         }
     }
 
     [System.Serializable]
-    [ProfilerModuleMetadata("Network Profiler Received")]
+    [ProfilerModuleMetadata(ModuleNames.RECEIVED)]
     public class NetworkProfilerReceivedModule : ProfilerModule
     {
         static readonly ProfilerCounterDescriptor[] k_Counters = new ProfilerCounterDescriptor[]
         {
-            new ProfilerCounterDescriptor(Names.MESSAGES_RECEIVED_COUNT, Counters.Category),
-            new ProfilerCounterDescriptor(Names.MESSAGES_RECEIVED_BYTES, Counters.Category),
-            new ProfilerCounterDescriptor(Names.MESSAGES_RECEIVED_PER_SECOND, Counters.Category),
+            new ProfilerCounterDescriptor(Names.RECEIVED_COUNT, Counters.Category),
+            new ProfilerCounterDescriptor(Names.RECEIVED_BYTES, Counters.Category),
+            new ProfilerCounterDescriptor(Names.RECEIVED_PER_SECOND, Counters.Category),
         };
 
         public NetworkProfilerReceivedModule() : base(k_Counters) { }
 
         public override ProfilerModuleViewController CreateDetailsViewController()
         {
-            return new NetworkProfilerModuleViewController(ProfilerWindow);
+            var names = new ViewNames(
+                Names.RECEIVED_COUNT,
+                Names.RECEIVED_BYTES,
+                Names.RECEIVED_PER_SECOND
+            );
+
+            return new NetworkProfilerModuleViewController(ProfilerWindow, names);
         }
     }
 
+    public struct ViewNames
+    {
+        public readonly string Count;
+        public readonly string Bytes;
+        public readonly string PerSecond;
+
+        public ViewNames(string count, string bytes, string perSecond)
+        {
+            Count = count;
+            Bytes = bytes;
+            PerSecond = perSecond;
+        }
+    }
     public class NetworkProfilerModuleViewController : ProfilerModuleViewController
     {
+        readonly ViewNames _names;
+
         // Define a label, which will display the total particle count for tank trails in the selected frame.
-        Label PlayerCount;
-        Label CountLabel;
-        Label BytesLabel;
-        Label MessagesReceivedCount;
-        Label MessagesReceivedBytes;
-        private VisualElement messageView;
+        Label _countLabel;
+        Label _bytesLabel;
+        Label _perSecondLabel;
+
+        VisualElement messageView;
+
 
         // Define a constructor for the view controller, which calls the base constructor with the Profiler Window passed from the module.
-        public NetworkProfilerModuleViewController(ProfilerWindow profilerWindow) : base(profilerWindow) { }
+        public NetworkProfilerModuleViewController(ProfilerWindow profilerWindow, ViewNames names) : base(profilerWindow)
+        {
+            _names = names;
+        }
 
         // Override CreateView to build the custom module details panel.
         protected override VisualElement CreateView()
@@ -86,11 +117,10 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         private VisualElement CreateDataView()
         {
             var dataView = new VisualElement();
-            PlayerCount = AddLabelWithPadding(dataView);
-            MessagesSentCount = AddLabelWithPadding(dataView);
-            MessagesSentBytes = AddLabelWithPadding(dataView);
-            MessagesReceivedCount = AddLabelWithPadding(dataView);
-            MessagesReceivedBytes = AddLabelWithPadding(dataView);
+            _countLabel = AddLabelWithPadding(dataView);
+            _bytesLabel = AddLabelWithPadding(dataView);
+            _perSecondLabel = AddLabelWithPadding(dataView);
+            _perSecondLabel.tooltip = Names.PER_SECOND_TOOLTIP;
             return dataView;
         }
 
@@ -120,11 +150,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         void ReloadData()
         {
-            SetText(PlayerCount, Names.PLAYER_COUNT);
-            SetText(MessagesSentCount, Names.MESSAGES_SENT_COUNT);
-            SetText(MessagesSentBytes, Names.MESSAGES_SENT_BYTES);
-            SetText(MessagesReceivedCount, Names.MESSAGES_RECEIVED_COUNT);
-            SetText(MessagesReceivedBytes, Names.MESSAGES_RECEIVED_BYTES);
+            SetText(_countLabel, _names.Count);
+            SetText(_bytesLabel, _names.Bytes);
+            SetText(_perSecondLabel, _names.PerSecond);
 
             reloadMessages();
         }
