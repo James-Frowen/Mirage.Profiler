@@ -18,6 +18,6 @@ Thanks to https://github.com/JesusLuvsYooh/MirrorNetworkProfiler for some refere
 - [x] Bytes per second
 - [x] Table for messages
 - [ ] Flexable width of table
-- [ ] ScrollBar for table
+- [ ] ScrollBar for table (height get squashed with no scrollbar)
 - [ ] Group by Message type
 - [ ] Saving messages so that they can be viewed outside of playmode
