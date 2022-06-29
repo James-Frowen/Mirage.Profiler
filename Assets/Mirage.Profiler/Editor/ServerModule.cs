@@ -47,17 +47,14 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         }
     }
 
-    public class ServerViewController : BaseViewController
+    public sealed class ServerViewController : BaseViewController
     {
-        // Define a label, which will display the total particle count for tank trails in the selected frame.
         Label PlayerLabel;
         Label CharacterLabel;
         Label ObjectLabel;
 
-        // Define a constructor for the view controller, which calls the base constructor with the Profiler Window passed from the module.
         public ServerViewController(ProfilerWindow profilerWindow) : base(profilerWindow) { }
 
-        // Override CreateView to build the custom module details panel.
         protected override VisualElement CreateView()
         {
             var root = new VisualElement();
@@ -85,7 +82,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             ReloadData();
         }
 
-        // Override Dispose to do any cleanup of the view when it is destroyed. This is a standard C# Dispose pattern.
         protected override void Dispose(bool disposing)
         {
             if (!disposing)
