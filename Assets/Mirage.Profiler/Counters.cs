@@ -125,7 +125,7 @@ namespace Mirage.NetworkProfiler
             }
 
             // record sample after adding/removing value
-            profilerPerSecond.Sample(count);
+            profilerPerSecond.Sample(perSecond);
         }
     }
 }
