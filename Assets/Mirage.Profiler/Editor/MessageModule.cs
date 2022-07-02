@@ -238,10 +238,19 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
                 for (int i = 0; i < 5; i++)
                 {
-                    messages.Add(new NetworkDiagnostics.MessageInfo(null, new RpcMessage { netId = (uint)i }, 20, 5));
-                    messages.Add(new NetworkDiagnostics.MessageInfo(null, new SpawnMessage { netId = (uint)i }, 80, 1));
-                    messages.Add(new NetworkDiagnostics.MessageInfo(null, new SpawnMessage { netId = (uint)i }, 60, 4));
-                    messages.Add(new NetworkDiagnostics.MessageInfo(null, new NetworkPingMessage { }, 4, 1));
+                    messages.Add(newInfo(new RpcMessage { netId = (uint)i }, 20, 5));
+                    messages.Add(newInfo(new SpawnMessage { netId = (uint)i }, 80, 1));
+                    messages.Add(newInfo(new SpawnMessage { netId = (uint)i }, 60, 4));
+                    messages.Add(newInfo(new NetworkPingMessage { }, 4, 1));
+
+                    NetworkDiagnostics.MessageInfo newInfo(object msg, int bytes, int count)
+                    {
+#if MIRAGE_DIAGNOSTIC_INSTANCE
+                        return new NetworkDiagnostics.MessageInfo(null, msg, bytes, count);
+#else
+                        return new NetworkDiagnostics.MessageInfo(msg, bytes, count);
+#endif
+                    }
                 }
 
                 return true;
