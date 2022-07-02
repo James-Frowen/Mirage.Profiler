@@ -34,12 +34,6 @@ namespace Mirage.NetworkProfiler
                 Client.Started.AddListener(ClientStarted);
                 Client.Disconnected.AddListener(ClientStopped);
             }
-
-            if (Server != null || Client != null)
-            {
-                NetworkDiagnostics.InMessageEvent += receivedCounter.OnMessage;
-                NetworkDiagnostics.OutMessageEvent += sentCounter.OnMessage;
-            }
         }
 
         private void ServerStarted()
@@ -53,6 +47,8 @@ namespace Mirage.NetworkProfiler
 
             sentCounter = new CountRecorder(frameCount, Server, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
             receivedCounter = new CountRecorder(frameCount, Server, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
+            NetworkDiagnostics.InMessageEvent += receivedCounter.OnMessage;
+            NetworkDiagnostics.OutMessageEvent += sentCounter.OnMessage;
         }
 
         private void ClientStarted()
@@ -66,6 +62,8 @@ namespace Mirage.NetworkProfiler
 
             sentCounter = new CountRecorder(frameCount, Client, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
             receivedCounter = new CountRecorder(frameCount, Client, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
+            NetworkDiagnostics.InMessageEvent += receivedCounter.OnMessage;
+            NetworkDiagnostics.OutMessageEvent += sentCounter.OnMessage;
         }
 
         private void ServerStopped()
