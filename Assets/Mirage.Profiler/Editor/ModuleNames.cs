@@ -1,9 +1,9 @@
 namespace Mirage.NetworkProfiler.ModuleGUI
 {
-    static class ModuleNames
+    internal static class ModuleNames
     {
         // change this based on netcode lib
-        const string PREFIX = "Mirage";
+        private const string PREFIX = "Mirage";
 
         public const string SERVER = PREFIX + " Server";
         public const string SENT = PREFIX + " Sent";

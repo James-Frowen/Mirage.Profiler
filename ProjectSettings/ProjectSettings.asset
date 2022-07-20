@@ -704,7 +704,7 @@ PlayerSettings:
   webGLThreadsSupport: 0
   webGLDecompressionFallback: 0
   scriptingDefineSymbols:
-    Standalone: MIRAGE_DIAGNOSTIC_INSTANCE
+    Standalone: MIRAGE_PROFILER_DEBUG
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}

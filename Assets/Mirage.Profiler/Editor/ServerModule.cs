@@ -10,14 +10,14 @@ namespace Mirage.NetworkProfiler.ModuleGUI
     [ProfilerModuleMetadata(ModuleNames.SERVER)]
     public class ServerModule : ProfilerModule
     {
-        static readonly ProfilerCounterDescriptor[] s_Counters = new ProfilerCounterDescriptor[]
+        private static readonly ProfilerCounterDescriptor[] counters = new ProfilerCounterDescriptor[]
         {
             new ProfilerCounterDescriptor(Names.PLAYER_COUNT, Counters.Category),
             new ProfilerCounterDescriptor(Names.CHARACTER_COUNT, Counters.Category),
             new ProfilerCounterDescriptor(Names.OBJECT_COUNT, Counters.Category),
         };
 
-        public ServerModule() : base(s_Counters) { }
+        public ServerModule() : base(counters) { }
 
         public override ProfilerModuleViewController CreateDetailsViewController()
         {
@@ -39,9 +39,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         protected void SetText(Label label, string name)
         {
-            int frame = (int)ProfilerWindow.selectedFrameIndex;
-            string category = ProfilerCategory.Network.Name;
-            string value = ProfilerDriver.GetFormattedCounterValue(frame, category, name);
+            var frame = (int)ProfilerWindow.selectedFrameIndex;
+            var category = ProfilerCategory.Network.Name;
+            var value = ProfilerDriver.GetFormattedCounterValue(frame, category, name);
 
             label.text = $"{name}: {value}";
         }
@@ -49,9 +49,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
     public sealed class ServerViewController : BaseViewController
     {
-        Label PlayerLabel;
-        Label CharacterLabel;
-        Label ObjectLabel;
+        private Label PlayerLabel;
+        private Label CharacterLabel;
+        private Label ObjectLabel;
 
         public ServerViewController(ProfilerWindow profilerWindow) : base(profilerWindow) { }
 
@@ -76,7 +76,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             return root;
         }
 
-        void OnSelectedFrameIndexChanged(long selectedFrameIndex)
+        private void OnSelectedFrameIndexChanged(long selectedFrameIndex)
         {
             // Update the label with the current data for the newly selected frame.
             ReloadData();
@@ -93,7 +93,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             base.Dispose(disposing);
         }
 
-        void ReloadData()
+        private void ReloadData()
         {
             SetText(PlayerLabel, Names.PLAYER_COUNT);
             SetText(CharacterLabel, Names.CHARACTER_COUNT);
