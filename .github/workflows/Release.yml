@@ -49,5 +49,6 @@ jobs:
             @semantic-release/changelog
             @semantic-release/git
           branch: main
+          semantic_version: 17
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
