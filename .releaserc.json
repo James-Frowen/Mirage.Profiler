@@ -15,7 +15,7 @@
             "assets": [
                 {
                     "path": "Mirage.Profiler.unitypackage",
-                    "label": "Mirage.Profiler Unity Package",
+                    "label": "Mirage.Profiler ${branch.channel}-${nextRelease.version} Unity Package",
                     "name": "Mirage.Profiler-${branch.channel}-${nextRelease.version}.unitypackage"
                 }
             ]
