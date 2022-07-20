@@ -24,6 +24,12 @@
     ],
     "plugins": [
         [
+            "@semantic-release/exec",
+            {
+                "prepareCmd": "echo 'hello world'"
+            }
+        ],
+        [
             "@semantic-release/commit-analyzer",
             {
                 "preset": "angular",
