@@ -43,10 +43,11 @@ jobs:
 
       - name: Release
         uses: cycjimmy/semantic-release-action@v2
-        with:
+        with: 
           extra_plugins: |
             @semantic-release/exec
             @semantic-release/changelog
             @semantic-release/git
+          branch: ${{ GITHUB_REF }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
