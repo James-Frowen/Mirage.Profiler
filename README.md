@@ -5,12 +5,31 @@ Network Profiler for [Mirage](https://github.com/MirageNet/Mirage) using the new
 
 Thanks to https://github.com/JesusLuvsYooh/MirrorNetworkProfiler for some reference code.
 
+## How to install
+
+Add Required package: `"com.unity.profiling.core": "1.0.2"` if using package manager this will be done automatically
+
+### Unity package manager (Mirage only)
+use package manager to get the latest version, or replace `#master` with the full hash of the commit.
+
+branch:
+```
+"com.james-frowen.mirage-profiler": "https://github.com/James-Frowen/Mirage.Profiler.git?path=/Assets/Mirage.Profiler#master",
+```
+commit hash:
+```
+"com.james-frowen.mirage-profiler": "https://github.com/James-Frowen/Mirage.Profiler.git?path=/Assets/Mirage.Profiler#bfb3edbf5b70cc91700ddcb434e8883019282b3e",
+```
+
+### Unity package
+
+Download unity package from [release page](https://github.com/James-Frowen/Mirage.Profiler/releases) make sure to select the version for Mirage or Mirror depending on what you are using
+
 
 ## How to use:
-1) Add Requires package: "com.unity.profiling.core": "1.0.2",
-2) Add NetworkProfilerBehaviour to NetworkManager
-3) Open Unity's Profiler and select the "Network Profiler" module
-4) Press play, and start server
+1) Add NetworkProfilerBehaviour to NetworkManager
+2) Open Unity's Profiler and select the "Network Profiler" module
+3) Press play, and start server or client
 
 ## Development TODO
 
