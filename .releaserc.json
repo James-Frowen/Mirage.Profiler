@@ -1,9 +1,6 @@
 {
     "branches": [
-        {
-            "name": "main",
-            "channel": "mirage"
-        },
+        "main",
         {
             "name": "mirror",
             "channel": "mirror"
