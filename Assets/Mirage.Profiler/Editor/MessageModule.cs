@@ -12,7 +12,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
     [ProfilerModuleMetadata(ModuleNames.SENT)]
     public class SentModule : ProfilerModule, ICountRecorderProvider
     {
-        static readonly ProfilerCounterDescriptor[] k_Counters = new ProfilerCounterDescriptor[]
+        private static readonly ProfilerCounterDescriptor[] k_Counters = new ProfilerCounterDescriptor[]
         {
             new ProfilerCounterDescriptor(Names.SENT_COUNT, Counters.Category),
             new ProfilerCounterDescriptor(Names.SENT_BYTES, Counters.Category),
@@ -34,7 +34,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         CountRecorder ICountRecorderProvider.GetCountRecorder()
         {
-            return NetworkProfilerBehaviour.sentCounter;
+            return NetworkProfilerBehaviour._sentCounter;
         }
     }
 
@@ -42,7 +42,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
     [ProfilerModuleMetadata(ModuleNames.RECEIVED)]
     public class ReceivedModule : ProfilerModule, ICountRecorderProvider
     {
-        static readonly ProfilerCounterDescriptor[] k_Counters = new ProfilerCounterDescriptor[]
+        private static readonly ProfilerCounterDescriptor[] k_Counters = new ProfilerCounterDescriptor[]
         {
             new ProfilerCounterDescriptor(Names.RECEIVED_COUNT, Counters.Category),
             new ProfilerCounterDescriptor(Names.RECEIVED_BYTES, Counters.Category),
@@ -64,7 +64,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         CountRecorder ICountRecorderProvider.GetCountRecorder()
         {
-            return NetworkProfilerBehaviour.receivedCounter;
+            return NetworkProfilerBehaviour._receivedCounter;
         }
     }
 
@@ -75,16 +75,14 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
     internal sealed class MessageViewController : ProfilerModuleViewController
     {
-        readonly CounterNames _names;
-        readonly ICountRecorderProvider _counterProvider;
-        readonly Columns columns = new Columns();
-
-        Label _countLabel;
-        Label _bytesLabel;
-        Label _perSecondLabel;
-
-        Table table;
-        Toggle debugToggle;
+        private readonly CounterNames _names;
+        private readonly ICountRecorderProvider _counterProvider;
+        private readonly Columns _columns = new Columns();
+        private Label _countLabel;
+        private Label _bytesLabel;
+        private Label _perSecondLabel;
+        private Table _table;
+        private Toggle _debugToggle;
 
         public MessageViewController(ProfilerWindow profilerWindow, CounterNames names, ICountRecorderProvider counterProvider) : base(profilerWindow)
         {
@@ -98,7 +96,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             root.style.flexDirection = new StyleEnum<FlexDirection>(FlexDirection.Row);
             root.style.height = Length.Percent(100);
 
-            VisualElement labels = CreateLabels();
+            var labels = CreateLabels();
             root.Add(labels);
             labels.style.height = Length.Percent(100);
             labels.style.width = 180;
@@ -107,19 +105,25 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             labels.style.borderRightColor = Color.white * .4f;//dark grey
             labels.style.borderRightWidth = 3;
 
-            debugToggle = new Toggle();
-            debugToggle.text = "Show Debug Messages";
-            debugToggle.value = false;
-            debugToggle.style.position = Position.Absolute;
-            debugToggle.style.bottom = 5;
-            debugToggle.style.left = 5;
-            debugToggle.style.unityTextAlign = TextAnchor.LowerLeft;
-            debugToggle.RegisterValueChangedCallback(DebugToggleChanged);
-            labels.Add(debugToggle);
+            _debugToggle = new Toggle();
+            _debugToggle.text = "Show Debug (Fake) Messages";
+            _debugToggle.tooltip = "Adds fakes message to table to debug layout of table";
+            _debugToggle.value = false;
+            _debugToggle.style.position = Position.Absolute;
+            _debugToggle.style.bottom = 5;
+            _debugToggle.style.left = 5;
+            _debugToggle.style.unityTextAlign = TextAnchor.LowerLeft;
+            _debugToggle.RegisterValueChangedCallback(DebugToggleChanged);
+            labels.Add(_debugToggle);
+#if MIRAGE_PROFILER_DEBUG
+            _debugToggle.visible = true;
+#else
+            _debugToggle.visible = false;
+#endif
 
 
-            table = new Table(columns);
-            root.Add(table.VisualElement);
+            _table = new Table(_columns);
+            root.Add(_table.VisualElement);
 
             // Populate the label with the current data for the selected frame. 
             ReloadData();
@@ -130,7 +134,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             root.style.overflow = Overflow.Hidden;
             return root;
         }
-        void DebugToggleChanged(ChangeEvent<bool> _) => ReloadData();
+
+        private void DebugToggleChanged(ChangeEvent<bool> _) => ReloadData();
 
         private VisualElement CreateLabels()
         {
@@ -142,14 +147,14 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             return dataView;
         }
 
-        static Label AddLabelWithPadding(VisualElement view)
+        private static Label AddLabelWithPadding(VisualElement view)
         {
             var label = new Label() { style = { paddingTop = 8, paddingLeft = 8 } };
             view.Add(label);
             return label;
         }
 
-        void OnSelectedFrameIndexChanged(long selectedFrameIndex)
+        private void OnSelectedFrameIndexChanged(long selectedFrameIndex)
         {
             // Update the label with the current data for the newly selected frame.
             ReloadData();
@@ -167,30 +172,30 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             base.Dispose(disposing);
         }
 
-        void ReloadData()
+        private void ReloadData()
         {
             SetText(_countLabel, _names.Count);
             SetText(_bytesLabel, _names.Bytes);
             SetText(_perSecondLabel, _names.PerSecond);
 
-            reloadMessages();
+            ReloadMessages();
         }
 
-        void SetText(Label label, string name)
+        private void SetText(Label label, string name)
         {
-            int frame = (int)ProfilerWindow.selectedFrameIndex;
-            string category = ProfilerCategory.Network.Name;
-            string value = ProfilerDriver.GetFormattedCounterValue(frame, category, name);
+            var frame = (int)ProfilerWindow.selectedFrameIndex;
+            var category = ProfilerCategory.Network.Name;
+            var value = ProfilerDriver.GetFormattedCounterValue(frame, category, name);
 
             label.text = $"{name}: {value}";
         }
 
 
-        private void reloadMessages()
+        private void ReloadMessages()
         {
-            table.Clear();
+            _table.Clear();
 
-            if (!TryGetMessages(out List<NetworkDiagnostics.MessageInfo> messages))
+            if (!TryGetMessages(out var messages))
             {
                 AddCantLoadLabel();
                 return;
@@ -202,48 +207,48 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 return;
             }
 
-            foreach (NetworkDiagnostics.MessageInfo info in messages)
+            foreach (var info in messages)
             {
-                Row row = table.AddRow();
-                row.AddElement(columns.FullName, info.message.GetType().FullName);
-                row.AddElement(columns.TotalBytes, info.bytes * info.count);
-                row.AddElement(columns.Count, info.count);
-                row.AddElement(columns.BytesPerMessage, info.bytes);
-                uint? netid = GetNetId(info.message);
-                string netidStr = netid.HasValue ? netid.ToString() : "";
-                row.AddElement(columns.NetId, netidStr);
+                var row = _table.AddRow();
+                row.AddElement(_columns.FullName, info.message.GetType().FullName);
+                row.AddElement(_columns.TotalBytes, info.bytes * info.count);
+                row.AddElement(_columns.Count, info.count);
+                row.AddElement(_columns.BytesPerMessage, info.bytes);
+                var netid = GetNetId(info.message);
+                var netidStr = netid.HasValue ? netid.ToString() : "";
+                row.AddElement(_columns.NetId, netidStr);
             }
         }
 
         private void AddCantLoadLabel()
         {
-            Row row = table.AddRow();
-            Label ele = AddLabelWithPadding(row.VisualElement);
+            var row = _table.AddRow();
+            var ele = AddLabelWithPadding(row.VisualElement);
             ele.style.color = Color.red;
             ele.text = "Can not load messages! (Message list only visible in play mode)";
         }
 
         private void AddNoMessagesLabel()
         {
-            Row row = table.AddRow();
-            Label ele = AddLabelWithPadding(row.VisualElement);
+            var row = _table.AddRow();
+            var ele = AddLabelWithPadding(row.VisualElement);
             ele.text = "No Messages";
         }
 
         private bool TryGetMessages(out List<NetworkDiagnostics.MessageInfo> messages)
         {
-            if (debugToggle.value)
+            if (_debugToggle.value)
             {
                 messages = new List<NetworkDiagnostics.MessageInfo>();
 
-                for (int i = 0; i < 5; i++)
+                for (var i = 0; i < 5; i++)
                 {
-                    messages.Add(newInfo(new RpcMessage { netId = (uint)i }, 20, 5));
-                    messages.Add(newInfo(new SpawnMessage { netId = (uint)i }, 80, 1));
-                    messages.Add(newInfo(new SpawnMessage { netId = (uint)i }, 60, 4));
-                    messages.Add(newInfo(new NetworkPingMessage { }, 4, 1));
+                    messages.Add(NewInfo(new RpcMessage { netId = (uint)i }, 20, 5));
+                    messages.Add(NewInfo(new SpawnMessage { netId = (uint)i }, 80, 1));
+                    messages.Add(NewInfo(new SpawnMessage { netId = (uint)i }, 60, 4));
+                    messages.Add(NewInfo(new NetworkPingMessage { }, 4, 1));
 
-                    NetworkDiagnostics.MessageInfo newInfo(object msg, int bytes, int count)
+                    static NetworkDiagnostics.MessageInfo NewInfo(object msg, int bytes, int count)
                     {
 #if MIRAGE_DIAGNOSTIC_INSTANCE
                         return new NetworkDiagnostics.MessageInfo(null, msg, bytes, count);
@@ -258,23 +263,23 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
 
             messages = null;
-            CountRecorder counter = _counterProvider.GetCountRecorder();
+            var counter = _counterProvider.GetCountRecorder();
             if (counter == null)
                 return false;
 
-            string frameIndexStr = ProfilerDriver.GetFormattedCounterValue((int)ProfilerWindow.selectedFrameIndex, ProfilerCategory.Network.Name, Names.INTERNAL_FRAME_COUNTER);
-            int frameIndex = 0;
+            var frameIndexStr = ProfilerDriver.GetFormattedCounterValue((int)ProfilerWindow.selectedFrameIndex, ProfilerCategory.Network.Name, Names.INTERNAL_FRAME_COUNTER);
+            var frameIndex = 0;
             if (!string.IsNullOrEmpty(frameIndexStr))
                 frameIndex = int.Parse(frameIndexStr);
 
-            Frame frame = counter.frames[frameIndex];
-            int count = frame.Messages.Count;
+            var frame = counter._frames[frameIndex];
+            var count = frame.Messages.Count;
 
             messages = frame.Messages;
             return true;
         }
 
-        static uint? GetNetId(object message)
+        private static uint? GetNetId(object message)
         {
             switch (message)
             {
@@ -305,10 +310,10 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         }
     }
 
-    sealed class Columns : IEnumerable<ColumnInfo>
+    internal sealed class Columns : IEnumerable<ColumnInfo>
     {
-        const int NAME_WIDTH = 300;
-        const int OTHER_WIDTH = 100;
+        private const int NAME_WIDTH = 300;
+        private const int OTHER_WIDTH = 100;
 
         public ColumnInfo FullName = new ColumnInfo("Message", NAME_WIDTH);
         public ColumnInfo TotalBytes = new ColumnInfo("Total Bytes", OTHER_WIDTH);

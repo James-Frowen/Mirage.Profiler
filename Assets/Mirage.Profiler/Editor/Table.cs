@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 
 namespace Mirage.NetworkProfiler.ModuleGUI
 {
-    class Table
+    internal class Table
     {
         public readonly VisualElement VisualElement;
 
@@ -17,10 +17,10 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             Header = AddRow();
 
             // add headers
-            foreach (ColumnInfo c in columns)
+            foreach (var c in columns)
             {
-                Label ele = Header.AddElement(c, c.Header);
-                IStyle eleStyle = ele.style;
+                var ele = Header.AddElement(c, c.Header);
+                var eleStyle = ele.style;
                 // make header element thicker
                 eleStyle.unityFontStyleAndWeight = FontStyle.Bold;
                 eleStyle.borderBottomWidth = 3;
@@ -40,7 +40,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         /// </summary>
         public void Clear()
         {
-            foreach (Row row in Rows)
+            foreach (var row in Rows)
             {
                 if (row == Header)
                     continue;
@@ -50,7 +50,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         }
     }
 
-    class Row
+    internal class Row
     {
         public readonly Table Table;
         public readonly VisualElement VisualElement;
@@ -70,7 +70,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         }
         public Label AddElement(ColumnInfo column, string text)
         {
-            Label label = AddElement(column);
+            var label = AddElement(column);
             label.text = text;
             return label;
         }
@@ -78,7 +78,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         {
             var label = new Label();
             VisualElement.Add(label);
-            IStyle style = label.style;
+            var style = label.style;
             style.width = column.Width;
 
             style.paddingLeft = 5;
@@ -93,7 +93,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         }
     }
 
-    class ColumnInfo
+    internal class ColumnInfo
     {
         public string Header;
         public int Width;
