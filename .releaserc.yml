@@ -1,0 +1,33 @@
+branches: 
+  - "main"
+  - name: "beta"
+    channel: "beta"
+    prerelease: true
+  - name: "mirror"
+    channel: "mirror"
+    prerelease: true
+plugins:
+  - '@semantic-release/github'
+  - '@semantic-release/release-notes-generator'
+  - '@semantic-release/commit-analyzer'
+  - - '@semantic-release/changelog'
+    - changelogFile: 'CHANGELOG.md'
+  - - '@semantic-release/npm'
+    - npmPublish: false
+      pkgRoot: "Assets/Mirage.Profiler"
+  # run prepareCmd after other steps so that changes are included in package
+  - - '@semantic-release/exec'
+    # See .release.sh for what files are included in release
+    - prepareCmd: "sh ./.release.sh ${nextRelease.version}"
+  - - '@semantic-release/git'
+    - assets:
+        - 'Assets/Mirage.Profiler/AssemblyInfo.cs'
+        - 'Assets/Mirage.Profiler/Editor/AssemblyInfo.cs'
+        - 'Assets/Mirage.Profiler/package.json'
+        - 'CHANGELOG.md'
+publish:
+  - path: "@semantic-release/github" 
+    assets: 
+      - path: "Mirage.Profiler.unitypackage"
+        label: "Mirage.Profiler ${nextRelease.version} Unity Package"
+        name: "Mirage.Profiler-${nextRelease.version}.unitypackage"

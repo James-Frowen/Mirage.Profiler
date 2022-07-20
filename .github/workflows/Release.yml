@@ -1,0 +1,41 @@
+name: Release
+
+on: 
+  push:
+    branches:
+     - main
+     - beta
+     - mirror
+  
+jobs:
+  Release:
+    env:
+      SOURCE_PATH: Assets/Mirage.Profiler
+      TARGET_PATH: Assets/Mirage.Profiler
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '3.1.100'
+
+      - name: Install unity-packer
+        run: dotnet tool install -g unity-packer
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+    
+      - name: Release
+        # id so output can be used by other steps
+        id: semantic 
+        uses: cycjimmy/semantic-release-action@v3
+        with:          
+          extra_plugins: |
+            @semantic-release/exec
+            @semantic-release/changelog
+            @semantic-release/git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
