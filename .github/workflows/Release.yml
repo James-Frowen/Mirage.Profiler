@@ -9,6 +9,7 @@ on:
 jobs:
   Release:
     env:
+      SOURCE_PATH: Assets/Mirage.Profiler
       TARGET_PATH: Assets/Mirage.Profiler
     runs-on: windows-latest
     # needs: Tests
@@ -31,9 +32,9 @@ jobs:
 
         run: >-
           unity-packer pack Mirage.Profiler.unitypackage 
-          source ${{ env.TARGET_PATH }}
-          LICENSE LICENSE 
-          README.md README.md
+          ${{ env.SOURCE_PATH }} ${{ env.TARGET_PATH }}
+          LICENSE ${{ env.TARGET_PATH }}/LICENSE 
+          README.md ${{ env.TARGET_PATH }}/README.md
           
       - uses: actions/upload-artifact@v1
         with:
