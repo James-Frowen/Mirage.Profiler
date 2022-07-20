@@ -42,7 +42,7 @@ jobs:
           path: Mirage.Profiler.unitypackage
 
       - name: Branch name
-        run: echo ${GITHUB_REF##*/}
+        run: echo ${GITHUB_REF}
     
       - name: Release
         uses: cycjimmy/semantic-release-action@v2
@@ -51,6 +51,6 @@ jobs:
             @semantic-release/exec
             @semantic-release/changelog
             @semantic-release/git
-          branch: ${GITHUB_REF##*/}
+          branch: ${GITHUB_REF}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
