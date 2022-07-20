@@ -105,6 +105,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             labels.style.borderRightColor = Color.white * .4f;//dark grey
             labels.style.borderRightWidth = 3;
 
+
             _debugToggle = new Toggle();
             _debugToggle.text = "Show Debug (Fake) Messages";
             _debugToggle.tooltip = "Adds fakes message to table to debug layout of table";
