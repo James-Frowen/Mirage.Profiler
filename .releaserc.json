@@ -1,4 +1,11 @@
 {
+    "branches": [
+        "main",
+        {
+            "name": "mirror",
+            "channel": "mirror"
+        }
+    ],
     "verifyConditions": [
         "@semantic-release/github"
     ],
