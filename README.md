@@ -1,3 +1,7 @@
+[![Discord](https://img.shields.io/discord/809535064551456888.svg)](https://discordapp.com/invite/DTBPBYvexy)
+[![Releases](https://img.shields.io/github/release/James-Frowen/Mirage.Profiler.svg?include_prereleases&sort=semver)](https://github.com/James-Frowen/Mirage.Profiler/releases/latest)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/James-Frowen)](https://github.com/sponsors/James-Frowen)
+
 # Mirage.Profiler (work in progress)
 
 Network Profiler for [Mirage](https://github.com/MirageNet/Mirage) using the new [unity profiler package](https://docs.unity3d.com/Packages/com.unity.profiling.core@1.0/manual/index.html)
@@ -27,6 +31,7 @@ Download unity package from [release page](https://github.com/James-Frowen/Mirag
 
 
 ## How to use:
+
 1) Add NetworkProfilerBehaviour to NetworkManager
 2) Open Unity's Profiler and select the "Network Profiler" module
 3) Press play, and start server or client
