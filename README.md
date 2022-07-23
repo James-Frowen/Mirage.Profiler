@@ -9,6 +9,8 @@ Network Profiler for [Mirage](https://github.com/MirageNet/Mirage) using the new
 
 Thanks to https://github.com/JesusLuvsYooh/MirrorNetworkProfiler for some reference code.
 
+![Profiler example](./profiler-example.jpg)
+
 ## How to install
 
 Add Required package: `"com.unity.profiling.core": "1.0.2"` if using package manager this will be done automatically
