@@ -1,3 +1,10 @@
+# [1.0.0-beta.3](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2022-07-23)
+
+
+### Bug Fixes
+
+* scroll bar for table ([d7b697f](https://github.com/James-Frowen/Mirage.Profiler/commit/d7b697f1556300a22773f4f9e04718c7d228203e))
+
 # [1.0.0-beta.2](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2022-07-23)
 
 
