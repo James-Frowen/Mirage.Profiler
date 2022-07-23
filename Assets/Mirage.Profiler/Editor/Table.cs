@@ -6,14 +6,14 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 {
     internal class Table
     {
-        public readonly VisualElement VisualElement;
+        public readonly ScrollView VisualElement;
 
         public readonly Row Header;
         public readonly List<Row> Rows = new List<Row>();
 
         public Table(IEnumerable<ColumnInfo> columns)
         {
-            VisualElement = new VisualElement();
+            VisualElement = new ScrollView(ScrollViewMode.VerticalAndHorizontal);
             Header = AddRow();
 
             // add headers
