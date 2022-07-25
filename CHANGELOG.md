@@ -1,3 +1,10 @@
+# [1.0.0-beta.5](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.4...v1.0.0-beta.5) (2022-07-25)
+
+
+### Features
+
+* adding option to group messages by type ([9392ebb](https://github.com/James-Frowen/Mirage.Profiler/commit/9392ebb6d324db1cc4fb09f28909acde371ba198))
+
 # [1.0.0-beta.4](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2022-07-23)
 
 
