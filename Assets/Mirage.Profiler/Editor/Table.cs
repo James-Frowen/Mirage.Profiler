@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -10,18 +11,26 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         public readonly Row Header;
         public readonly List<Row> Rows = new List<Row>();
+        public readonly IReadOnlyList<ColumnInfo> HeaderInfo;
 
         public Table(IEnumerable<ColumnInfo> columns)
         {
             VisualElement = new ScrollView(ScrollViewMode.VerticalAndHorizontal);
+
+            // create readonly list from given Enumerable
+            HeaderInfo = new List<ColumnInfo>(columns);
+
+            // header will initialize labels, but we need to set text
             Header = AddRow();
 
             // add headers
             foreach (var c in columns)
             {
-                var ele = Header.AddElement(c, c.Header);
-                var eleStyle = ele.style;
+                var ele = Header.GetLabel(c);
+                ele.text = c.Header;
+
                 // make header element thicker
+                var eleStyle = ele.style;
                 eleStyle.unityFontStyleAndWeight = FontStyle.Bold;
                 eleStyle.borderBottomWidth = 3;
                 eleStyle.borderRightWidth = 3;
@@ -30,9 +39,32 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         public Row AddRow()
         {
-            var row = new Row(this);
+            var row = new LabelRow(this);
             Rows.Add(row);
             return row;
+        }
+
+        public Row AddEmptyRow()
+        {
+            var row = new EmptyRow(this);
+            Rows.Add(row);
+            return row;
+        }
+
+        public void ChangeWidth(ColumnInfo column, int newWidth, bool setVisibility)
+        {
+            foreach (var row in Rows)
+            {
+                if (row is EmptyRow)
+                    continue;
+
+                var label = row.GetLabel(column);
+                var style = label.style;
+                style.width = newWidth;
+
+                if (setVisibility)
+                    style.display = newWidth > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            }
         }
 
         /// <summary>
@@ -50,10 +82,10 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         }
     }
 
-    internal class Row
+    internal abstract class Row
     {
-        public readonly Table Table;
-        public readonly VisualElement VisualElement;
+        public Table Table { get; }
+        public VisualElement VisualElement { get; }
 
         public Row(Table table)
         {
@@ -64,22 +96,48 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             table.VisualElement.Add(VisualElement);
         }
 
-        public Label AddElement(ColumnInfo column, object obj)
+        public abstract Label GetLabel(ColumnInfo column);
+
+        public void SetText(ColumnInfo column, object obj)
         {
-            return AddElement(column, obj.ToString());
+            SetText(column, obj.ToString());
         }
-        public Label AddElement(ColumnInfo column, string text)
+        public void SetText(ColumnInfo column, string text)
         {
-            var label = AddElement(column);
+            var label = GetLabel(column);
             label.text = text;
-            return label;
         }
-        public Label AddElement(ColumnInfo column)
+    }
+
+    internal class EmptyRow : Row
+    {
+        public EmptyRow(Table table) : base(table) { }
+
+        public override Label GetLabel(ColumnInfo column)
+        {
+            throw new NotSupportedException("Empty row does not have any columns");
+        }
+    }
+
+    internal class LabelRow : Row
+    {
+        private readonly Dictionary<ColumnInfo, Label> _elements = new Dictionary<ColumnInfo, Label>();
+
+        public LabelRow(Table table) : base(table)
+        {
+            foreach (var header in table.HeaderInfo)
+            {
+                var label = CreateLabel(header.Width);
+                VisualElement.Add(label);
+                _elements[header] = label;
+            }
+        }
+
+        public static Label CreateLabel(int width)
         {
             var label = new Label();
-            VisualElement.Add(label);
             var style = label.style;
-            style.width = column.Width;
+            style.width = width;
 
             style.paddingLeft = 5;
             style.paddingRight = 5;
@@ -90,6 +148,11 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             style.borderBottomWidth = 1;
             style.borderRightWidth = 2;
             return label;
+        }
+
+        public override Label GetLabel(ColumnInfo column)
+        {
+            return _elements[column];
         }
     }
 
