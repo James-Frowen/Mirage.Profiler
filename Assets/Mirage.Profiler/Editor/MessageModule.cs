@@ -131,9 +131,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             _debugToggle.RegisterValueChangedCallback(DebugToggleChanged);
             _toggleBox.Add(_debugToggle);
 #if MIRAGE_PROFILER_DEBUG
-            _debugToggle.visible = true;
+            _debugToggle.style.display = DisplayStyle.Flex;
 #else
-            _debugToggle.visible = false;
+            _debugToggle.style.display = DisplayStyle.None;
 #endif
 
 
