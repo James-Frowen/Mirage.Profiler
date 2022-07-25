@@ -48,3 +48,4 @@ Download unity package from [release page](https://github.com/James-Frowen/Mirag
 - [ ] Group by Message type
 - [ ] Saving messages so that they can be viewed outside of playmode
 - [ ] Multi-instance support for mirage (give option to pick which server/client NetworkDiagnostics uses)
+- [ ] Add Sort by column
