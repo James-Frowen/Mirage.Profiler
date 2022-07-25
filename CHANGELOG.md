@@ -1,3 +1,10 @@
+# [1.0.0-beta.6](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.5...v1.0.0-beta.6) (2022-07-25)
+
+
+### Bug Fixes
+
+* fixing define to hide debug toggle ([5798c5c](https://github.com/James-Frowen/Mirage.Profiler/commit/5798c5c0f13c5614c8ce507736820ac6bfbfa04a))
+
 # [1.0.0-beta.5](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.4...v1.0.0-beta.5) (2022-07-25)
 
 
