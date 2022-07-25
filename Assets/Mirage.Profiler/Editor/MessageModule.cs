@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.Profiling;
 using Unity.Profiling.Editor;
@@ -82,7 +83,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         private Label _bytesLabel;
         private Label _perSecondLabel;
         private Table _table;
+        private VisualElement _toggleBox;
         private Toggle _debugToggle;
+        private Toggle _groupMsgToggle;
 
         public MessageViewController(ProfilerWindow profilerWindow, CounterNames names, ICountRecorderProvider counterProvider) : base(profilerWindow)
         {
@@ -105,16 +108,28 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             labels.style.borderRightColor = Color.white * .4f;//dark grey
             labels.style.borderRightWidth = 3;
 
+            _toggleBox = new VisualElement();
+            _toggleBox.style.position = Position.Absolute;
+            _toggleBox.style.bottom = 5;
+            _toggleBox.style.left = 5;
+            _toggleBox.style.unityTextAlign = TextAnchor.LowerLeft;
+            labels.Add(_toggleBox);
+
+
+            _groupMsgToggle = new Toggle();
+            _groupMsgToggle.text = "Group Messages";
+            _groupMsgToggle.tooltip = "Groups Message by type";
+            _groupMsgToggle.value = false;
+            _groupMsgToggle.RegisterValueChangedCallback(GroupMsgToggleChanged);
+            _toggleBox.Add(_groupMsgToggle);
+
+
             _debugToggle = new Toggle();
             _debugToggle.text = "Show Fake Messages";
             _debugToggle.tooltip = "Adds fakes message to table to debug layout of table";
-            _debugToggle.value = false;
-            _debugToggle.style.position = Position.Absolute;
-            _debugToggle.style.bottom = 5;
-            _debugToggle.style.left = 5;
-            _debugToggle.style.unityTextAlign = TextAnchor.LowerLeft;
+            _debugToggle.value = true;
             _debugToggle.RegisterValueChangedCallback(DebugToggleChanged);
-            labels.Add(_debugToggle);
+            _toggleBox.Add(_debugToggle);
 #if MIRAGE_PROFILER_DEBUG
             _debugToggle.visible = true;
 #else
@@ -136,6 +151,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         }
 
         private void DebugToggleChanged(ChangeEvent<bool> _) => ReloadData();
+        private void GroupMsgToggleChanged(ChangeEvent<bool> _) => ReloadData();
 
         private VisualElement CreateLabels()
         {
@@ -207,22 +223,48 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 return;
             }
 
+            if (_groupMsgToggle.value)
+            {
+                var groups = GroupMessages(messages);
+                DrawGroups(groups);
+            }
+            else
+            {
+                DrawMessages(messages);
+            }
+
+            var expandColumn = _columns.Expand;
+            var defaultWidth = expandColumn.Width;
+            var width = _groupMsgToggle.value ? defaultWidth : 0;
+            _table.ChangeWidth(expandColumn, width, true);
+        }
+
+        private void DrawMessages(List<NetworkDiagnostics.MessageInfo> messages)
+        {
             foreach (var info in messages)
             {
                 var row = _table.AddRow();
-                row.AddElement(_columns.FullName, info.message.GetType().FullName);
-                row.AddElement(_columns.TotalBytes, info.bytes * info.count);
-                row.AddElement(_columns.Count, info.count);
-                row.AddElement(_columns.BytesPerMessage, info.bytes);
+                row.SetText(_columns.FullName, info.message.GetType().FullName);
+                row.SetText(_columns.TotalBytes, info.bytes * info.count);
+                row.SetText(_columns.Count, info.count);
+                row.SetText(_columns.BytesPerMessage, info.bytes);
                 var netid = GetNetId(info.message);
                 var netidStr = netid.HasValue ? netid.ToString() : "";
-                row.AddElement(_columns.NetId, netidStr);
+                row.SetText(_columns.NetId, netidStr);
+            }
+        }
+
+        private void DrawGroups(Dictionary<Type, List<NetworkDiagnostics.MessageInfo>> groups)
+        {
+            foreach (var group in groups)
+            {
+                DrawMessages(group.Value);
             }
         }
 
         private void AddCantLoadLabel()
         {
-            var row = _table.AddRow();
+            var row = _table.AddEmptyRow();
             var ele = AddLabelWithPadding(row.VisualElement);
             ele.style.color = Color.red;
             ele.text = "Can not load messages! (Message list only visible in play mode)";
@@ -230,7 +272,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         private void AddNoMessagesLabel()
         {
-            var row = _table.AddRow();
+            var row = _table.AddEmptyRow();
             var ele = AddLabelWithPadding(row.VisualElement);
             ele.text = "No Messages";
         }
@@ -239,25 +281,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         {
             if (_debugToggle.value)
             {
-                messages = new List<NetworkDiagnostics.MessageInfo>();
-
-                for (var i = 0; i < 5; i++)
-                {
-                    messages.Add(NewInfo(new RpcMessage { netId = (uint)i }, 20, 5));
-                    messages.Add(NewInfo(new SpawnMessage { netId = (uint)i }, 80, 1));
-                    messages.Add(NewInfo(new SpawnMessage { netId = (uint)i }, 60, 4));
-                    messages.Add(NewInfo(new NetworkPingMessage { }, 4, 1));
-
-                    static NetworkDiagnostics.MessageInfo NewInfo(object msg, int bytes, int count)
-                    {
-#if MIRAGE_DIAGNOSTIC_INSTANCE
-                        return new NetworkDiagnostics.MessageInfo(null, msg, bytes, count);
-#else
-                        return new NetworkDiagnostics.MessageInfo(msg, bytes, count);
-#endif
-                    }
-                }
-
+                messages = GenerateDebugMessages();
                 return true;
             }
 
@@ -273,10 +297,49 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 frameIndex = int.Parse(frameIndexStr);
 
             var frame = counter._frames[frameIndex];
-            var count = frame.Messages.Count;
-
             messages = frame.Messages;
+
             return true;
+        }
+
+        private Dictionary<Type, List<NetworkDiagnostics.MessageInfo>> GroupMessages(List<NetworkDiagnostics.MessageInfo> messages)
+        {
+            var groups = new Dictionary<Type, List<NetworkDiagnostics.MessageInfo>>();
+            foreach (var message in messages)
+            {
+                var type = message.message.GetType();
+                if (!groups.TryGetValue(type, out var group))
+                {
+                    group = new List<NetworkDiagnostics.MessageInfo>();
+                    groups[type] = group;
+                }
+
+                group.Add(message);
+            }
+            return groups;
+        }
+
+        private static List<NetworkDiagnostics.MessageInfo> GenerateDebugMessages()
+        {
+            var messages = new List<NetworkDiagnostics.MessageInfo>();
+            for (var i = 0; i < 5; i++)
+            {
+                messages.Add(NewInfo(new RpcMessage { netId = (uint)i }, 20, 5));
+                messages.Add(NewInfo(new SpawnMessage { netId = (uint)i }, 80, 1));
+                messages.Add(NewInfo(new SpawnMessage { netId = (uint)i }, 60, 4));
+                messages.Add(NewInfo(new NetworkPingMessage { }, 4, 1));
+
+                static NetworkDiagnostics.MessageInfo NewInfo(object msg, int bytes, int count)
+                {
+#if MIRAGE_DIAGNOSTIC_INSTANCE
+                        return new NetworkDiagnostics.MessageInfo(null, msg, bytes, count);
+#else
+                    return new NetworkDiagnostics.MessageInfo(msg, bytes, count);
+#endif
+                }
+            }
+
+            return messages;
         }
 
         private static uint? GetNetId(object message)
@@ -308,30 +371,33 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 PerSecond = perSecond;
             }
         }
-    }
 
-    internal sealed class Columns : IEnumerable<ColumnInfo>
-    {
-        private const int NAME_WIDTH = 300;
-        private const int OTHER_WIDTH = 100;
-
-        public ColumnInfo FullName = new ColumnInfo("Message", NAME_WIDTH);
-        public ColumnInfo TotalBytes = new ColumnInfo("Total Bytes", OTHER_WIDTH);
-        public ColumnInfo Count = new ColumnInfo("Count", OTHER_WIDTH);
-        public ColumnInfo BytesPerMessage = new ColumnInfo("Bytes", OTHER_WIDTH);
-        public ColumnInfo NetId = new ColumnInfo("Net id", OTHER_WIDTH);
-
-        public IEnumerator<ColumnInfo> GetEnumerator()
+        internal sealed class Columns : IEnumerable<ColumnInfo>
         {
-            yield return FullName;
-            yield return TotalBytes;
-            yield return Count;
-            yield return BytesPerMessage;
-            yield return NetId;
-        }
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            private const int Expand_WIDTH = 25;
+            private const int NAME_WIDTH = 300;
+            private const int OTHER_WIDTH = 100;
+
+            public ColumnInfo Expand = new ColumnInfo("+", Expand_WIDTH);
+            public ColumnInfo FullName = new ColumnInfo("Message", NAME_WIDTH);
+            public ColumnInfo TotalBytes = new ColumnInfo("Total Bytes", OTHER_WIDTH);
+            public ColumnInfo Count = new ColumnInfo("Count", OTHER_WIDTH);
+            public ColumnInfo BytesPerMessage = new ColumnInfo("Bytes", OTHER_WIDTH);
+            public ColumnInfo NetId = new ColumnInfo("Net id", OTHER_WIDTH);
+
+            public IEnumerator<ColumnInfo> GetEnumerator()
+            {
+                yield return Expand;
+                yield return FullName;
+                yield return TotalBytes;
+                yield return Count;
+                yield return BytesPerMessage;
+                yield return NetId;
+            }
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
         }
     }
 }
