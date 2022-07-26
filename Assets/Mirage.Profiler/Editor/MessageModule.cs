@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UIElements;
+using MessageInfo = Mirage.NetworkDiagnostics.MessageInfo;
 
 namespace Mirage.NetworkProfiler.ModuleGUI
 {
@@ -119,7 +120,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             _groupMsgToggle = new Toggle();
             _groupMsgToggle.text = "Group Messages";
             _groupMsgToggle.tooltip = "Groups Message by type";
-            _groupMsgToggle.value = false;
+            _groupMsgToggle.value = true;
             _groupMsgToggle.RegisterValueChangedCallback(GroupMsgToggleChanged);
             _toggleBox.Add(_groupMsgToggle);
 
@@ -239,11 +240,16 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             _table.ChangeWidth(expandColumn, width, true);
         }
 
-        private void DrawMessages(List<NetworkDiagnostics.MessageInfo> messages)
+        /// <param name="messages">Messages to add to table</param>
+        /// <param name="createdRows">list to add rows to once created, Can be null</param>
+        private void DrawMessages(List<MessageInfo> messages, Row previous = null, List<Row> createdRows = null)
         {
             foreach (var info in messages)
             {
-                var row = _table.AddRow();
+                var row = _table.AddRow(previous);
+                // set previous to be new row, so that message are added in order after previous
+                previous = row;
+
                 row.SetText(_columns.FullName, info.message.GetType().FullName);
                 row.SetText(_columns.TotalBytes, info.bytes * info.count);
                 row.SetText(_columns.Count, info.count);
@@ -251,14 +257,33 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 var netid = GetNetId(info.message);
                 var netidStr = netid.HasValue ? netid.ToString() : "";
                 row.SetText(_columns.NetId, netidStr);
+
+                createdRows?.Add(row);
             }
         }
 
-        private void DrawGroups(Dictionary<Type, List<NetworkDiagnostics.MessageInfo>> groups)
+        private void DrawGroups(Dictionary<Type, Group> groups)
         {
-            foreach (var group in groups)
+            foreach (var group in groups.Values)
             {
-                DrawMessages(group.Value);
+                // draw header
+                var head = _table.AddRow();
+                head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
+                head.SetText(_columns.FullName, group.Type.FullName);
+                head.SetText(_columns.TotalBytes, group.TotalBytes);
+                head.SetText(_columns.Count, group.TotalCount);
+                head.SetText(_columns.BytesPerMessage, "");
+                head.SetText(_columns.NetId, "");
+                group.Head = head;
+
+                var expand = head.GetLabel(_columns.Expand);
+                expand.AddManipulator(new Clickable((evt) =>
+                {
+                    group.ToggleExpand();
+                    group.Head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
+                }));
+
+                group.Expand(group.Expanded);
             }
         }
 
@@ -277,14 +302,13 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             ele.text = "No Messages";
         }
 
-        private bool TryGetMessages(out List<NetworkDiagnostics.MessageInfo> messages)
+        private bool TryGetMessages(out List<MessageInfo> messages)
         {
             if (_debugToggle.value)
             {
                 messages = GenerateDebugMessages();
                 return true;
             }
-
 
             messages = null;
             var counter = _counterProvider.GetCountRecorder();
@@ -302,39 +326,39 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             return true;
         }
 
-        private Dictionary<Type, List<NetworkDiagnostics.MessageInfo>> GroupMessages(List<NetworkDiagnostics.MessageInfo> messages)
+        private Dictionary<Type, Group> GroupMessages(List<MessageInfo> messages)
         {
-            var groups = new Dictionary<Type, List<NetworkDiagnostics.MessageInfo>>();
+            var groups = new Dictionary<Type, Group>();
             foreach (var message in messages)
             {
                 var type = message.message.GetType();
                 if (!groups.TryGetValue(type, out var group))
                 {
-                    group = new List<NetworkDiagnostics.MessageInfo>();
+                    group = new Group(type, this);
                     groups[type] = group;
                 }
 
-                group.Add(message);
+                group.AddMessage(message);
             }
             return groups;
         }
 
-        private static List<NetworkDiagnostics.MessageInfo> GenerateDebugMessages()
+        private static List<MessageInfo> GenerateDebugMessages()
         {
-            var messages = new List<NetworkDiagnostics.MessageInfo>();
+            var messages = new List<MessageInfo>();
             for (var i = 0; i < 5; i++)
             {
-                messages.Add(NewInfo(new RpcMessage { netId = (uint)i }, 20, 5));
-                messages.Add(NewInfo(new SpawnMessage { netId = (uint)i }, 80, 1));
-                messages.Add(NewInfo(new SpawnMessage { netId = (uint)i }, 60, 4));
+                messages.Add(NewInfo(new RpcMessage { netId = (uint)i }, 20 + i, 5));
+                messages.Add(NewInfo(new SpawnMessage { netId = (uint)i }, 80 + i, 1));
+                messages.Add(NewInfo(new SpawnMessage { netId = (uint)i }, 60 + i, 4));
                 messages.Add(NewInfo(new NetworkPingMessage { }, 4, 1));
 
-                static NetworkDiagnostics.MessageInfo NewInfo(object msg, int bytes, int count)
+                static MessageInfo NewInfo(object msg, int bytes, int count)
                 {
 #if MIRAGE_DIAGNOSTIC_INSTANCE
-                        return new NetworkDiagnostics.MessageInfo(null, msg, bytes, count);
+                        return new MessageInfo(null, msg, bytes, count);
 #else
-                    return new NetworkDiagnostics.MessageInfo(msg, bytes, count);
+                    return new MessageInfo(msg, bytes, count);
 #endif
                 }
             }
@@ -355,6 +379,81 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 case ObjectHideMessage msg: return msg.netId;
                 case UpdateVarsMessage msg: return msg.netId;
                 default: return default;
+            }
+        }
+
+        public class Group
+        {
+            public readonly List<Row> Rows = new List<Row>();
+            public readonly Type Type;
+            public readonly List<MessageInfo> Messages = new List<MessageInfo>();
+            public Row Head;
+
+            private readonly MessageViewController _view;
+
+            public int TotalBytes { get; private set; }
+            public int TotalCount { get; private set; }
+
+            public bool Expanded { get; private set; }
+
+            public Group(Type type, MessageViewController view)
+            {
+                Type = type;
+                _view = view;
+            }
+
+            public void AddMessage(MessageInfo msg)
+            {
+                Messages.Add(msg);
+                TotalBytes += msg.bytes * msg.count;
+                TotalCount += msg.count;
+            }
+
+            public void ToggleExpand()
+            {
+                Expand(!Expanded);
+            }
+
+            public void Expand(bool expanded)
+            {
+                Expanded = expanded;
+                // create rows if needed
+                LazyCreateRows();
+                foreach (var row in Rows)
+                {
+                    row.VisualElement.style.display = expanded ? DisplayStyle.Flex : DisplayStyle.None;
+                }
+            }
+
+            public void LazyCreateRows()
+            {
+                // not visible, do nothing till row is expanded
+                if (!Expanded)
+                    return;
+                // already created
+                if (Rows.Count > 0)
+                    return;
+
+                _view.DrawMessages(Messages, Head, Rows);
+
+                var backgroundColor = GetBackgroundColor();
+
+                // set the each element of child rows
+                foreach (var row in Rows)
+                {
+                    // set color of labels not whole row, otherwise color will be outside of table as well
+                    foreach (var ele in row.GetChildren())
+                        ele.style.backgroundColor = backgroundColor;
+                }
+            }
+
+            private static Color GetBackgroundColor()
+            {
+                // pick color that is lighter/darker than default editor background
+                // todo check if there is a way to get the real color, or do we have to use `isProSkin`?
+                return EditorGUIUtility.isProSkin
+                    ? (Color)new Color32(56, 56, 56, 255) / 0.8f
+                    : (Color)new Color32(194, 194, 194, 255) * .8f;
             }
         }
 

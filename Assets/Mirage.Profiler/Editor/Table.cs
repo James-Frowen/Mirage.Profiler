@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -37,16 +38,16 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             }
         }
 
-        public Row AddRow()
+        public Row AddRow(Row previous = null)
         {
-            var row = new LabelRow(this);
+            var row = new LabelRow(this, previous);
             Rows.Add(row);
             return row;
         }
 
-        public Row AddEmptyRow()
+        public Row AddEmptyRow(Row previous = null)
         {
-            var row = new EmptyRow(this);
+            var row = new EmptyRow(this, previous);
             Rows.Add(row);
             return row;
         }
@@ -87,16 +88,28 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         public Table Table { get; }
         public VisualElement VisualElement { get; }
 
-        public Row(Table table)
+        public Row(Table table, Row previous = null)
         {
             Table = table;
 
             VisualElement = new VisualElement();
             VisualElement.style.flexDirection = FlexDirection.Row;
-            table.VisualElement.Add(VisualElement);
+
+            if (previous != null)
+            {
+                var index = table.VisualElement.IndexOf(previous.VisualElement);
+                // insert after previous
+                table.VisualElement.Insert(index + 1, VisualElement);
+            }
+            else
+            {
+                // just add at end
+                table.VisualElement.Add(VisualElement);
+            }
         }
 
         public abstract Label GetLabel(ColumnInfo column);
+        public abstract IEnumerable<VisualElement> GetChildren();
 
         public void SetText(ColumnInfo column, object obj)
         {
@@ -111,11 +124,16 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
     internal class EmptyRow : Row
     {
-        public EmptyRow(Table table) : base(table) { }
+        public EmptyRow(Table table, Row previous = null) : base(table, previous) { }
 
         public override Label GetLabel(ColumnInfo column)
         {
             throw new NotSupportedException("Empty row does not have any columns");
+        }
+
+        public override IEnumerable<VisualElement> GetChildren()
+        {
+            return Enumerable.Empty<VisualElement>();
         }
     }
 
@@ -123,7 +141,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI
     {
         private readonly Dictionary<ColumnInfo, Label> _elements = new Dictionary<ColumnInfo, Label>();
 
-        public LabelRow(Table table) : base(table)
+
+        public LabelRow(Table table, Row previous = null) : base(table, previous)
         {
             foreach (var header in table.HeaderInfo)
             {
@@ -153,6 +172,11 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         public override Label GetLabel(ColumnInfo column)
         {
             return _elements[column];
+        }
+
+        public override IEnumerable<VisualElement> GetChildren()
+        {
+            return _elements.Values;
         }
     }
 
