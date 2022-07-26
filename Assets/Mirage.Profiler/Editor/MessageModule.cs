@@ -99,44 +99,46 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             var root = new VisualElement();
             root.style.flexDirection = new StyleEnum<FlexDirection>(FlexDirection.Row);
             root.style.height = Length.Percent(100);
+            root.style.overflow = Overflow.Hidden;
 
-            var labels = CreateLabels();
-            root.Add(labels);
-            labels.style.height = Length.Percent(100);
-            labels.style.width = 180;
-            labels.style.minWidth = 180;
-            labels.style.maxWidth = 180;
-            labels.style.borderRightColor = Color.white * .4f;//dark grey
-            labels.style.borderRightWidth = 3;
+            var summary = new VisualElement();
+            _countLabel = AddLabelWithPadding(summary);
+            _bytesLabel = AddLabelWithPadding(summary);
+            _perSecondLabel = AddLabelWithPadding(summary);
+            _perSecondLabel.tooltip = Names.PER_SECOND_TOOLTIP;
+            root.Add(summary);
+            summary.style.height = Length.Percent(100);
+            summary.style.width = 180;
+            summary.style.minWidth = 180;
+            summary.style.maxWidth = 180;
+            summary.style.borderRightColor = Color.white * .4f;//dark grey
+            summary.style.borderRightWidth = 3;
 
             _toggleBox = new VisualElement();
             _toggleBox.style.position = Position.Absolute;
             _toggleBox.style.bottom = 5;
             _toggleBox.style.left = 5;
             _toggleBox.style.unityTextAlign = TextAnchor.LowerLeft;
-            labels.Add(_toggleBox);
-
+            summary.Add(_toggleBox);
 
             _groupMsgToggle = new Toggle();
             _groupMsgToggle.text = "Group Messages";
             _groupMsgToggle.tooltip = "Groups Message by type";
             _groupMsgToggle.value = true;
-            _groupMsgToggle.RegisterValueChangedCallback(GroupMsgToggleChanged);
+            _groupMsgToggle.RegisterValueChangedCallback(_ => ReloadData());
             _toggleBox.Add(_groupMsgToggle);
-
 
             _debugToggle = new Toggle();
             _debugToggle.text = "Show Fake Messages";
             _debugToggle.tooltip = "Adds fakes message to table to debug layout of table";
             _debugToggle.value = false;
-            _debugToggle.RegisterValueChangedCallback(DebugToggleChanged);
+            _debugToggle.RegisterValueChangedCallback(_ => ReloadData());
             _toggleBox.Add(_debugToggle);
 #if MIRAGE_PROFILER_DEBUG
             _debugToggle.style.display = DisplayStyle.Flex;
 #else
             _debugToggle.style.display = DisplayStyle.None;
 #endif
-
 
             _table = new Table(_columns);
             root.Add(_table.VisualElement);
@@ -145,23 +147,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             ReloadData();
 
             // Be notified when the selected frame index in the Profiler Window changes, so we can update the label.
-            ProfilerWindow.SelectedFrameIndexChanged += OnSelectedFrameIndexChanged;
+            ProfilerWindow.SelectedFrameIndexChanged += FrameIndexChanged;
 
-            root.style.overflow = Overflow.Hidden;
             return root;
-        }
-
-        private void DebugToggleChanged(ChangeEvent<bool> _) => ReloadData();
-        private void GroupMsgToggleChanged(ChangeEvent<bool> _) => ReloadData();
-
-        private VisualElement CreateLabels()
-        {
-            var dataView = new VisualElement();
-            _countLabel = AddLabelWithPadding(dataView);
-            _bytesLabel = AddLabelWithPadding(dataView);
-            _perSecondLabel = AddLabelWithPadding(dataView);
-            _perSecondLabel.tooltip = Names.PER_SECOND_TOOLTIP;
-            return dataView;
         }
 
         private static Label AddLabelWithPadding(VisualElement view)
@@ -171,12 +159,11 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             return label;
         }
 
-        private void OnSelectedFrameIndexChanged(long selectedFrameIndex)
+        private void FrameIndexChanged(long selectedFrameIndex)
         {
             // Update the label with the current data for the newly selected frame.
             ReloadData();
         }
-
 
         protected override void Dispose(bool disposing)
         {
@@ -184,31 +171,30 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 return;
 
             // Unsubscribe from the Profiler window event that we previously subscribed to.
-            ProfilerWindow.SelectedFrameIndexChanged -= OnSelectedFrameIndexChanged;
+            ProfilerWindow.SelectedFrameIndexChanged -= FrameIndexChanged;
 
             base.Dispose(disposing);
         }
 
         private void ReloadData()
         {
-            SetText(_countLabel, _names.Count);
-            SetText(_bytesLabel, _names.Bytes);
-            SetText(_perSecondLabel, _names.PerSecond);
+            SetSummary(_countLabel, _names.Count);
+            SetSummary(_bytesLabel, _names.Bytes);
+            SetSummary(_perSecondLabel, _names.PerSecond);
 
             ReloadMessages();
         }
 
-        private void SetText(Label label, string name)
+        private void SetSummary(Label label, string counterName)
         {
             var frame = (int)ProfilerWindow.selectedFrameIndex;
             var category = ProfilerCategory.Network.Name;
-            var value = ProfilerDriver.GetFormattedCounterValue(frame, category, name);
+            var value = ProfilerDriver.GetFormattedCounterValue(frame, category, counterName);
 
             // replace prefix
-            var display = name.Replace("Received", "").Replace("Sent", "").Trim();
+            var display = counterName.Replace("Received", "").Replace("Sent", "").Trim();
             label.text = $"{display}: {value}";
         }
-
 
         private void ReloadMessages()
         {
@@ -240,68 +226,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             var defaultWidth = expandColumn.Width;
             var width = _groupMsgToggle.value ? defaultWidth : 0;
             _table.ChangeWidth(expandColumn, width, true);
-        }
-
-        /// <param name="messages">Messages to add to table</param>
-        /// <param name="createdRows">list to add rows to once created, Can be null</param>
-        private void DrawMessages(List<MessageInfo> messages, Row previous = null, List<Row> createdRows = null)
-        {
-            foreach (var info in messages)
-            {
-                var row = _table.AddRow(previous);
-                // set previous to be new row, so that message are added in order after previous
-                previous = row;
-
-                row.SetText(_columns.FullName, info.message.GetType().FullName);
-                row.SetText(_columns.TotalBytes, info.bytes * info.count);
-                row.SetText(_columns.Count, info.count);
-                row.SetText(_columns.BytesPerMessage, info.bytes);
-                var netid = GetNetId(info.message);
-                var netidStr = netid.HasValue ? netid.ToString() : "";
-                row.SetText(_columns.NetId, netidStr);
-
-                createdRows?.Add(row);
-            }
-        }
-
-        private void DrawGroups(Dictionary<Type, Group> groups)
-        {
-            foreach (var group in groups.Values)
-            {
-                // draw header
-                var head = _table.AddRow();
-                head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
-                head.SetText(_columns.FullName, group.Type.FullName);
-                head.SetText(_columns.TotalBytes, group.TotalBytes);
-                head.SetText(_columns.Count, group.TotalCount);
-                head.SetText(_columns.BytesPerMessage, "");
-                head.SetText(_columns.NetId, "");
-                group.Head = head;
-
-                var expand = head.GetLabel(_columns.Expand);
-                expand.AddManipulator(new Clickable((evt) =>
-                {
-                    group.ToggleExpand();
-                    group.Head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
-                }));
-
-                group.Expand(group.Expanded);
-            }
-        }
-
-        private void AddCantLoadLabel()
-        {
-            var row = _table.AddEmptyRow();
-            var ele = AddLabelWithPadding(row.VisualElement);
-            ele.style.color = Color.red;
-            ele.text = "Can not load messages! (Message list only visible in play mode)";
-        }
-
-        private void AddNoMessagesLabel()
-        {
-            var row = _table.AddEmptyRow();
-            var ele = AddLabelWithPadding(row.VisualElement);
-            ele.text = "No Messages";
         }
 
         private bool TryGetMessages(out List<MessageInfo> messages)
@@ -368,6 +292,53 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             return messages;
         }
 
+        private void DrawGroups(Dictionary<Type, Group> groups)
+        {
+            foreach (var group in groups.Values)
+            {
+                // draw header
+                var head = _table.AddRow();
+                head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
+                head.SetText(_columns.FullName, group.Type.FullName);
+                head.SetText(_columns.TotalBytes, group.TotalBytes);
+                head.SetText(_columns.Count, group.TotalCount);
+                head.SetText(_columns.BytesPerMessage, "");
+                head.SetText(_columns.NetId, "");
+                group.Head = head;
+
+                var expand = head.GetLabel(_columns.Expand);
+                expand.AddManipulator(new Clickable((evt) =>
+                {
+                    group.ToggleExpand();
+                    group.Head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
+                }));
+
+                group.Expand(group.Expanded);
+            }
+        }
+
+        /// <param name="messages">Messages to add to table</param>
+        /// <param name="createdRows">list to add rows to once created, Can be null</param>
+        private void DrawMessages(List<MessageInfo> messages, Row previous = null, List<Row> createdRows = null)
+        {
+            foreach (var info in messages)
+            {
+                var row = _table.AddRow(previous);
+                // set previous to be new row, so that message are added in order after previous
+                previous = row;
+
+                row.SetText(_columns.FullName, info.message.GetType().FullName);
+                row.SetText(_columns.TotalBytes, info.bytes * info.count);
+                row.SetText(_columns.Count, info.count);
+                row.SetText(_columns.BytesPerMessage, info.bytes);
+                var netid = GetNetId(info.message);
+                var netidStr = netid.HasValue ? netid.ToString() : "";
+                row.SetText(_columns.NetId, netidStr);
+
+                createdRows?.Add(row);
+            }
+        }
+
         private static uint? GetNetId(object message)
         {
             switch (message)
@@ -382,6 +353,21 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 case UpdateVarsMessage msg: return msg.netId;
                 default: return default;
             }
+        }
+
+        private void AddCantLoadLabel()
+        {
+            var row = _table.AddEmptyRow();
+            var ele = AddLabelWithPadding(row.VisualElement);
+            ele.style.color = Color.red;
+            ele.text = "Can not load messages! (Message list only visible in play mode)";
+        }
+
+        private void AddNoMessagesLabel()
+        {
+            var row = _table.AddEmptyRow();
+            var ele = AddLabelWithPadding(row.VisualElement);
+            ele.text = "No Messages";
         }
 
         public class Group
