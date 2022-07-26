@@ -204,7 +204,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             var category = ProfilerCategory.Network.Name;
             var value = ProfilerDriver.GetFormattedCounterValue(frame, category, name);
 
-            label.text = $"{name}: {value}";
+            // replace prefix
+            var display = name.Replace("Received", "").Replace("Sent", "").Trim();
+            label.text = $"{display}: {value}";
         }
 
 
