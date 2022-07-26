@@ -1,3 +1,11 @@
+# [1.0.0-beta.8](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.7...v1.0.0-beta.8) (2022-07-26)
+
+
+### Bug Fixes
+
+* disabling debug message by default ([ad1e082](https://github.com/James-Frowen/Mirage.Profiler/commit/ad1e08243d1f4e443468b32682eb44ede8c3ffa4))
+* removing prefix from summary labels ([6836ff5](https://github.com/James-Frowen/Mirage.Profiler/commit/6836ff547c7f2340baca8a68064c7556ef0ccfe6))
+
 # [1.0.0-beta.7](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.6...v1.0.0-beta.7) (2022-07-26)
 
 
