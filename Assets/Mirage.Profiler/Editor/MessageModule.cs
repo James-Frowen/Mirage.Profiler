@@ -128,7 +128,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             _debugToggle = new Toggle();
             _debugToggle.text = "Show Fake Messages";
             _debugToggle.tooltip = "Adds fakes message to table to debug layout of table";
-            _debugToggle.value = true;
+            _debugToggle.value = false;
             _debugToggle.RegisterValueChangedCallback(DebugToggleChanged);
             _toggleBox.Add(_debugToggle);
 #if MIRAGE_PROFILER_DEBUG
