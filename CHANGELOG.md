@@ -1,3 +1,10 @@
+# [1.0.0-beta.7](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.6...v1.0.0-beta.7) (2022-07-26)
+
+
+### Features
+
+* expandable groups for message types ([20f949c](https://github.com/James-Frowen/Mirage.Profiler/commit/20f949ceee10951cf4215451afbbea33d3f0d63f))
+
 # [1.0.0-beta.6](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.5...v1.0.0-beta.6) (2022-07-25)
 
 
