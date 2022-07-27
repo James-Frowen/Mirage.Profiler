@@ -47,10 +47,64 @@ namespace Mirage.NetworkProfiler
         public static readonly ProfilerCounter<int> ReceiveBytes = new ProfilerCounter<int>(Category, Names.RECEIVED_BYTES, BYTES);
         public static readonly ProfilerCounter<int> ReceivePerSecond = new ProfilerCounter<int>(Category, Names.RECEIVED_PER_SECOND, BYTES);
     }
+
+    [System.Serializable]
     internal class Frame
     {
-        public readonly List<NetworkDiagnostics.MessageInfo> Messages = new List<NetworkDiagnostics.MessageInfo>();
+        public List<MessageInfo> Messages = new List<MessageInfo>();
         public int Bytes;
+    }
+
+    [System.Serializable]
+    internal class MessageInfo
+    {
+        /// <summary>
+        /// Order message was sent/received in frame
+        /// </summary>
+        private int _order;
+        private int _bytes;
+        private int _count;
+        private string _messageName;
+        // unity can't serialize nullable so store as 2 fields
+        private bool _hasNetId;
+        private uint _netId;
+
+
+        public string Name => _messageName;
+        public int Bytes => _bytes;
+        public int Count => _count;
+        public int TotalBytes => Bytes * Count;
+        public uint? NetId => _hasNetId ? _netId : default;
+
+        public MessageInfo(NetworkDiagnostics.MessageInfo msg, int order)
+        {
+            _order = order;
+            _bytes = msg.bytes;
+            _count = msg.count;
+            _messageName = msg.message.GetType().FullName;
+            var id = msg.GetNetId();
+            _hasNetId = id.HasValue;
+            _netId = id.GetValueOrDefault();
+        }
+    }
+
+    public static class MessageHelper
+    {
+        public static uint? GetNetId(this NetworkDiagnostics.MessageInfo info)
+        {
+            switch (info.message)
+            {
+                case ServerRpcMessage msg: return msg.netId;
+                case ServerRpcWithReplyMessage msg: return msg.netId;
+                case RpcMessage msg: return msg.netId;
+                case SpawnMessage msg: return msg.netId;
+                case RemoveAuthorityMessage msg: return msg.netId;
+                case ObjectDestroyMessage msg: return msg.netId;
+                case ObjectHideMessage msg: return msg.netId;
+                case UpdateVarsMessage msg: return msg.netId;
+                default: return default;
+            }
+        }
     }
 
     internal class CountRecorder
@@ -92,7 +146,7 @@ namespace Mirage.NetworkProfiler
             _count += obj.count;
             _bytes += obj.bytes * obj.count;
             var frame = _frames[Time.frameCount % _frames.Length];
-            frame.Messages.Add(obj);
+            frame.Messages.Add(new MessageInfo(obj, frame.Messages.Count));
             frame.Bytes++;
         }
 

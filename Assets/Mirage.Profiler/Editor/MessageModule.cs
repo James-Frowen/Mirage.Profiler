@@ -6,7 +6,6 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UIElements;
-using MessageInfo = Mirage.NetworkDiagnostics.MessageInfo;
 
 namespace Mirage.NetworkProfiler.ModuleGUI
 {
@@ -87,6 +86,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         private VisualElement _toggleBox;
         private Toggle _debugToggle;
         private Toggle _groupMsgToggle;
+        private Dictionary<string, Group> _messages;
 
         public MessageViewController(ProfilerWindow profilerWindow, CounterNames names, ICountRecorderProvider counterProvider) : base(profilerWindow)
         {
@@ -95,6 +95,20 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         }
 
         protected override VisualElement CreateView()
+        {
+            // unity doesn't catch errors here so we have to wrap in try/catch
+            try
+            {
+                return CreateViewInternal();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+                return null;
+            }
+        }
+
+        private VisualElement CreateViewInternal()
         {
             var root = new VisualElement();
             root.style.flexDirection = new StyleEnum<FlexDirection>(FlexDirection.Row);
@@ -212,15 +226,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 return;
             }
 
-            if (_groupMsgToggle.value)
-            {
-                var groups = GroupMessages(messages);
-                DrawGroups(groups);
-            }
-            else
-            {
-                DrawMessages(messages);
-            }
+            _messages = GroupMessages(messages);
+            DrawGroups(_messages);
 
             var expandColumn = _columns.Expand;
             var defaultWidth = expandColumn.Width;
@@ -252,16 +259,17 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             return true;
         }
 
-        private Dictionary<Type, Group> GroupMessages(List<MessageInfo> messages)
+        private Dictionary<string, Group> GroupMessages(List<MessageInfo> messages)
         {
-            var groups = new Dictionary<Type, Group>();
+            var groups = new Dictionary<string, Group>();
             foreach (var message in messages)
             {
-                var type = message.message.GetType();
-                if (!groups.TryGetValue(type, out var group))
+                var name = message.Name;
+
+                if (!groups.TryGetValue(name, out var group))
                 {
-                    group = new Group(type, this);
-                    groups[type] = group;
+                    group = new Group(name, this);
+                    groups[name] = group;
                 }
 
                 group.AddMessage(message);
@@ -272,19 +280,20 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         private static List<MessageInfo> GenerateDebugMessages()
         {
             var messages = new List<MessageInfo>();
+            var order = 0;
             for (var i = 0; i < 5; i++)
             {
-                messages.Add(NewInfo(new RpcMessage { netId = (uint)i }, 20 + i, 5));
-                messages.Add(NewInfo(new SpawnMessage { netId = (uint)i }, 80 + i, 1));
-                messages.Add(NewInfo(new SpawnMessage { netId = (uint)i }, 60 + i, 4));
-                messages.Add(NewInfo(new NetworkPingMessage { }, 4, 1));
+                messages.Add(NewInfo(order++, new RpcMessage { netId = (uint)i }, 20 + i, 5));
+                messages.Add(NewInfo(order++, new SpawnMessage { netId = (uint)i }, 80 + i, 1));
+                messages.Add(NewInfo(order++, new SpawnMessage { netId = (uint)i }, 60 + i, 4));
+                messages.Add(NewInfo(order++, new NetworkPingMessage { }, 4, 1));
 
-                static MessageInfo NewInfo(object msg, int bytes, int count)
+                static MessageInfo NewInfo(int order, object msg, int bytes, int count)
                 {
 #if MIRAGE_DIAGNOSTIC_INSTANCE
                         return new MessageInfo(null, msg, bytes, count);
 #else
-                    return new MessageInfo(msg, bytes, count);
+                    return new MessageInfo(new NetworkDiagnostics.MessageInfo(msg, bytes, count), order);
 #endif
                 }
             }
@@ -292,29 +301,43 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             return messages;
         }
 
-        private void DrawGroups(Dictionary<Type, Group> groups)
+        private void DrawGroups(Dictionary<string, Group> groups)
         {
+            var asGroups = _groupMsgToggle.value;
             foreach (var group in groups.Values)
             {
-                // draw header
-                var head = _table.AddRow();
-                head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
-                head.SetText(_columns.FullName, group.Type.FullName);
-                head.SetText(_columns.TotalBytes, group.TotalBytes);
-                head.SetText(_columns.Count, group.TotalCount);
-                head.SetText(_columns.BytesPerMessage, "");
-                head.SetText(_columns.NetId, "");
-                group.Head = head;
-
-                var expand = head.GetLabel(_columns.Expand);
-                expand.AddManipulator(new Clickable((evt) =>
+                if (asGroups)
                 {
-                    group.ToggleExpand();
-                    group.Head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
-                }));
-
-                group.Expand(group.Expanded);
+                    DrawGroupHeader(group);
+                }
+                else
+                {
+                    group.Expand(true);
+                }
             }
+        }
+
+        private void DrawGroupHeader(Group group)
+        {
+            // draw header
+            var head = _table.AddRow();
+            head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
+            head.SetText(_columns.FullName, group.Name);
+            head.SetText(_columns.TotalBytes, group.TotalBytes);
+            head.SetText(_columns.Count, group.TotalCount);
+            head.SetText(_columns.BytesPerMessage, "");
+            head.SetText(_columns.NetId, "");
+            group.Head = head;
+
+            var expand = head.GetLabel(_columns.Expand);
+            expand.AddManipulator(new Clickable((evt) =>
+            {
+                group.ToggleExpand();
+                group.Head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
+            }));
+
+            // will lazy create message if expanded
+            group.Expand(group.Expanded);
         }
 
         /// <param name="messages">Messages to add to table</param>
@@ -327,33 +350,17 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 // set previous to be new row, so that message are added in order after previous
                 previous = row;
 
-                row.SetText(_columns.FullName, info.message.GetType().FullName);
-                row.SetText(_columns.TotalBytes, info.bytes * info.count);
-                row.SetText(_columns.Count, info.count);
-                row.SetText(_columns.BytesPerMessage, info.bytes);
-                var netid = GetNetId(info.message);
-                var netidStr = netid.HasValue ? netid.ToString() : "";
+                row.SetText(_columns.FullName, info.Name);
+                row.SetText(_columns.TotalBytes, info.TotalBytes);
+                row.SetText(_columns.Count, info.Count);
+                row.SetText(_columns.BytesPerMessage, info.Bytes);
+                var netidStr = info.NetId.HasValue ? info.NetId.ToString() : "";
                 row.SetText(_columns.NetId, netidStr);
 
                 createdRows?.Add(row);
             }
         }
 
-        private static uint? GetNetId(object message)
-        {
-            switch (message)
-            {
-                case ServerRpcMessage msg: return msg.netId;
-                case ServerRpcWithReplyMessage msg: return msg.netId;
-                case RpcMessage msg: return msg.netId;
-                case SpawnMessage msg: return msg.netId;
-                case RemoveAuthorityMessage msg: return msg.netId;
-                case ObjectDestroyMessage msg: return msg.netId;
-                case ObjectHideMessage msg: return msg.netId;
-                case UpdateVarsMessage msg: return msg.netId;
-                default: return default;
-            }
-        }
 
         private void AddCantLoadLabel()
         {
@@ -373,7 +380,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         public class Group
         {
             public readonly List<Row> Rows = new List<Row>();
-            public readonly Type Type;
+            public readonly string Name;
             public readonly List<MessageInfo> Messages = new List<MessageInfo>();
             public Row Head;
 
@@ -384,17 +391,17 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
             public bool Expanded { get; private set; }
 
-            public Group(Type type, MessageViewController view)
+            public Group(string name, MessageViewController view)
             {
-                Type = type;
+                Name = name;
                 _view = view;
             }
 
             public void AddMessage(MessageInfo msg)
             {
                 Messages.Add(msg);
-                TotalBytes += msg.bytes * msg.count;
-                TotalCount += msg.count;
+                TotalBytes += msg.TotalBytes;
+                TotalCount += msg.Count;
             }
 
             public void ToggleExpand()
