@@ -1,7 +1,7 @@
 {
     "name": "com.james-frowen.mirage-profiler",
     "displayName": "Mirage Profiler",
-    "version": "1.0.0-beta.8",
+    "version": "1.0.0-beta.9",
     "unity": "2021.3",
     "description": "Network profiler for Mirage",
     "author": "James Frowen",

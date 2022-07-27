@@ -1,3 +1,10 @@
+# [1.0.0-beta.9](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.8...v1.0.0-beta.9) (2022-07-27)
+
+
+### Features
+
+* adding basic column sort ([1ce56a8](https://github.com/James-Frowen/Mirage.Profiler/commit/1ce56a878444597bf4946bf573264c9ebd156581))
+
 # [1.0.0-beta.8](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.7...v1.0.0-beta.8) (2022-07-26)
 
 
