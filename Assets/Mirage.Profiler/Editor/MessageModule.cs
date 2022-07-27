@@ -140,7 +140,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             _debugToggle.style.display = DisplayStyle.None;
 #endif
 
-            _table = new Table(_columns);
+            _table = new Table(_columns, new TableSorter());
             root.Add(_table.VisualElement);
 
             // Populate the label with the current data for the selected frame. 
@@ -461,16 +461,16 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         internal sealed class Columns : IEnumerable<ColumnInfo>
         {
-            private const int Expand_WIDTH = 25;
+            private const int EXPAND_WIDTH = 25;
             private const int NAME_WIDTH = 300;
             private const int OTHER_WIDTH = 100;
 
-            public ColumnInfo Expand = new ColumnInfo("+", Expand_WIDTH);
-            public ColumnInfo FullName = new ColumnInfo("Message", NAME_WIDTH);
-            public ColumnInfo TotalBytes = new ColumnInfo("Total Bytes", OTHER_WIDTH);
-            public ColumnInfo Count = new ColumnInfo("Count", OTHER_WIDTH);
-            public ColumnInfo BytesPerMessage = new ColumnInfo("Bytes", OTHER_WIDTH);
-            public ColumnInfo NetId = new ColumnInfo("Net id", OTHER_WIDTH);
+            public readonly ColumnInfo Expand = new ColumnInfo("+", EXPAND_WIDTH, false);
+            public readonly ColumnInfo FullName = new ColumnInfo("Message", NAME_WIDTH, true);
+            public readonly ColumnInfo TotalBytes = new ColumnInfo("Total Bytes", OTHER_WIDTH, true);
+            public readonly ColumnInfo Count = new ColumnInfo("Count", OTHER_WIDTH, true);
+            public readonly ColumnInfo BytesPerMessage = new ColumnInfo("Bytes", OTHER_WIDTH, true);
+            public readonly ColumnInfo NetId = new ColumnInfo("Net id", OTHER_WIDTH, true);
 
             public IEnumerator<ColumnInfo> GetEnumerator()
             {
@@ -484,6 +484,71 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
             {
                 return GetEnumerator();
+            }
+        }
+
+        private class TableSorter : ITableSorter
+        {
+            private SortHeader _header;
+            private Table _table;
+
+            public void Sort(Table table, SortHeader header)
+            {
+                _header = header;
+                _table = table;
+
+                if (header == null)
+                    return;
+
+                if (table.ContainsEmptyRows)
+                {
+                    Debug.LogWarning("Can't sort when there are empty rows");
+                    return;
+                }
+
+                table.Rows.Sort(Sort);
+                foreach (var row in table.Rows)
+                {
+                    // put at end of parent list
+                    // this causes rows to be moved to the end of the layout as they are in the List
+                    row.VisualElement.BringToFront();
+                }
+            }
+
+            private int Sort(Row x, Row y)
+            {
+                // make sure header stays at top
+                if (x == _table.Header)
+                    return -1;
+                if (y == _table.Header)
+                    return 1;
+
+                var a = x.GetLabel(_header.Info);
+                var b = y.GetLabel(_header.Info);
+
+                var aText = a.text;
+                var bText = b.text;
+
+                var sort = 0;
+                // if both numbers then sort by number instead of string
+                if (int.TryParse(aText, out var aNum) && int.TryParse(bText, out var bNum))
+                {
+                    sort = aNum.CompareTo(bNum);
+                }
+                else
+                {
+                    sort = a.text.CompareTo(b.text);
+                }
+
+
+                if (_header.SortMode == SortMode.Descending)
+                {
+                    return -sort;
+                }
+                else
+                {
+                    return sort;
+                }
             }
         }
     }

@@ -10,11 +10,13 @@ namespace Mirage.NetworkProfiler.ModuleGUI
     {
         public readonly ScrollView VisualElement;
 
-        public readonly Row Header;
+        public readonly SortHeaderRow Header;
         public readonly List<Row> Rows = new List<Row>();
         public readonly IReadOnlyList<ColumnInfo> HeaderInfo;
 
-        public Table(IEnumerable<ColumnInfo> columns)
+        public bool ContainsEmptyRows { get; private set; }
+
+        public Table(IEnumerable<ColumnInfo> columns, ITableSorter sorter)
         {
             VisualElement = new ScrollView(ScrollViewMode.VerticalAndHorizontal);
 
@@ -22,13 +24,20 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             HeaderInfo = new List<ColumnInfo>(columns);
 
             // header will initialize labels, but we need to set text
-            Header = AddRow();
+            Header = new SortHeaderRow(this, sorter);
+            Rows.Add(Header);
 
             // add headers
             foreach (var c in columns)
             {
                 var ele = Header.GetLabel(c);
                 ele.text = c.Header;
+
+                if (c.AllowSort)
+                {
+                    var sortHeader = (SortHeader)ele;
+                    sortHeader.Info = c;
+                }
 
                 // make header element thicker
                 var eleStyle = ele.style;
@@ -48,6 +57,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         public Row AddEmptyRow(Row previous = null)
         {
             var row = new EmptyRow(this, previous);
+            ContainsEmptyRows = true;
             Rows.Add(row);
             return row;
         }
@@ -80,6 +90,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
                 row.VisualElement.RemoveFromHierarchy();
             }
+            Rows.Clear();
+            Rows.Add(Header);
+            ContainsEmptyRows = false;
         }
     }
 
@@ -141,22 +154,27 @@ namespace Mirage.NetworkProfiler.ModuleGUI
     {
         private readonly Dictionary<ColumnInfo, Label> _elements = new Dictionary<ColumnInfo, Label>();
 
-
         public LabelRow(Table table, Row previous = null) : base(table, previous)
         {
             foreach (var header in table.HeaderInfo)
             {
-                var label = CreateLabel(header.Width);
+                var label = CreateLabel(header);
                 VisualElement.Add(label);
                 _elements[header] = label;
             }
         }
 
-        public static Label CreateLabel(int width)
+        public virtual Label CreateLabel(ColumnInfo column)
         {
             var label = new Label();
+            SetLabelStyle(column, label);
+            return label;
+        }
+
+        protected static void SetLabelStyle(ColumnInfo column, Label label)
+        {
             var style = label.style;
-            style.width = width;
+            style.width = column.Width;
 
             style.paddingLeft = 5;
             style.paddingRight = 5;
@@ -166,10 +184,10 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             style.borderBottomColor = Color.white * .4f;
             style.borderBottomWidth = 1;
             style.borderRightWidth = 2;
-            return label;
         }
 
         public override Label GetLabel(ColumnInfo column)
+
         {
             return _elements[column];
         }
@@ -180,15 +198,120 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         }
     }
 
+    internal class SortHeaderRow : LabelRow
+    {
+        private readonly ITableSorter _sorter;
+        private SortHeader _currentSort;
+
+        public SortHeaderRow(Table table, ITableSorter sorter) : base(table, null)
+        {
+            _sorter = sorter ?? throw new ArgumentNullException(nameof(sorter));
+        }
+
+        public override Label CreateLabel(ColumnInfo column)
+        {
+            var label = column.AllowSort
+                ? new SortHeader(this)
+                : new Label();
+
+            SetLabelStyle(column, label);
+            return label;
+        }
+
+
+        internal void UpdateSort(SortHeader sortHeader)
+        {
+            // not null or current
+            if (_currentSort != null && _currentSort != sortHeader)
+            {
+                _currentSort.SortMode = SortMode.None;
+                _currentSort.UpdateName();
+            }
+
+            _currentSort = sortHeader;
+            _currentSort.UpdateName();
+
+            _sorter.Sort(Table, sortHeader);
+        }
+    }
+
+    internal class SortHeader : Label
+    {
+        public const string ARROW_UP = "\u2191";
+        public const string ARROW_DOWN = "\u2193";
+
+        public SortMode SortMode;
+
+        private readonly SortHeaderRow _row;
+
+        private string _nameWithoutSort;
+        public string NameWithoutSort
+        {
+            get
+            {
+                // this get should be called before any modifications are made
+                // so lazy property should be safe here
+                if (_nameWithoutSort == null)
+                    _nameWithoutSort = text;
+
+                return _nameWithoutSort;
+            }
+        }
+
+        public ColumnInfo Info { get; internal set; }
+
+        public SortHeader(SortHeaderRow row) : base()
+        {
+            _row = row;
+            this.AddManipulator(new Clickable(OnClick));
+        }
+
+        private void OnClick(EventBase evt)
+        {
+            var sortIndex = (int)SortMode;
+            sortIndex = (sortIndex + 1) % 3;
+            SortMode = (SortMode)sortIndex;
+            _row.UpdateSort(this);
+        }
+
+        public void UpdateName()
+        {
+            switch (SortMode)
+            {
+                case SortMode.None:
+                    text = NameWithoutSort;
+                    break;
+                case SortMode.Accending:
+                    text = ARROW_UP + NameWithoutSort;
+                    break;
+                case SortMode.Descending:
+                    text = ARROW_DOWN + NameWithoutSort;
+                    break;
+            }
+        }
+    }
+    internal enum SortMode
+    {
+        None,
+        Accending,
+        Descending,
+    }
+    internal interface ITableSorter
+    {
+        void Sort(Table table, SortHeader header);
+    }
+
     internal class ColumnInfo
     {
         public string Header;
         public int Width;
+        public bool AllowSort;
 
-        public ColumnInfo(string header, int width)
+        public ColumnInfo(string header, int width, bool allowSort)
         {
             Header = header;
             Width = width;
+            AllowSort = allowSort;
         }
     }
 }
