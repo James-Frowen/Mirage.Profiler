@@ -1,3 +1,10 @@
+# [1.0.0-beta.12](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.11...v1.0.0-beta.12) (2022-07-28)
+
+
+### Bug Fixes
+
+* fixing groups not un-expanding ([17c27c2](https://github.com/James-Frowen/Mirage.Profiler/commit/17c27c24a22f40a9e240e9f0a68933ad531bd192))
+
 # [1.0.0-beta.11](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.10...v1.0.0-beta.11) (2022-07-28)
 
 
