@@ -154,7 +154,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             _debugToggle.style.display = DisplayStyle.None;
 #endif
 
-            _table = new Table(_columns, new TableSorter());
+            _table = new Table(_columns, new TableSorter(this));
             root.Add(_table.VisualElement);
 
             // Populate the label with the current data for the selected frame. 
@@ -262,9 +262,14 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         private Dictionary<string, Group> GroupMessages(List<MessageInfo> messages)
         {
             var groups = new Dictionary<string, Group>();
+            var asGroups = _groupMsgToggle.value;
             foreach (var message in messages)
             {
-                var name = message.Name;
+                string name;
+                if (asGroups)
+                    name = message.Name;
+                else
+                    name = "all_messages";
 
                 if (!groups.TryGetValue(name, out var group))
                 {
@@ -340,27 +345,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             group.Expand(group.Expanded);
         }
 
-        /// <param name="messages">Messages to add to table</param>
-        /// <param name="createdRows">list to add rows to once created, Can be null</param>
-        private void DrawMessages(List<MessageInfo> messages, Row previous = null, List<Row> createdRows = null)
-        {
-            foreach (var info in messages)
-            {
-                var row = _table.AddRow(previous);
-                // set previous to be new row, so that message are added in order after previous
-                previous = row;
-
-                row.SetText(_columns.FullName, info.Name);
-                row.SetText(_columns.TotalBytes, info.TotalBytes);
-                row.SetText(_columns.Count, info.Count);
-                row.SetText(_columns.BytesPerMessage, info.Bytes);
-                var netidStr = info.NetId.HasValue ? info.NetId.ToString() : "";
-                row.SetText(_columns.NetId, netidStr);
-
-                createdRows?.Add(row);
-            }
-        }
-
 
         private void AddCantLoadLabel()
         {
@@ -381,13 +365,14 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         {
             public readonly List<Row> Rows = new List<Row>();
             public readonly string Name;
-            public readonly List<MessageInfo> Messages = new List<MessageInfo>();
+            public readonly List<DrawnMessage> Messages = new List<DrawnMessage>();
             public Row Head;
 
             private readonly MessageViewController _view;
 
             public int TotalBytes { get; private set; }
             public int TotalCount { get; private set; }
+            public int Order { get; private set; }
 
             public bool Expanded { get; private set; }
 
@@ -395,13 +380,16 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             {
                 Name = name;
                 _view = view;
+                // start at max, then take min each time message is added
+                Order = int.MaxValue;
             }
 
             public void AddMessage(MessageInfo msg)
             {
-                Messages.Add(msg);
+                Messages.Add(new DrawnMessage { Info = msg });
                 TotalBytes += msg.TotalBytes;
                 TotalCount += msg.Count;
+                Order = Math.Min(Order, msg.Order);
             }
 
             public void ToggleExpand()
@@ -429,18 +417,41 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 if (Rows.Count > 0)
                     return;
 
-                _view.DrawMessages(Messages, Head, Rows);
+                DrawMessages();
+            }
 
+
+            /// <param name="messages">Messages to add to table</param>
+            /// <param name="createdRows">list to add rows to once created, Can be null</param>
+            private void DrawMessages()
+            {
+                var table = _view._table;
+                var columns = _view._columns;
+
+                var previous = Head;
                 var backgroundColor = GetBackgroundColor();
 
-                // set the each element of child rows
-                foreach (var row in Rows)
+                foreach (var drawn in Messages)
                 {
+                    var row = table.AddRow(previous);
+                    // set previous to be new row, so that message are added in order after previous
+                    previous = row;
+
+                    drawn.Row = row;
+                    var info = drawn.Info;
+
+                    row.SetText(columns.FullName, info.Name);
+                    row.SetText(columns.TotalBytes, info.TotalBytes);
+                    row.SetText(columns.Count, info.Count);
+                    row.SetText(columns.BytesPerMessage, info.Bytes);
+                    row.SetText(columns.NetId, info.NetId.HasValue ? info.NetId.ToString() : "");
+
                     // set color of labels not whole row, otherwise color will be outside of table as well
                     foreach (var ele in row.GetChildren())
                         ele.style.backgroundColor = backgroundColor;
                 }
             }
+
 
             private static Color GetBackgroundColor()
             {
@@ -450,6 +461,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                     ? (Color)new Color32(56, 56, 56, 255) / 0.8f
                     : (Color)new Color32(194, 194, 194, 255) * .8f;
             }
+        }
+
+        public class DrawnMessage
+        {
+            public MessageInfo Info;
+            public Row Row;
         }
 
         public struct CounterNames
@@ -496,16 +513,24 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         private class TableSorter : ITableSorter
         {
+            private readonly MessageViewController _view;
+            private readonly Columns _columns;
+
             private SortHeader _header;
             private Table _table;
+
+
+            public TableSorter(MessageViewController view)
+            {
+                _view = view;
+                _columns = _view._columns;
+            }
 
             public void Sort(Table table, SortHeader header)
             {
                 _header = header;
                 _table = table;
-
-                if (header == null)
-                    return;
+                Debug.Assert(_table == _view._table);
 
                 if (table.ContainsEmptyRows)
                 {
@@ -513,49 +538,106 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                     return;
                 }
 
-                table.Rows.Sort(Sort);
-                foreach (var row in table.Rows)
+
+                var messages = _view._messages;
+                var groups = new List<Group>(messages.Values);
+
+                // sort all groups and their messages
+                groups.Sort(ApplyMode<Group>(CompareGroup));
+                foreach (var group in groups)
                 {
-                    // put at end of parent list
-                    // this causes rows to be moved to the end of the layout as they are in the List
-                    row.VisualElement.BringToFront();
+                    group.Messages.Sort(ApplyMode<DrawnMessage>(CompareDrawn));
+                }
+
+
+                // apply sort to table
+                foreach (var group in groups)
+                {
+                    // use BringToFront so that each new element is placed after the last one, bring them all to their correct position
+
+                    // head might be null if messages are ungrouped
+                    group.Head?.VisualElement.BringToFront();
+                    foreach (var msg in group.Messages)
+                    {
+                        // row might be null before it is drawn for first time
+                        msg.Row?.VisualElement.BringToFront();
+                    }
                 }
             }
 
-            private int Sort(Row x, Row y)
+            private Comparison<T> ApplyMode<T>(Comparison<T> comparison)
             {
-                // make sure header stays at top
-                if (x == _table.Header)
-                    return -1;
-                if (y == _table.Header)
-                    return 1;
-
-                var a = x.GetLabel(_header.Info);
-                var b = y.GetLabel(_header.Info);
-
-                var aText = a.text;
-                var bText = b.text;
-
-                var sort = 0;
-                // if both numbers then sort by number instead of string
-                if (int.TryParse(aText, out var aNum) && int.TryParse(bText, out var bNum))
+                return (x, y) =>
                 {
-                    sort = aNum.CompareTo(bNum);
-                }
-                else
-                {
-                    sort = a.text.CompareTo(b.text);
-                }
+                    var sort = comparison.Invoke(x, y);
 
+                    // flip order if Descending
+                    if (_header != null && _header.SortMode == SortMode.Descending)
+                        return -sort;
 
-                if (_header.SortMode == SortMode.Descending)
-                {
-                    return -sort;
-                }
-                else
-                {
                     return sort;
-                }
+                };
+            }
+
+            private int CompareGroup(Group x, Group y)
+            {
+                // find matching coloum and sort using it
+                if (IsHeader(_columns.FullName))
+                    return Compare(x, y, m => m.Name);
+
+                if (IsHeader(_columns.TotalBytes))
+                    return Compare(x, y, m => m.TotalBytes);
+
+                if (IsHeader(_columns.Count))
+                    return Compare(x, y, m => m.TotalCount);
+
+                // else just use order
+                // for example if someone is sorting by netid
+                return x.Order.CompareTo(y.Order);
+            }
+
+            private int CompareDrawn(DrawnMessage x, DrawnMessage y)
+            {
+                return CompareMessage(x.Info, y.Info);
+            }
+            private int CompareMessage(MessageInfo x, MessageInfo y)
+            {
+                // find matching coloum and sort using it
+                if (IsHeader(_columns.FullName))
+                    return Compare(x, y, m => m.Name);
+
+                if (IsHeader(_columns.TotalBytes))
+                    return Compare(x, y, m => m.TotalBytes);
+
+                if (IsHeader(_columns.Count))
+                    return Compare(x, y, m => m.Count);
+
+                if (IsHeader(_columns.BytesPerMessage))
+                    return Compare(x, y, m => m.Bytes);
+
+                if (IsHeader(_columns.NetId))
+                    return Compare(x, y, m => m.NetId.GetValueOrDefault());
+
+                // else, header not found just use order
+                return x.Order.CompareTo(y.Order);
+            }
+
+            private bool IsHeader(ColumnInfo info)
+            {
+                return _header != null && _header.Info == info;
+            }
+
+            private int Compare<T>(Group x, Group y, Func<Group, T> func) where T : IComparable<T>
+            {
+                var xValue = func.Invoke(x);
+                var yValue = func.Invoke(y);
+                return xValue.CompareTo(yValue);
+            }
+            private int Compare<T>(MessageInfo x, MessageInfo y, Func<MessageInfo, T> func) where T : IComparable<T>
+            {
+                var xValue = func.Invoke(x);
+                var yValue = func.Invoke(y);
+                return xValue.CompareTo(yValue);
             }
         }
     }

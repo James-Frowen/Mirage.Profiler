@@ -69,7 +69,7 @@ namespace Mirage.NetworkProfiler
         private bool _hasNetId;
         private uint _netId;
 
-
+        public int Order => _order;
         public string Name => _messageName;
         public int Bytes => _bytes;
         public int Count => _count;
