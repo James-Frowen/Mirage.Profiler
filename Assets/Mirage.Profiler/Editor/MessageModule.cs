@@ -434,6 +434,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 foreach (var drawn in Messages)
                 {
                     var row = table.AddRow(previous);
+                    Rows.Add(row);
+
                     // set previous to be new row, so that message are added in order after previous
                     previous = row;
 
@@ -451,7 +453,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                         ele.style.backgroundColor = backgroundColor;
                 }
             }
-
 
             private static Color GetBackgroundColor()
             {
