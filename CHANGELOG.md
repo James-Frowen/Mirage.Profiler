@@ -1,3 +1,10 @@
+# [1.0.0-beta.10](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.9...v1.0.0-beta.10) (2022-07-28)
+
+
+### Features
+
+* adding sorting for groups ([bd655e8](https://github.com/James-Frowen/Mirage.Profiler/commit/bd655e89338f1f03b32f600288be6dd06edc6a8f))
+
 # [1.0.0-beta.9](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.8...v1.0.0-beta.9) (2022-07-27)
 
 
