@@ -1,3 +1,10 @@
+# [1.0.0-beta.11](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.10...v1.0.0-beta.11) (2022-07-28)
+
+
+### Features
+
+* putting table header above scrollview ([6d52a00](https://github.com/James-Frowen/Mirage.Profiler/commit/6d52a004e8859d8930063b4610f24512d3016113))
+
 # [1.0.0-beta.10](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.9...v1.0.0-beta.10) (2022-07-28)
 
 
