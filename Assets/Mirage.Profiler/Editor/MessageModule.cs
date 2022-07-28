@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Unity.Profiling;
 using Unity.Profiling.Editor;
 using UnityEditor;
@@ -76,6 +77,60 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
     internal sealed class MessageViewController : ProfilerModuleViewController
     {
+        [Serializable]
+        private class SavedData
+        {
+            /// <summary>
+            /// Message from each frame so they can survive domain reload
+            /// </summary>
+            public Frame[] Frames;
+
+            /// <summary>
+            /// Active sort header
+            /// </summary>
+            public string SortHeader;
+
+            public SortMode SortMode;
+
+            /// <summary>
+            /// Which Message groups are expanded
+            /// </summary>
+            public List<string> Expanded;
+
+            public static void Save(string path, SavedData data)
+            {
+                var text = JsonUtility.ToJson(data);
+                File.WriteAllText(path, text);
+            }
+            public static SavedData Load(string path)
+            {
+                var text = File.ReadAllText(path);
+                return JsonUtility.FromJson<SavedData>(text);
+            }
+
+            public (ColumnInfo, SortMode) GetSortHeader(Columns columns)
+            {
+                foreach (var c in columns)
+                {
+                    if (SortHeader == c.Header)
+                    {
+                        return (c, SortMode);
+                    }
+                }
+
+                return (null, SortMode.None);
+            }
+            public void SetSortHeader(SortHeader header)
+            {
+                if (header == null)
+                    SortHeader = "";
+                else
+                {
+                    SortHeader = header.Info.Header;
+                }
+            }
+        }
+
         private readonly CounterNames _names;
         private readonly ICountRecorderProvider _counterProvider;
         private readonly Columns _columns = new Columns();
@@ -87,6 +142,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         private Toggle _debugToggle;
         private Toggle _groupMsgToggle;
         private Dictionary<string, Group> _messages;
+        private SavedData _savedData = new SavedData();
 
         public MessageViewController(ProfilerWindow profilerWindow, CounterNames names, ICountRecorderProvider counterProvider) : base(profilerWindow)
         {
@@ -517,8 +573,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             private readonly MessageViewController _view;
             private readonly Columns _columns;
 
-            private SortHeader _header;
-            private Table _table;
+            private ColumnInfo _sortHeader;
+            private SortMode _sortMode;
 
 
             public TableSorter(MessageViewController view)
@@ -529,16 +585,20 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
             public void Sort(Table table, SortHeader header)
             {
-                _header = header;
-                _table = table;
-                Debug.Assert(_table == _view._table);
+                Debug.Assert(table == _view._table);
 
-                if (table.ContainsEmptyRows)
+                _view._savedData.SetSortHeader(header);
+                Sort();
+            }
+            public void Sort()
+            {
+                (_sortHeader, _sortMode) = _view._savedData.GetSortHeader(_view._columns);
+
+                if (_view._table.ContainsEmptyRows)
                 {
                     Debug.LogWarning("Can't sort when there are empty rows");
                     return;
                 }
-
 
                 var messages = _view._messages;
                 var groups = new List<Group>(messages.Values);
@@ -573,7 +633,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                     var sort = comparison.Invoke(x, y);
 
                     // flip order if Descending
-                    if (_header != null && _header.SortMode == SortMode.Descending)
+                    if (_sortMode == SortMode.Descending)
                         return -sort;
 
                     return sort;
@@ -625,7 +685,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
             private bool IsHeader(ColumnInfo info)
             {
-                return _header != null && _header.Info == info;
+                return _sortHeader != null && _sortHeader == info;
             }
 
             private int Compare<T>(Group x, Group y, Func<Group, T> func) where T : IComparable<T>
