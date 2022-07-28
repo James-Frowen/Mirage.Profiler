@@ -8,7 +8,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 {
     internal class Table
     {
-        public readonly ScrollView VisualElement;
+        public readonly VisualElement VisualElement;
+        public readonly ScrollView ScrollView;
 
         public readonly SortHeaderRow Header;
         public readonly List<Row> Rows = new List<Row>();
@@ -18,14 +19,20 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         public Table(IEnumerable<ColumnInfo> columns, ITableSorter sorter)
         {
-            VisualElement = new ScrollView(ScrollViewMode.VerticalAndHorizontal);
-
             // create readonly list from given Enumerable
             HeaderInfo = new List<ColumnInfo>(columns);
 
+            // create table root and scroll view
+            VisualElement = new VisualElement();
+            ScrollView = new ScrollView(ScrollViewMode.VerticalAndHorizontal);
+
+            // add header to table root
             // header will initialize labels, but we need to set text
             Header = new SortHeaderRow(this, sorter);
-            Rows.Add(Header);
+
+            // add header and scroll to root
+            VisualElement.Add(Header.VisualElement);
+            VisualElement.Add(ScrollView);
 
             // add headers
             foreach (var c in columns)
@@ -83,13 +90,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         /// </summary>
         public void Clear()
         {
-            foreach (var row in Rows)
-            {
-                if (row == Header)
-                    continue;
-
-                row.VisualElement.RemoveFromHierarchy();
-            }
+            ScrollView.Clear();
             Rows.Clear();
             Rows.Add(Header);
             ContainsEmptyRows = false;
@@ -108,16 +109,17 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             VisualElement = new VisualElement();
             VisualElement.style.flexDirection = FlexDirection.Row;
 
+            var parent = table.ScrollView;
             if (previous != null)
             {
-                var index = table.VisualElement.IndexOf(previous.VisualElement);
+                var index = parent.IndexOf(previous.VisualElement);
                 // insert after previous
-                table.VisualElement.Insert(index + 1, VisualElement);
+                parent.Insert(index + 1, VisualElement);
             }
             else
             {
                 // just add at end
-                table.VisualElement.Add(VisualElement);
+                parent.Add(VisualElement);
             }
         }
 
