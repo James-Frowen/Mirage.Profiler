@@ -14,14 +14,14 @@ namespace Mirage.NetworkProfiler.ModuleGUI
     [ProfilerModuleMetadata(ModuleNames.SENT)]
     public class SentModule : ProfilerModule, ICountRecorderProvider
     {
-        private static readonly ProfilerCounterDescriptor[] k_Counters = new ProfilerCounterDescriptor[]
+        private static readonly ProfilerCounterDescriptor[] counters = new ProfilerCounterDescriptor[]
         {
             new ProfilerCounterDescriptor(Names.SENT_COUNT, Counters.Category),
             new ProfilerCounterDescriptor(Names.SENT_BYTES, Counters.Category),
             new ProfilerCounterDescriptor(Names.SENT_PER_SECOND, Counters.Category),
         };
 
-        public SentModule() : base(k_Counters) { }
+        public SentModule() : base(counters) { }
 
         public override ProfilerModuleViewController CreateDetailsViewController()
         {
@@ -31,7 +31,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 Names.SENT_PER_SECOND
             );
 
-            return new MessageViewController(ProfilerWindow, names, this);
+            return new MessageViewController(ProfilerWindow, names, "Sent", this);
         }
 
         CountRecorder ICountRecorderProvider.GetCountRecorder()
@@ -44,14 +44,14 @@ namespace Mirage.NetworkProfiler.ModuleGUI
     [ProfilerModuleMetadata(ModuleNames.RECEIVED)]
     public class ReceivedModule : ProfilerModule, ICountRecorderProvider
     {
-        private static readonly ProfilerCounterDescriptor[] k_Counters = new ProfilerCounterDescriptor[]
+        private static readonly ProfilerCounterDescriptor[] counters = new ProfilerCounterDescriptor[]
         {
             new ProfilerCounterDescriptor(Names.RECEIVED_COUNT, Counters.Category),
             new ProfilerCounterDescriptor(Names.RECEIVED_BYTES, Counters.Category),
             new ProfilerCounterDescriptor(Names.RECEIVED_PER_SECOND, Counters.Category),
         };
 
-        public ReceivedModule() : base(k_Counters) { }
+        public ReceivedModule() : base(counters) { }
 
         public override ProfilerModuleViewController CreateDetailsViewController()
         {
@@ -61,7 +61,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 Names.RECEIVED_PER_SECOND
             );
 
-            return new MessageViewController(ProfilerWindow, names, this);
+            return new MessageViewController(ProfilerWindow, names, "Received", this);
         }
 
         CountRecorder ICountRecorderProvider.GetCountRecorder()
@@ -75,62 +75,85 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         CountRecorder GetCountRecorder();
     }
 
-    internal sealed class MessageViewController : ProfilerModuleViewController
+    internal class SaveDataLoader
     {
-        [Serializable]
-        private class SavedData
+        public static void Save(string path, SavedData data)
         {
-            /// <summary>
-            /// Message from each frame so they can survive domain reload
-            /// </summary>
-            public Frame[] Frames;
+            CheckDir(path);
 
-            /// <summary>
-            /// Active sort header
-            /// </summary>
-            public string SortHeader;
+            var text = JsonUtility.ToJson(data);
+            File.WriteAllText(path, text);
+        }
 
-            public SortMode SortMode;
+        public static SavedData Load(string path)
+        {
+            CheckDir(path);
 
-            /// <summary>
-            /// Which Message groups are expanded
-            /// </summary>
-            public List<string> Expanded;
-
-            public static void Save(string path, SavedData data)
-            {
-                var text = JsonUtility.ToJson(data);
-                File.WriteAllText(path, text);
-            }
-            public static SavedData Load(string path)
+            if (File.Exists(path))
             {
                 var text = File.ReadAllText(path);
                 return JsonUtility.FromJson<SavedData>(text);
             }
-
-            public (ColumnInfo, SortMode) GetSortHeader(Columns columns)
+            else
             {
-                foreach (var c in columns)
-                {
-                    if (SortHeader == c.Header)
-                    {
-                        return (c, SortMode);
-                    }
-                }
-
-                return (null, SortMode.None);
-            }
-            public void SetSortHeader(SortHeader header)
-            {
-                if (header == null)
-                    SortHeader = "";
-                else
-                {
-                    SortHeader = header.Info.Header;
-                }
+                return new SavedData();
             }
         }
 
+        private static void CheckDir(string path)
+        {
+            // check dir exists
+            var dir = Path.GetDirectoryName(path);
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+        }
+    }
+    [Serializable]
+    internal class SavedData
+    {
+        /// <summary>
+        /// Message from each frame so they can survive domain reload
+        /// </summary>
+        public Frame[] Frames;
+
+        /// <summary>
+        /// Active sort header
+        /// </summary>
+        public string SortHeader;
+
+        public SortMode SortMode;
+
+        /// <summary>
+        /// Which Message groups are expanded
+        /// </summary>
+        public List<string> Expanded;
+
+        public (ColumnInfo, SortMode) GetSortHeader(MessageViewController.Columns columns)
+        {
+            foreach (var c in columns)
+            {
+                if (SortHeader == c.Header)
+                {
+                    return (c, SortMode);
+                }
+            }
+
+            return (null, SortMode.None);
+        }
+        public void SetSortHeader(SortHeader header)
+        {
+            if (header == null)
+                SortHeader = "";
+            else
+            {
+                SortHeader = header.Info.Header;
+                SortMode = header.SortMode;
+            }
+        }
+    }
+    internal sealed class MessageViewController : ProfilerModuleViewController
+    {
+        private readonly string _saveDataPath;
         private readonly CounterNames _names;
         private readonly ICountRecorderProvider _counterProvider;
         private readonly Columns _columns = new Columns();
@@ -142,12 +165,20 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         private Toggle _debugToggle;
         private Toggle _groupMsgToggle;
         private Dictionary<string, Group> _messages;
-        private SavedData _savedData = new SavedData();
+        private SavedData _savedData;
 
-        public MessageViewController(ProfilerWindow profilerWindow, CounterNames names, ICountRecorderProvider counterProvider) : base(profilerWindow)
+        public MessageViewController(ProfilerWindow profilerWindow, CounterNames names, string name, ICountRecorderProvider counterProvider) : base(profilerWindow)
         {
             _names = names;
             _counterProvider = counterProvider;
+
+            var userSettingsFolder = Path.GetFullPath("UserSettings");
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException(nameof(name));
+
+            _saveDataPath = Path.Join(userSettingsFolder, "Mirage.Profiler", $"{name}.json");
+            Debug.Log($"Load from {_saveDataPath}");
+            _savedData = SaveDataLoader.Load(_saveDataPath);
         }
 
         protected override VisualElement CreateView()
@@ -198,6 +229,14 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             _groupMsgToggle.RegisterValueChangedCallback(_ => ReloadData());
             _toggleBox.Add(_groupMsgToggle);
 
+            // todo allow selection of multiple frames
+            //var frameSlider = new MinMaxSlider();
+            //frameSlider.highLimit = 300;
+            //frameSlider.lowLimit = 1;
+            //frameSlider.value = Vector2.one;
+            //frameSlider.RegisterValueChangedCallback(_ => Debug.Log(frameSlider.value));
+            //_toggleBox.Add(frameSlider);
+
             _debugToggle = new Toggle();
             _debugToggle.text = "Show Fake Messages";
             _debugToggle.tooltip = "Adds fakes message to table to debug layout of table";
@@ -242,6 +281,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
             // Unsubscribe from the Profiler window event that we previously subscribed to.
             ProfilerWindow.SelectedFrameIndexChanged -= FrameIndexChanged;
+
+            Debug.Log($"Save to {_saveDataPath}");
+            SaveDataLoader.Save(_saveDataPath, _savedData);
 
             base.Dispose(disposing);
         }
