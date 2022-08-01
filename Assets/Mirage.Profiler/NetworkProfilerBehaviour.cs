@@ -8,6 +8,9 @@ namespace Mirage.NetworkProfiler
     {
         private static readonly ILogger logger = LogFactory.GetLogger<NetworkProfilerBehaviour>();
 
+        // singleton because unity only has 1 profiler
+        public static NetworkProfilerBehaviour Instance { get; private set; }
+
         public NetworkServer Server;
         public NetworkServer Client;
 
@@ -22,6 +25,10 @@ namespace Mirage.NetworkProfiler
 
         private void Start()
         {
+            Debug.Assert(Instance == null);
+            Instance = this;
+            DontDestroyOnLoad(this);
+
             if (Server != null)
             {
                 Server.Started.AddListener(ServerStarted);
@@ -33,6 +40,17 @@ namespace Mirage.NetworkProfiler
                 Client.Started.AddListener(ClientStarted);
                 Client.Disconnected.AddListener(ClientStopped);
             }
+        }
+
+        private void OnDestroy()
+        {
+            if (_receivedCounter != null)
+                NetworkDiagnostics.InMessageEvent -= _receivedCounter.OnMessage;
+            if (_sentCounter != null)
+                NetworkDiagnostics.OutMessageEvent -= _sentCounter.OnMessage;
+
+            Debug.Assert(Instance == this);
+            Instance = null;
         }
 
         private void ServerStarted()
@@ -78,14 +96,6 @@ namespace Mirage.NetworkProfiler
 
             _receivedCounter = null;
             _sentCounter = null;
-        }
-
-        private void OnDestroy()
-        {
-            if (_receivedCounter != null)
-                NetworkDiagnostics.InMessageEvent -= _receivedCounter.OnMessage;
-            if (_sentCounter != null)
-                NetworkDiagnostics.OutMessageEvent -= _sentCounter.OnMessage;
         }
 
         private void LateUpdate()
