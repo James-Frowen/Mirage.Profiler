@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Mirage.NetworkProfiler
 {
-    [DefaultExecutionOrder(10000)] // last
+    [DefaultExecutionOrder(int.MaxValue)] // last
     public class NetworkProfilerBehaviour : MonoBehaviour
     {
         private static readonly ILogger logger = LogFactory.GetLogger<NetworkProfilerBehaviour>();
