@@ -23,6 +23,9 @@ namespace Mirage.NetworkProfiler
         internal static CountRecorder _receivedCounter;
         private const int FRAME_COUNT = 300; // todo find a way to get real frame count
 
+        public delegate void FrameUpdate(int tick);
+        public event FrameUpdate AfterUpdate;
+
         private void Start()
         {
             Debug.Assert(Instance == null);
@@ -112,7 +115,9 @@ namespace Mirage.NetworkProfiler
 
             _sentCounter.EndFrame();
             _receivedCounter.EndFrame();
-            Counters._internalFrameCounter.Sample(Time.frameCount % FRAME_COUNT);
+            var frame = Time.frameCount % FRAME_COUNT;
+            Counters._internalFrameCounter.Sample(frame);
+            AfterUpdate?.Invoke(frame);
         }
     }
 }
