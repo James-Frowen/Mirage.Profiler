@@ -1,3 +1,10 @@
+# [1.0.0-beta.14](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.13...v1.0.0-beta.14) (2022-08-03)
+
+
+### Bug Fixes
+
+* adding note about maybe missing NetworkProfilerBehaviour ([5120029](https://github.com/James-Frowen/Mirage.Profiler/commit/5120029c3d30f5a141d0a86e28501dc52a6d7a7d))
+
 # [1.0.0-beta.13](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.12...v1.0.0-beta.13) (2022-08-03)
 
 
