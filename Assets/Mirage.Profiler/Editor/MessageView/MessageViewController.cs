@@ -311,7 +311,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             var row = _table.AddEmptyRow();
             var ele = AddLabelWithPadding(row.VisualElement);
             ele.style.color = Color.red;
-            ele.text = "Can not load messages! (Message list only visible in play mode)";
+            ele.text = "Can not load messages! (Message list only visible in play mode)\nIMPORTANT: make sure NetworkProfilerBehaviour is setup in starting scene";
         }
 
         private void AddNoMessagesLabel()
