@@ -1,3 +1,10 @@
+# [1.0.0-beta.13](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.12...v1.0.0-beta.13) (2022-08-03)
+
+
+### Bug Fixes
+
+* changing order to be int.max ([31cbd2f](https://github.com/James-Frowen/Mirage.Profiler/commit/31cbd2ff5b9b9a476d9c9562a19c7d3aec894eb1))
+
 # [1.0.0-beta.12](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.11...v1.0.0-beta.12) (2022-07-28)
 
 
