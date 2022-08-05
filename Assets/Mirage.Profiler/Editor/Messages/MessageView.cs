@@ -107,6 +107,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         {
             var sorter = new GroupSorter(_columns, _grouped, sortHeader, sortMode);
             sorter.Sort();
+
+            if (sortHeader != null)
+            {
+                // also set table names, 
+                _table.SetSortHeader(sortHeader, sortMode);
+            }
         }
 
         public void Clear()
