@@ -20,12 +20,11 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         private Label _countLabel;
         private Label _bytesLabel;
         private Label _perSecondLabel;
-        private Table _table;
         private VisualElement _toggleBox;
         private Toggle _debugToggle;
         private Toggle _groupMsgToggle;
-        private Dictionary<string, Group> _messages;
-        private SavedData _savedData;
+        private MessageView _messageView;
+        private readonly SavedData _savedData;
 
         public MessageViewController(ProfilerWindow profilerWindow, CounterNames names, string name, ICountRecorderProvider counterProvider) : base(profilerWindow)
         {
@@ -109,9 +108,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             _debugToggle.style.display = DisplayStyle.None;
 #endif
 
-            var sorter = new TableSorter(_columns, _savedData, _messages);
-            _table = new Table(_columns, sorter);
-            root.Add(_table.VisualElement);
+
+            var sorter = new TableSorter(this);
+            _messageView = new MessageView(_columns, sorter, root);
 
             // Populate the label with the current data for the selected frame. 
             ReloadData();
@@ -122,10 +121,18 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             return root;
         }
 
-        private static Label AddLabelWithPadding(VisualElement view)
+        internal void Sort(SortHeader header)
+        {
+            _savedData.SetSortHeader(header);
+            var (sortHeader, sortMode) = _savedData.GetSortHeader(_columns);
+
+            _messageView.Sort(sortHeader, sortMode);
+        }
+
+        private static Label AddLabelWithPadding(VisualElement parent)
         {
             var label = new Label() { style = { paddingTop = 8, paddingLeft = 8 } };
-            view.Add(label);
+            parent.Add(label);
             return label;
         }
 
@@ -171,7 +178,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
         private void ReloadMessages()
         {
-            _table.Clear();
+            _messageView.Clear();
 
             if (!TryGetMessages(out var messages))
             {
@@ -185,13 +192,10 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
                 return;
             }
 
-            _messages = GroupMessages(messages);
-            DrawGroups(_messages);
-
-            var expandColumn = _columns.Expand;
-            var defaultWidth = expandColumn.Width;
-            var width = _groupMsgToggle.value ? defaultWidth : 0;
-            _table.ChangeWidth(expandColumn, width, true);
+            var frame = new Frame[1] {
+                new Frame{ Messages = messages },
+            };
+            _messageView.Draw(frame, _groupMsgToggle.value);
         }
 
         private bool TryGetMessages(out List<MessageInfo> messages)
@@ -218,29 +222,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             return true;
         }
 
-        private Dictionary<string, Group> GroupMessages(List<MessageInfo> messages)
-        {
-            var groups = new Dictionary<string, Group>();
-            var asGroups = _groupMsgToggle.value;
-            foreach (var message in messages)
-            {
-                string name;
-                if (asGroups)
-                    name = message.Name;
-                else
-                    name = "all_messages";
-
-                if (!groups.TryGetValue(name, out var group))
-                {
-                    group = new Group(name, _table, _columns);
-                    groups[name] = group;
-                }
-
-                group.AddMessage(message);
-            }
-            return groups;
-        }
-
         private static List<MessageInfo> GenerateDebugMessages()
         {
             var messages = new List<MessageInfo>();
@@ -265,58 +246,19 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             return messages;
         }
 
-        private void DrawGroups(Dictionary<string, Group> groups)
-        {
-            var asGroups = _groupMsgToggle.value;
-            foreach (var group in groups.Values)
-            {
-                if (asGroups)
-                {
-                    DrawGroupHeader(group);
-                }
-                else
-                {
-                    group.Expand(true);
-                }
-            }
-        }
-
-        private void DrawGroupHeader(Group group)
-        {
-            // draw header
-            var head = _table.AddRow();
-            head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
-            head.SetText(_columns.FullName, group.Name);
-            head.SetText(_columns.TotalBytes, group.TotalBytes);
-            head.SetText(_columns.Count, group.TotalCount);
-            head.SetText(_columns.BytesPerMessage, "");
-            head.SetText(_columns.NetId, "");
-            group.Head = head;
-
-            var expand = head.GetLabel(_columns.Expand);
-            expand.AddManipulator(new Clickable((evt) =>
-            {
-                group.ToggleExpand();
-                group.Head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
-            }));
-
-            // will lazy create message if expanded
-            group.Expand(group.Expanded);
-        }
-
 
         private void AddCantLoadLabel()
         {
-            var row = _table.AddEmptyRow();
-            var ele = AddLabelWithPadding(row.VisualElement);
+            var parent = _messageView.AddEmptyRow();
+            var ele = AddLabelWithPadding(parent);
             ele.style.color = Color.red;
             ele.text = "Can not load messages! (Message list only visible in play mode)\nIMPORTANT: make sure NetworkProfilerBehaviour is setup in starting scene";
         }
 
         private void AddNoMessagesLabel()
         {
-            var row = _table.AddEmptyRow();
-            var ele = AddLabelWithPadding(row.VisualElement);
+            var parent = _messageView.AddEmptyRow();
+            var ele = AddLabelWithPadding(parent);
             ele.text = "No Messages";
         }
     }
