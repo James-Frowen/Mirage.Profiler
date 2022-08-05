@@ -182,7 +182,15 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         {
             _messageView.Clear();
 
-            if (!TryGetMessages(out var messages))
+            var frameIndexStr = ProfilerDriver.GetFormattedCounterValue((int)ProfilerWindow.selectedFrameIndex, ProfilerCategory.Network.Name, Names.INTERNAL_FRAME_COUNTER);
+            var frameIndex = 0;
+            if (!string.IsNullOrEmpty(frameIndexStr))
+                frameIndex = int.Parse(frameIndexStr);
+            Debug.Log($"ReloadMessages (frameIndex {frameIndex})");
+            Debug.Log($"ReloadMessages [selected {(int)ProfilerWindow.selectedFrameIndex}, frameIndex {frameIndex}]");
+
+
+            if (!TryGetMessages(frameIndex, out var messages))
             {
                 AddCantLoadLabel();
                 return;
@@ -201,7 +209,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             SortFromSaveData();
         }
 
-        private bool TryGetMessages(out List<MessageInfo> messages)
+        private bool TryGetMessages(int frameIndex, out List<MessageInfo> messages)
         {
             if (_debugToggle.value)
             {
@@ -209,19 +217,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
                 return true;
             }
 
-            messages = null;
-            var counter = _counterProvider.GetCountRecorder();
-            if (counter == null)
-                return false;
-
-            var frameIndexStr = ProfilerDriver.GetFormattedCounterValue((int)ProfilerWindow.selectedFrameIndex, ProfilerCategory.Network.Name, Names.INTERNAL_FRAME_COUNTER);
-            var frameIndex = 0;
-            if (!string.IsNullOrEmpty(frameIndexStr))
-                frameIndex = int.Parse(frameIndexStr);
-
-            var frame = counter._frames[frameIndex];
-            messages = frame.Messages;
-
+            messages = _savedData.Frames[frameIndex].Messages;
             return true;
         }
 
@@ -249,7 +245,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             return messages;
         }
 
-
         private void AddCantLoadLabel()
         {
             var parent = _messageView.AddEmptyRow();
@@ -269,23 +264,27 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         {
             Debug.Assert(_savedData.Frames.Length == NetworkProfilerBehaviour.FRAME_COUNT);
 
-            var frameIndexStr = ProfilerDriver.GetFormattedCounterValue((int)ProfilerWindow.selectedFrameIndex, ProfilerCategory.Network.Name, Names.INTERNAL_FRAME_COUNTER);
-            var frameIndex = 0;
-            if (!string.IsNullOrEmpty(frameIndexStr))
-                frameIndex = int.Parse(frameIndexStr);
+            {
+                var frameIndexStr = ProfilerDriver.GetFormattedCounterValue((int)ProfilerWindow.selectedFrameIndex, ProfilerCategory.Network.Name, Names.INTERNAL_FRAME_COUNTER);
+                var frameIndex = 0;
+                if (!string.IsNullOrEmpty(frameIndexStr))
+                    frameIndex = int.Parse(frameIndexStr);
+
+                Debug.Log($"AfterUpdate [tick {tick}, selected {(int)ProfilerWindow.selectedFrameIndex}, frameIndex {frameIndex}]");
+            }
 
             var counter = _counterProvider.GetCountRecorder();
             if (counter == null)
             {
                 // no counter, no messages for this frame
                 // clear old data
-                _savedData.Frames[frameIndex] = new Frame();
+                _savedData.Frames[tick] = new Frame();
 
                 return;
             }
 
             // just save frame in save data to be the frame in counter
-            _savedData.Frames[frameIndex] = counter._frames[frameIndex];
+            _savedData.Frames[tick] = counter._frames[tick];
         }
     }
 }
