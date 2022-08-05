@@ -1,4 +1,4 @@
-﻿using UnityEngine.UIElements;
+using UnityEngine.UIElements;
 
 namespace Mirage.NetworkProfiler.ModuleGUI.UITable
 {
@@ -35,9 +35,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
 
         private void OnClick(EventBase evt)
         {
-            var sortIndex = (int)SortMode;
-            sortIndex = (sortIndex + 1) % 3;
-            SortMode = (SortMode)sortIndex;
+            // just flip between Accending and Descending, no going back to none
+            if (SortMode == SortMode.Accending)
+                SortMode = SortMode.Descending;
+            else
+                SortMode = SortMode.Accending;
+
             _row.UpdateSort(this);
         }
 
