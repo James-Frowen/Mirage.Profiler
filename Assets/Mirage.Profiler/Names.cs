@@ -2,8 +2,6 @@ namespace Mirage.NetworkProfiler
 {
     public static class Names
     {
-        internal const string INTERNAL_FRAME_COUNTER = "INTERNAL_FRAME_COUNTER";
-
         public const string PLAYER_COUNT = "Player Count";
         public const string PLAYER_COUNT_TOOLTIP = "Number of players connected to the server";
         public const string CHARACTER_COUNT = "Character Count";

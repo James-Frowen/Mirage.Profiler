@@ -15,6 +15,7 @@ namespace Mirage.NetworkProfiler
         private int _bytes;
         private int _perSecond;
         private readonly Queue<(float time, int bytes)> _perSecondQueue = new Queue<(float time, int bytes)>();
+        private int _frameIndex = -1;
 
 
         public CountRecorder(int bufferSize, object instance, ProfilerCounter<int> profilerCount, ProfilerCounter<int> profilerBytes, ProfilerCounter<int> profilerPerSecond)
@@ -47,14 +48,16 @@ namespace Mirage.NetworkProfiler
             frame.Bytes++;
         }
 
-        public void EndFrame()
+        public void EndFrame(int frameIndex)
         {
             CaclulatePerSecond(Time.time, _bytes);
             _profilerCount.Sample(_count);
             _profilerBytes.Sample(_bytes);
             _count = 0;
             _bytes = 0;
-            var frame = _frames[(Time.frameCount + 1) % _frames.Length];
+
+            _frameIndex = frameIndex;
+            var frame = _frames.GetFrame(_frameIndex);
             frame.Messages.Clear();
             frame.Bytes = 0;
         }

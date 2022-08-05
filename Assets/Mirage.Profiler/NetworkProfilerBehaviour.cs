@@ -1,4 +1,5 @@
 using Mirage.Logging;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace Mirage.NetworkProfiler
@@ -24,7 +25,7 @@ namespace Mirage.NetworkProfiler
         internal const int FRAME_COUNT = 300; // todo find a way to get real frame count
 
         public delegate void FrameUpdate(int tick);
-        public static event FrameUpdate AfterUpdate;
+        public static event FrameUpdate AfterSample;
 
         private void Start()
         {
@@ -43,10 +44,19 @@ namespace Mirage.NetworkProfiler
                 Client.Started.AddListener(ClientStarted);
                 Client.Disconnected.AddListener(ClientStopped);
             }
+
+            ProfilerDriver.NewProfilerFrameRecorded += NewProfilerFrameRecorded;
+        }
+
+        private void NewProfilerFrameRecorded(int _connectionId, int newFrameIndex)
+        {
+            Sample(newFrameIndex);
         }
 
         private void OnDestroy()
         {
+            ProfilerDriver.NewProfilerFrameRecorded -= NewProfilerFrameRecorded;
+
             if (_receivedCounter != null)
                 NetworkDiagnostics.InMessageEvent -= _receivedCounter.OnMessage;
             if (_sentCounter != null)
@@ -101,8 +111,10 @@ namespace Mirage.NetworkProfiler
             _sentCounter = null;
         }
 
-        private void LateUpdate()
+        private void Sample(int frame)
         {
+            Debug.Log($"Sample: [frame: {frame}, first {ProfilerDriver.firstFrameIndex}, last {ProfilerDriver.lastFrameIndex}]");
+
             if (instance == null)
                 return;
 
@@ -113,11 +125,9 @@ namespace Mirage.NetworkProfiler
                 Counters.ObjectCount.Sample(Server.World.SpawnedIdentities.Count);
             }
 
-            _sentCounter.EndFrame();
-            _receivedCounter.EndFrame();
-            var frame = Time.frameCount % FRAME_COUNT;
-            Counters._internalFrameCounter.Sample(frame);
-            AfterUpdate?.Invoke(frame);
+            _sentCounter.EndFrame(frame);
+            _receivedCounter.EndFrame(frame);
+            AfterSample?.Invoke(frame);
         }
     }
 }
