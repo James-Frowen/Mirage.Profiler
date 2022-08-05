@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.miragenet.mirage": "123.3.3",
+    "com.miragenet.mirage": "125.0.0",
     "com.unity.profiling.core": "1.0.2",
     "com.unity.collab-proxy": "1.15.18",
     "com.unity.feature.development": "1.0.1",
