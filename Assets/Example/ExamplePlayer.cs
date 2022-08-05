@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Mirage.NetworkProfiler.Example
@@ -6,12 +7,15 @@ namespace Mirage.NetworkProfiler.Example
     [RequireComponent(typeof(NetworkTransform))]
     public class ExamplePlayer : NetworkBehaviour
     {
-        [SerializeField] float _moveSpeed = 10;
-        [SerializeField] float _rotateSpeed = 10;
+        [SerializeField] private float _moveSpeed = 10;
+        [SerializeField] private float _rotateSpeed = 10;
 
-        Vector2Int _clientInputs;
-        Vector2Int _serverInputs;
-        int _serverCounter;
+        [SerializeField] private float _bulletImpulse = 10;
+        public NetworkIdentity[] BulletPrefabs;
+
+        private Vector2Int _clientInputs;
+        private Vector2Int _serverInputs;
+        private int _serverCounter;
 
         private void Awake()
         {
@@ -39,8 +43,8 @@ namespace Mirage.NetworkProfiler.Example
             {
                 _clientInputs = default;
 
-                float xRand = Random.value;
-                float yRand = Random.value;
+                var xRand = Random.value;
+                var yRand = Random.value;
 
                 // turn left bias (keeps objects near origin)
                 if (xRand < 0.6f)
@@ -58,11 +62,37 @@ namespace Mirage.NetworkProfiler.Example
                     _clientInputs.y = 1;
             }
 
-            SendInuts(_clientInputs);
+            RpcSendInuts(_clientInputs);
+
+            if (Input.GetKey(KeyCode.Space))
+            {
+                RpcShoot(0, transform.position, transform.rotation, 10, Random.value);
+            }
         }
 
         [ServerRpc]
-        private void SendInuts(Vector2Int clientInputs)
+        public void RpcShoot(int prefabIndex, Vector3 position, Quaternion rotation, float impluse, float lifeTime)
+        {
+            var prefab = BulletPrefabs[prefabIndex];
+            var clone = Instantiate(prefab, position, rotation);
+            if (clone.TryGetComponent(out Rigidbody rb))
+            {
+                rb.AddForce(transform.forward * impluse, ForceMode.Impulse);
+            }
+            ServerObjectManager.Spawn(clone);
+
+            Despawn(clone, lifeTime).Forget();
+        }
+
+        private async UniTaskVoid Despawn(NetworkIdentity clone, float time)
+        {
+            await UniTask.Delay((int)(time * 1000));
+            ServerObjectManager.Destroy(clone, true);
+        }
+
+
+        [ServerRpc]
+        private void RpcSendInuts(Vector2Int clientInputs)
         {
             _serverInputs = clientInputs;
         }
