@@ -115,7 +115,7 @@ namespace Mirage.NetworkProfiler.Example
 
         private void SetupProfiler(NetworkServer server)
         {
-            var profiler = server.gameObject.AddComponent<NetworkProfilerBehaviour>();
+            var profiler = server.gameObject.AddComponent<NetworkProfilerRecorder>();
             profiler.Server = server;
         }
     }

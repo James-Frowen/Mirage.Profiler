@@ -29,7 +29,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         public SavedData()
         {
-            Frames = new Frame[NetworkProfilerBehaviour.FRAME_COUNT];
+            Frames = new Frame[NetworkProfilerRecorder.FRAME_COUNT];
             for (var i = 0; i < Frames.Length; i++)
                 Frames[i] = new Frame();
 
@@ -91,9 +91,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         private static void Validate(SavedData data)
         {
-            if (data.Frames.Length != NetworkProfilerBehaviour.FRAME_COUNT)
+            if (data.Frames.Length != NetworkProfilerRecorder.FRAME_COUNT)
             {
-                Array.Resize(ref data.Frames, NetworkProfilerBehaviour.FRAME_COUNT);
+                Array.Resize(ref data.Frames, NetworkProfilerRecorder.FRAME_COUNT);
             }
         }
 
