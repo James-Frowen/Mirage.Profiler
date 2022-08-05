@@ -30,6 +30,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         public SavedData()
         {
             Frames = new Frame[NetworkProfilerBehaviour.FRAME_COUNT];
+            for (var i = 0; i < Frames.Length; i++)
+                Frames[i] = new Frame();
+
             Expanded = new List<string>();
         }
 
