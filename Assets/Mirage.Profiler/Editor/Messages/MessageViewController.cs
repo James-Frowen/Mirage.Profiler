@@ -124,8 +124,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         internal void Sort(SortHeader header)
         {
             _savedData.SetSortHeader(header);
-            var (sortHeader, sortMode) = _savedData.GetSortHeader(_columns);
+            SortFromSaveData();
+        }
 
+        private void SortFromSaveData()
+        {
+            var (sortHeader, sortMode) = _savedData.GetSortHeader(_columns);
             _messageView.Sort(sortHeader, sortMode);
         }
 
@@ -196,6 +200,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
                 new Frame{ Messages = messages },
             };
             _messageView.Draw(frame, _groupMsgToggle.value);
+            SortFromSaveData();
         }
 
         private bool TryGetMessages(out List<MessageInfo> messages)

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -18,7 +18,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
             }
         }
 
-        public virtual Label CreateLabel(ColumnInfo column)
+        protected virtual Label CreateLabel(ColumnInfo column)
         {
             var label = new Label();
             SetLabelStyle(column, label);
@@ -41,7 +41,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
         }
 
         public override Label GetLabel(ColumnInfo column)
-
         {
             return _elements[column];
         }

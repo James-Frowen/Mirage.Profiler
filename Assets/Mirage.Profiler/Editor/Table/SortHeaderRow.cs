@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine.UIElements;
 
 namespace Mirage.NetworkProfiler.ModuleGUI.UITable
@@ -13,7 +13,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
             _sorter = sorter ?? throw new ArgumentNullException(nameof(sorter));
         }
 
-        public override Label CreateLabel(ColumnInfo column)
+        protected override Label CreateLabel(ColumnInfo column)
         {
             var label = column.AllowSort
                 ? new SortHeader(this)
@@ -23,11 +23,18 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
             return label;
         }
 
-
-        internal void UpdateSort(SortHeader sortHeader)
+        /// <summary>
+        /// Update names of header based on sort
+        /// </summary>
+        /// <param name="sortHeader"></param>
+        public void SetSortHeader(SortHeader sortHeader)
         {
+            // current is new, so names should already be updated
+            if (_currentSort == sortHeader)
+                return;
+
             // not null or current
-            if (_currentSort != null && _currentSort != sortHeader)
+            if (_currentSort != null)
             {
                 _currentSort.SortMode = SortMode.None;
                 _currentSort.UpdateName();
@@ -35,6 +42,15 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
 
             _currentSort = sortHeader;
             _currentSort.UpdateName();
+        }
+
+        /// <summary>
+        /// Updates names and applies sort to table
+        /// </summary>
+        /// <param name="sortHeader"></param>
+        public void ApplySort(SortHeader sortHeader)
+        {
+            SetSortHeader(sortHeader);
 
             _sorter.Sort(Table, sortHeader);
         }

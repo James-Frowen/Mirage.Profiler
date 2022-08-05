@@ -93,5 +93,15 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
             Rows.Add(Header);
             ContainsEmptyRows = false;
         }
+
+        /// <summary>
+        /// Updates names of sort header
+        /// </summary>
+        public void SetSortHeader(ColumnInfo info, SortMode mode)
+        {
+            var sortBy = (SortHeader)Header.GetLabel(info);
+            sortBy.SortMode = mode;
+            Header.SetSortHeader(sortBy);
+        }
     }
 }

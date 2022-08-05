@@ -41,7 +41,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
             else
                 SortMode = SortMode.Accending;
 
-            _row.UpdateSort(this);
+            _row.ApplySort(this);
         }
 
         public void UpdateName()
