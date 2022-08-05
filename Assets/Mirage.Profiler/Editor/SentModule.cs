@@ -29,7 +29,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         CountRecorder ICountRecorderProvider.GetCountRecorder()
         {
-            return NetworkProfilerBehaviour._sentCounter;
+            return NetworkProfilerRecorder._sentCounter;
         }
     }
 }

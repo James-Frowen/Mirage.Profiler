@@ -4,12 +4,12 @@ using UnityEngine;
 namespace Mirage.NetworkProfiler
 {
     [DefaultExecutionOrder(int.MaxValue)] // last
-    public class NetworkProfilerBehaviour : MonoBehaviour
+    public class NetworkProfilerRecorder : MonoBehaviour
     {
-        private static readonly ILogger logger = LogFactory.GetLogger<NetworkProfilerBehaviour>();
+        private static readonly ILogger logger = LogFactory.GetLogger<NetworkProfilerRecorder>();
 
         // singleton because unity only has 1 profiler
-        public static NetworkProfilerBehaviour Instance { get; private set; }
+        public static NetworkProfilerRecorder Instance { get; private set; }
 
         public NetworkServer Server;
         public NetworkServer Client;

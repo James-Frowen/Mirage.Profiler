@@ -39,7 +39,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             Debug.Log($"Load from {_saveDataPath}");
             _savedData = SaveDataLoader.Load(_saveDataPath);
 
-            NetworkProfilerBehaviour.AfterSample += AfterUpdate;
+            NetworkProfilerRecorder.AfterSample += AfterUpdate;
         }
 
         protected override VisualElement CreateView()
@@ -268,7 +268,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
         private void AfterUpdate(int tick)
         {
-            Debug.Assert(_savedData.Frames.Length == NetworkProfilerBehaviour.FRAME_COUNT);
+            Debug.Assert(_savedData.Frames.Length == NetworkProfilerRecorder.FRAME_COUNT);
 
             {
                 Debug.Log($"AfterUpdate [tick {tick}, selected {(int)ProfilerWindow.selectedFrameIndex}]");
