@@ -330,7 +330,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f85e4ae5f2d83445b17991b7eb9f038, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ClientCount: 4
+  EditorRun:
+    StartServer: 1
+    ClientCount: 0
+  PlayerRun:
+    StartServer: 0
+    ClientCount: 4
 --- !u!4 &1832509054
 Transform:
   m_ObjectHideFlags: 0

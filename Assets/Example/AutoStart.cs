@@ -6,27 +6,69 @@ namespace Mirage.NetworkProfiler.Example
 {
     public class AutoStart : MonoBehaviour
     {
-        public int ClientCount = 4;
-        private NetworkServer server;
-        private NetworkClient[] clients;
+        [System.Serializable]
+        public struct RunSettings
+        {
+            public bool StartServer;
+            public int ClientCount;
+        }
+        public RunSettings EditorRun;
+        public RunSettings PlayerRun;
 
         private void Start()
         {
-            StartAsync().Forget();
+#if UNITY_EDITOR
+            var settings = EditorRun;
+#else
+            var settings = PlayerRun;
+#endif
+
+            StartAsync(settings).Forget();
         }
 
-        private async UniTaskVoid StartAsync()
+        private const int PREFAB_HASH = 1;
+        private const int PREFAB_HASH_BULLET = 2;
+
+        private async UniTaskVoid StartAsync(RunSettings runSettings)
         {
             var (prefabIdentity, prefabCharacter) = CreatePlayerPrefab();
             var prefabBullet = CreateBulletPrefab();
             prefabCharacter.BulletPrefabs = new NetworkIdentity[1] { prefabBullet };
 
-            const int PREFAB_HASH = 1;
-            const int PREFAB_HASH_BULLET = 2;
+            if (runSettings.StartServer)
+                CreateServer(prefabIdentity);
 
+            await UniTask.Delay(100);
+
+            var clients = new NetworkClient[runSettings.ClientCount];
+            for (var i = 0; i < runSettings.ClientCount; i++)
+            {
+                clients[i] = await CreateClient(prefabIdentity, prefabBullet, i);
+            }
+        }
+
+        private async UniTask<NetworkClient> CreateClient(NetworkIdentity prefabIdentity, NetworkIdentity prefabBullet, int i)
+        {
+            var clientGO = new GameObject($"client {i}");
+            clientGO.transform.parent = transform;
+            var client = clientGO.AddComponent<NetworkClient>();
+            var clientObjectManager = clientGO.AddComponent<ClientObjectManager>();
+            clientObjectManager.Client = client;
+            clientObjectManager.RegisterPrefab(prefabIdentity, PREFAB_HASH);
+            clientObjectManager.RegisterPrefab(prefabBullet, PREFAB_HASH_BULLET);
+
+            client.SocketFactory = clientGO.AddComponent<UdpSocketFactory>();
+            await UniTask.Delay(100);
+            client.Connect();
+
+            return client;
+        }
+
+        private void CreateServer(NetworkIdentity prefabIdentity)
+        {
             var serverGO = new GameObject("server");
             serverGO.transform.parent = transform;
-            server = serverGO.AddComponent<NetworkServer>();
+            var server = serverGO.AddComponent<NetworkServer>();
             var serverObjectManager = serverGO.AddComponent<ServerObjectManager>();
             server.SocketFactory = serverGO.AddComponent<UdpSocketFactory>();
             serverObjectManager.Server = server;
@@ -41,25 +83,6 @@ namespace Mirage.NetworkProfiler.Example
             SetupProfiler(server);
 
             server.StartServer();
-
-            await UniTask.Delay(100);
-
-            clients = new NetworkClient[ClientCount];
-            for (var i = 0; i < ClientCount; i++)
-            {
-                var clientGO = new GameObject($"client {i}");
-                clientGO.transform.parent = transform;
-                var client = clientGO.AddComponent<NetworkClient>();
-                clients[i] = client;
-                var clientObjectManager = clientGO.AddComponent<ClientObjectManager>();
-                clientObjectManager.Client = client;
-                clientObjectManager.RegisterPrefab(prefabIdentity, PREFAB_HASH);
-                clientObjectManager.RegisterPrefab(prefabBullet, PREFAB_HASH_BULLET);
-
-                client.SocketFactory = clientGO.AddComponent<UdpSocketFactory>();
-                await UniTask.Delay(100);
-                client.Connect();
-            }
         }
 
         private (NetworkIdentity, ExamplePlayer) CreatePlayerPrefab()
