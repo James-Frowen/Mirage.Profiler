@@ -38,6 +38,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             _saveDataPath = Path.Join(userSettingsFolder, "Mirage.Profiler", $"{name}.json");
             Debug.Log($"Load from {_saveDataPath}");
             _savedData = SaveDataLoader.Load(_saveDataPath);
+
+            NetworkProfilerBehaviour.AfterUpdate += AfterUpdate;
         }
 
         protected override VisualElement CreateView()
@@ -121,6 +123,15 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             return root;
         }
 
+        private void FrameIndexChanged(long selectedFrameIndex) => ReloadData();
+
+        private static Label AddLabelWithPadding(VisualElement parent)
+        {
+            var label = new Label() { style = { paddingTop = 8, paddingLeft = 8 } };
+            parent.Add(label);
+            return label;
+        }
+
         internal void Sort(SortHeader header)
         {
             _savedData.SetSortHeader(header);
@@ -131,19 +142,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         {
             var (sortHeader, sortMode) = _savedData.GetSortHeader(_columns);
             _messageView.Sort(sortHeader, sortMode);
-        }
-
-        private static Label AddLabelWithPadding(VisualElement parent)
-        {
-            var label = new Label() { style = { paddingTop = 8, paddingLeft = 8 } };
-            parent.Add(label);
-            return label;
-        }
-
-        private void FrameIndexChanged(long selectedFrameIndex)
-        {
-            // Update the label with the current data for the newly selected frame.
-            ReloadData();
         }
 
         protected override void Dispose(bool disposing)
@@ -265,6 +263,29 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             var parent = _messageView.AddEmptyRow();
             var ele = AddLabelWithPadding(parent);
             ele.text = "No Messages";
+        }
+
+        private void AfterUpdate(int tick)
+        {
+            Debug.Assert(_savedData.Frames.Length == NetworkProfilerBehaviour.FRAME_COUNT);
+
+            var frameIndexStr = ProfilerDriver.GetFormattedCounterValue((int)ProfilerWindow.selectedFrameIndex, ProfilerCategory.Network.Name, Names.INTERNAL_FRAME_COUNTER);
+            var frameIndex = 0;
+            if (!string.IsNullOrEmpty(frameIndexStr))
+                frameIndex = int.Parse(frameIndexStr);
+
+            var counter = _counterProvider.GetCountRecorder();
+            if (counter == null)
+            {
+                // no counter, no messages for this frame
+                // clear old data
+                _savedData.Frames[frameIndex] = new Frame();
+
+                return;
+            }
+
+            // just save frame in save data to be the frame in counter
+            _savedData.Frames[frameIndex] = counter._frames[frameIndex];
         }
     }
 }
