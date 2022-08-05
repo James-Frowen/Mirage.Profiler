@@ -68,7 +68,12 @@ namespace Mirage.NetworkProfiler.Example
                     return;
 
                 // else just connect again
-                client.Connect();
+                // must be in delay so client can fully shutdown
+                UniTask.Void(async () =>
+                {
+                    await UniTask.Delay(100);
+                    client.Connect();
+                });
             });
             client.Connect();
 
