@@ -39,7 +39,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             Debug.Log($"Load from {_saveDataPath}");
             _savedData = SaveDataLoader.Load(_saveDataPath);
 
-            NetworkProfilerBehaviour.AfterUpdate += AfterUpdate;
+            NetworkProfilerBehaviour.AfterSample += AfterUpdate;
         }
 
         protected override VisualElement CreateView()
@@ -54,6 +54,26 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
                 Debug.LogException(ex);
                 return null;
             }
+        }
+
+        private void ProfilerDriver_profileCleared()
+        {
+            Debug.Log($"ProfilerDriver_profileCleared");
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposing)
+                return;
+
+            // Unsubscribe from the Profiler window event that we previously subscribed to.
+            ProfilerWindow.SelectedFrameIndexChanged -= FrameIndexChanged;
+            ProfilerDriver.profileCleared -= ProfilerDriver_profileCleared;
+
+            Debug.Log($"Save to {_saveDataPath}");
+            SaveDataLoader.Save(_saveDataPath, _savedData);
+
+            base.Dispose(disposing);
         }
 
         private VisualElement CreateViewInternal()
@@ -119,9 +139,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
             // Be notified when the selected frame index in the Profiler Window changes, so we can update the label.
             ProfilerWindow.SelectedFrameIndexChanged += FrameIndexChanged;
+            ProfilerDriver.profileCleared += ProfilerDriver_profileCleared;
+
 
             return root;
         }
+
 
         private void FrameIndexChanged(long selectedFrameIndex) => ReloadData();
 
@@ -144,19 +167,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             _messageView.Sort(sortHeader, sortMode);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (!disposing)
-                return;
-
-            // Unsubscribe from the Profiler window event that we previously subscribed to.
-            ProfilerWindow.SelectedFrameIndexChanged -= FrameIndexChanged;
-
-            Debug.Log($"Save to {_saveDataPath}");
-            SaveDataLoader.Save(_saveDataPath, _savedData);
-
-            base.Dispose(disposing);
-        }
 
         private void ReloadData()
         {
@@ -182,12 +192,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         {
             _messageView.Clear();
 
-            var frameIndexStr = ProfilerDriver.GetFormattedCounterValue((int)ProfilerWindow.selectedFrameIndex, ProfilerCategory.Network.Name, Names.INTERNAL_FRAME_COUNTER);
-            var frameIndex = 0;
-            if (!string.IsNullOrEmpty(frameIndexStr))
-                frameIndex = int.Parse(frameIndexStr);
-            Debug.Log($"ReloadMessages (frameIndex {frameIndex})");
-            Debug.Log($"ReloadMessages [selected {(int)ProfilerWindow.selectedFrameIndex}, frameIndex {frameIndex}]");
+            var frameIndex = (int)ProfilerWindow.selectedFrameIndex;
+            Debug.Log($"ReloadMessages [selected {(int)ProfilerWindow.selectedFrameIndex}]");
 
 
             if (!TryGetMessages(frameIndex, out var messages))
@@ -217,7 +223,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
                 return true;
             }
 
-            messages = _savedData.Frames[frameIndex].Messages;
+            messages = _savedData.Frames.GetFrame(frameIndex).Messages;
             return true;
         }
 
@@ -265,12 +271,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             Debug.Assert(_savedData.Frames.Length == NetworkProfilerBehaviour.FRAME_COUNT);
 
             {
-                var frameIndexStr = ProfilerDriver.GetFormattedCounterValue((int)ProfilerWindow.selectedFrameIndex, ProfilerCategory.Network.Name, Names.INTERNAL_FRAME_COUNTER);
-                var frameIndex = 0;
-                if (!string.IsNullOrEmpty(frameIndexStr))
-                    frameIndex = int.Parse(frameIndexStr);
-
-                Debug.Log($"AfterUpdate [tick {tick}, selected {(int)ProfilerWindow.selectedFrameIndex}, frameIndex {frameIndex}]");
+                Debug.Log($"AfterUpdate [tick {tick}, selected {(int)ProfilerWindow.selectedFrameIndex}]");
             }
 
             var counter = _counterProvider.GetCountRecorder();
