@@ -1,5 +1,4 @@
 using Mirage.Logging;
-using UnityEditorInternal;
 using UnityEngine;
 
 namespace Mirage.NetworkProfiler
@@ -29,6 +28,11 @@ namespace Mirage.NetworkProfiler
 
         private void Start()
         {
+#if !UNITY_EDITOR
+            Debug.LogWarning("NetworkProfilerBehaviour only works in editor");
+            return;
+#endif
+
             Debug.Assert(Instance == null);
             Instance = this;
             DontDestroyOnLoad(this);
@@ -44,19 +48,10 @@ namespace Mirage.NetworkProfiler
                 Client.Started.AddListener(ClientStarted);
                 Client.Disconnected.AddListener(ClientStopped);
             }
-
-            ProfilerDriver.NewProfilerFrameRecorded += NewProfilerFrameRecorded;
-        }
-
-        private void NewProfilerFrameRecorded(int _connectionId, int newFrameIndex)
-        {
-            Sample(newFrameIndex);
         }
 
         private void OnDestroy()
         {
-            ProfilerDriver.NewProfilerFrameRecorded -= NewProfilerFrameRecorded;
-
             if (_receivedCounter != null)
                 NetworkDiagnostics.InMessageEvent -= _receivedCounter.OnMessage;
             if (_sentCounter != null)
@@ -111,9 +106,16 @@ namespace Mirage.NetworkProfiler
             _sentCounter = null;
         }
 
+
+#if UNITY_EDITOR
+        private void LateUpdate()
+        {
+            Debug.Log($"Sample: [LateUpdate, first {UnityEditorInternal.ProfilerDriver.firstFrameIndex}, last {UnityEditorInternal.ProfilerDriver.lastFrameIndex}]");
+            Sample(UnityEditorInternal.ProfilerDriver.lastFrameIndex);
+        }
+#endif
         private void Sample(int frame)
         {
-            Debug.Log($"Sample: [frame: {frame}, first {ProfilerDriver.firstFrameIndex}, last {ProfilerDriver.lastFrameIndex}]");
 
             if (instance == null)
                 return;
