@@ -59,6 +59,17 @@ namespace Mirage.NetworkProfiler.Example
 
             client.SocketFactory = clientGO.AddComponent<UdpSocketFactory>();
             await UniTask.Delay(100);
+
+            client.Disconnected.AddListener(reason =>
+            {
+                Debug.Log($"Disconnected[{i} {reason}");
+                // if closed locally, do nothing
+                if (reason == ClientStoppedReason.LocalConnectionClosed || reason == ClientStoppedReason.ConnectingCancel)
+                    return;
+
+                // else just connect again
+                client.Connect();
+            });
             client.Connect();
 
             return client;
