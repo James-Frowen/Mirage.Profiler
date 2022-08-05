@@ -79,7 +79,7 @@ namespace Mirage.NetworkProfiler.Example
             {
                 rb.AddForce(transform.forward * impluse, ForceMode.Impulse);
             }
-            ServerObjectManager.Spawn(clone);
+            ServerObjectManager.Spawn(clone, prefab.name.GetStableHashCode());
 
             Despawn(clone, lifeTime).Forget();
         }

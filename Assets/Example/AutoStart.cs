@@ -26,9 +26,6 @@ namespace Mirage.NetworkProfiler.Example
             StartAsync(settings).Forget();
         }
 
-        private const int PREFAB_HASH = 1;
-        private const int PREFAB_HASH_BULLET = 2;
-
         private async UniTaskVoid StartAsync(RunSettings runSettings)
         {
             var (prefabIdentity, prefabCharacter) = CreatePlayerPrefab();
@@ -54,12 +51,15 @@ namespace Mirage.NetworkProfiler.Example
             var client = clientGO.AddComponent<NetworkClient>();
             var clientObjectManager = clientGO.AddComponent<ClientObjectManager>();
             clientObjectManager.Client = client;
-            clientObjectManager.RegisterPrefab(prefabIdentity, PREFAB_HASH);
-            clientObjectManager.RegisterPrefab(prefabBullet, PREFAB_HASH_BULLET);
 
             client.SocketFactory = clientGO.AddComponent<UdpSocketFactory>();
             await UniTask.Delay(100);
 
+            client.Connected.AddListener(_ =>
+            {
+                clientObjectManager.RegisterPrefab(prefabIdentity, prefabIdentity.name.GetStableHashCode());
+                clientObjectManager.RegisterPrefab(prefabBullet, prefabBullet.name.GetStableHashCode());
+            });
             client.Disconnected.AddListener(reason =>
             {
                 Debug.Log($"Disconnected[{i} {reason}");
@@ -92,7 +92,7 @@ namespace Mirage.NetworkProfiler.Example
             {
                 var clone = Instantiate(prefabIdentity);
                 clone.gameObject.SetActive(true);
-                serverObjectManager.AddCharacter(player, clone, PREFAB_HASH);
+                serverObjectManager.AddCharacter(player, clone, prefabIdentity.name.GetStableHashCode());
                 clone.name = $"Player {clone.NetId}";
                 clone.transform.parent = serverGO.transform;
             });
