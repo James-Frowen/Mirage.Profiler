@@ -21,10 +21,10 @@ namespace Mirage.NetworkProfiler
 
         internal static CountRecorder _sentCounter;
         internal static CountRecorder _receivedCounter;
-        private const int FRAME_COUNT = 300; // todo find a way to get real frame count
+        internal const int FRAME_COUNT = 300; // todo find a way to get real frame count
 
         public delegate void FrameUpdate(int tick);
-        public event FrameUpdate AfterUpdate;
+        public static event FrameUpdate AfterUpdate;
 
         private void Start()
         {

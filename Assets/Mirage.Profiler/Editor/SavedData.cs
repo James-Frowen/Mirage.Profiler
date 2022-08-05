@@ -27,6 +27,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         /// </summary>
         public List<string> Expanded;
 
+        public SavedData()
+        {
+            Frames = new Frame[NetworkProfilerBehaviour.FRAME_COUNT];
+            Expanded = new List<string>();
+        }
+
         public (ColumnInfo, SortMode) GetSortHeader(Columns columns)
         {
             foreach (var c in columns)
@@ -70,11 +76,21 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             if (File.Exists(path))
             {
                 var text = File.ReadAllText(path);
-                return JsonUtility.FromJson<SavedData>(text);
+                var data = JsonUtility.FromJson<SavedData>(text);
+                Validate(data);
+                return data;
             }
             else
             {
                 return new SavedData();
+            }
+        }
+
+        private static void Validate(SavedData data)
+        {
+            if (data.Frames.Length != NetworkProfilerBehaviour.FRAME_COUNT)
+            {
+                Array.Resize(ref data.Frames, NetworkProfilerBehaviour.FRAME_COUNT);
             }
         }
 
