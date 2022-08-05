@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Unity.Profiling;
 using UnityEngine;
 
@@ -56,7 +56,7 @@ namespace Mirage.NetworkProfiler
             _bytes = 0;
             var frame = _frames[(Time.frameCount + 1) % _frames.Length];
             frame.Messages.Clear();
-
+            frame.Bytes = 0;
         }
 
         private void CaclulatePerSecond(float now, int bytes)
