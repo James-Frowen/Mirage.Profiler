@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Mirage.NetworkProfiler.ModuleGUI.MessageView;
+using Mirage.NetworkProfiler.ModuleGUI.Messages;
 using Mirage.NetworkProfiler.ModuleGUI.UITable;
 using UnityEngine;
 

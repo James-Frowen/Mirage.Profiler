@@ -1,6 +1,6 @@
-﻿using Mirage.NetworkProfiler.ModuleGUI.UITable;
+using Mirage.NetworkProfiler.ModuleGUI.UITable;
 
-namespace Mirage.NetworkProfiler.ModuleGUI.MessageView
+namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 {
     internal class DrawnMessage
     {

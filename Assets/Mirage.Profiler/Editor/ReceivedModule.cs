@@ -1,4 +1,4 @@
-using Mirage.NetworkProfiler.ModuleGUI.MessageView;
+using Mirage.NetworkProfiler.ModuleGUI.Messages;
 using Unity.Profiling.Editor;
 
 namespace Mirage.NetworkProfiler.ModuleGUI

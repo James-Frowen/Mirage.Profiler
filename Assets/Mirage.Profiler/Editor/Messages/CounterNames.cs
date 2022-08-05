@@ -1,4 +1,4 @@
-﻿namespace Mirage.NetworkProfiler.ModuleGUI.MessageView
+namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 {
     internal struct CounterNames
     {
