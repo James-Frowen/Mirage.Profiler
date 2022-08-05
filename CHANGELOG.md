@@ -1,3 +1,15 @@
+# [1.0.0-beta.15](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.14...v1.0.0-beta.15) (2022-08-05)
+
+
+### Bug Fixes
+
+* stoping sort mode going back to none ([5c85668](https://github.com/James-Frowen/Mirage.Profiler/commit/5c856680631869769e41206c72fb024e90e74cd9))
+
+
+### Features
+
+* using sort from save data ([cdc65ad](https://github.com/James-Frowen/Mirage.Profiler/commit/cdc65ad3d72791e74d51d76df700eb3993a4576d))
+
 # [1.0.0-beta.14](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.13...v1.0.0-beta.14) (2022-08-03)
 
 
