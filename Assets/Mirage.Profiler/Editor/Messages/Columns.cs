@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Mirage.NetworkProfiler.ModuleGUI.UITable;
 
-namespace Mirage.NetworkProfiler.ModuleGUI.MessageView
+namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 {
     internal sealed class Columns : IEnumerable<ColumnInfo>
     {

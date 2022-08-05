@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Mirage.NetworkProfiler.ModuleGUI.MessageView;
 using Mirage.NetworkProfiler.ModuleGUI.UITable;
 using Unity.Profiling;
 using Unity.Profiling.Editor;
@@ -10,7 +9,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Mirage.NetworkProfiler.ModuleGUI
+namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 {
     internal sealed class MessageViewController : ProfilerModuleViewController
     {

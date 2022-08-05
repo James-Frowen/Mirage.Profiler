@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Mirage.NetworkProfiler.ModuleGUI.MessageView
+namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 {
     internal class Group
     {

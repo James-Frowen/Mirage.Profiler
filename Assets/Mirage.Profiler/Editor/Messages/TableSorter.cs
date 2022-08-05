@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Mirage.NetworkProfiler.ModuleGUI.UITable;
 using UnityEngine;
 
-namespace Mirage.NetworkProfiler.ModuleGUI.MessageView
+namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 {
     internal class TableSorter : ITableSorter
     {
