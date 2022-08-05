@@ -1,4 +1,6 @@
-﻿namespace Mirage.NetworkProfiler
+using UnityEngine;
+
+namespace Mirage.NetworkProfiler
 {
     [System.Serializable]
     internal class MessageInfo
@@ -6,13 +8,13 @@
         /// <summary>
         /// Order message was sent/received in frame
         /// </summary>
-        private int _order;
-        private int _bytes;
-        private int _count;
-        private string _messageName;
+        [SerializeField] private int _order;
+        [SerializeField] private int _bytes;
+        [SerializeField] private int _count;
+        [SerializeField] private string _messageName;
         // unity can't serialize nullable so store as 2 fields
-        private bool _hasNetId;
-        private uint _netId;
+        [SerializeField] private bool _hasNetId;
+        [SerializeField] private uint _netId;
 
         public int Order => _order;
         public string Name => _messageName;
