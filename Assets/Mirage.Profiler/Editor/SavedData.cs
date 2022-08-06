@@ -76,15 +76,16 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         private SavedData _receiveData;
         private SavedData _sentData;
         private static SaveDataLoader instance;
+        private static bool isQuitting;
 
         // private so only we can create one
         private SaveDataLoader()
         {
             NetworkProfilerRecorder.AfterSample += AfterSample;
-            EditorApplication.quitting += quitting;
+            EditorApplication.quitting += Quitting;
         }
 
-        private void quitting()
+        private void Quitting()
         {
             Console.WriteLine("[Mirage.Profiler] quitting");
             // save and clear references when quitting,
@@ -92,11 +93,17 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             SaveBoth();
             _receiveData = null;
             _sentData = null;
+            isQuitting = true;
         }
 
         ~SaveDataLoader()
         {
             NetworkProfilerRecorder.AfterSample -= AfterSample;
+
+            // dont save after quitting, unity might unload their dll and cause crash
+            if (isQuitting)
+                return;
+
             SaveBoth();
         }
 
@@ -111,7 +118,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         private static void AfterSample(int tick)
         {
-            // Debug.Log($"AfterSample {tick}");
             SetFrame(tick, ReceiveData, NetworkProfilerRecorder._receivedCounter);
             SetFrame(tick, SentData, NetworkProfilerRecorder._sentCounter);
         }
@@ -130,7 +136,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             var counterFrame = counter._frames.GetFrame(tick);
 
             saveFrame.Bytes = counterFrame.Bytes;
-            saveFrame.Messages.Clear();
             saveFrame.Messages.AddRange(counterFrame.Messages);
         }
 
@@ -138,6 +143,10 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         {
             get
             {
+                // dont load on quit, it might cause crash if unity dll unloads while savedata is save/loading
+                if (isQuitting)
+                    return null;
+
                 if (instance == null)
                     instance = new SaveDataLoader();
 
@@ -153,6 +162,10 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         {
             get
             {
+                // dont load on quit, it might cause crash if unity dll unloads while savedata is save/loading
+                if (isQuitting)
+                    return null;
+
                 if (instance == null)
                     instance = new SaveDataLoader();
 
