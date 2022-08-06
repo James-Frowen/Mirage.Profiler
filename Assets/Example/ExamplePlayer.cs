@@ -66,7 +66,7 @@ namespace Mirage.NetworkProfiler.Example
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                RpcShoot(0, transform.position, transform.rotation, 10, Random.value);
+                RpcShoot(0, transform.position, transform.rotation, _bulletImpulse, Random.value);
             }
         }
 
