@@ -64,7 +64,7 @@ namespace Mirage.NetworkProfiler.Example
 
             RpcSendInuts(_clientInputs);
 
-            if (Input.GetKey(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space))
             {
                 RpcShoot(0, transform.position, transform.rotation, 10, Random.value);
             }
