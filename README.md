@@ -52,5 +52,6 @@ Download unity package from [release page](https://github.com/James-Frowen/Mirag
 - [x] Fix crash on close
 
 ### Maybe Future
+- [ ] Add option to show message from multiple frames at same time
 - [ ] Flexable width of table
 - [ ] Multi-instance support for mirage (give option to pick which server/client NetworkDiagnostics uses)
