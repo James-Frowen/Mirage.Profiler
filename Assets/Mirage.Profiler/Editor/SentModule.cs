@@ -24,7 +24,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 Names.SENT_PER_SECOND
             );
 
-            return new MessageViewController(ProfilerWindow, names, "Sent", this);
+            return new MessageViewController(ProfilerWindow, names, SaveDataLoader.SentData);
         }
 
         CountRecorder ICountRecorderProvider.GetCountRecorder()

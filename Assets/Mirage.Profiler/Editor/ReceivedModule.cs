@@ -24,7 +24,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
                 Names.RECEIVED_PER_SECOND
             );
 
-            return new MessageViewController(ProfilerWindow, names, "Received", this);
+            return new MessageViewController(ProfilerWindow, names, SaveDataLoader.ReceiveData);
         }
 
         CountRecorder ICountRecorderProvider.GetCountRecorder()

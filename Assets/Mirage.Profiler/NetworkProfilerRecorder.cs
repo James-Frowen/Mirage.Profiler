@@ -1,6 +1,10 @@
 using Mirage.Logging;
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditorInternal;
+#endif
+
 namespace Mirage.NetworkProfiler
 {
     [DefaultExecutionOrder(int.MaxValue)] // last
@@ -70,8 +74,8 @@ namespace Mirage.NetworkProfiler
             }
             instance = Server;
 
-            _sentCounter = new CountRecorder(FRAME_COUNT, Server, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
-            _receivedCounter = new CountRecorder(FRAME_COUNT, Server, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
+            _sentCounter = new CountRecorder(Server, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
+            _receivedCounter = new CountRecorder(Server, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
             NetworkDiagnostics.InMessageEvent += _receivedCounter.OnMessage;
             NetworkDiagnostics.OutMessageEvent += _sentCounter.OnMessage;
         }
@@ -85,8 +89,8 @@ namespace Mirage.NetworkProfiler
             }
             instance = Client;
 
-            _sentCounter = new CountRecorder(FRAME_COUNT, Client, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
-            _receivedCounter = new CountRecorder(FRAME_COUNT, Client, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
+            _sentCounter = new CountRecorder(Client, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
+            _receivedCounter = new CountRecorder(Client, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
             NetworkDiagnostics.InMessageEvent += _receivedCounter.OnMessage;
             NetworkDiagnostics.OutMessageEvent += _sentCounter.OnMessage;
         }
@@ -106,19 +110,25 @@ namespace Mirage.NetworkProfiler
             _sentCounter = null;
         }
 
-
 #if UNITY_EDITOR
         private void LateUpdate()
         {
-            Debug.Log($"Sample: [LateUpdate, first {UnityEditorInternal.ProfilerDriver.firstFrameIndex}, last {UnityEditorInternal.ProfilerDriver.lastFrameIndex}]");
-            Sample(UnityEditorInternal.ProfilerDriver.lastFrameIndex);
+            Debug.Log($"Sample: [LateUpdate, first {ProfilerDriver.firstFrameIndex}, last {ProfilerDriver.lastFrameIndex}]");
+            var lastFrame = ProfilerDriver.lastFrameIndex;
+            // not sure why frame is offset, but +2 fixes it
+            Sample(lastFrame + 2);
         }
 #endif
         private void Sample(int frame)
         {
-
             if (instance == null)
                 return;
+
+            if (frame == -1)
+            {
+                Debug.LogWarning("Frame index was -1, not taking samples");
+                return;
+            }
 
             if (instance == (object)Server)
             {

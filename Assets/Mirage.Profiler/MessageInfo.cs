@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Mirage.NetworkProfiler
 {
     [System.Serializable]
-    internal class MessageInfo
+    public class MessageInfo
     {
         /// <summary>
         /// Order message was sent/received in frame
