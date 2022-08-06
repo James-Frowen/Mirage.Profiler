@@ -1,3 +1,10 @@
+# [1.0.0-beta.17](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.16...v1.0.0-beta.17) (2022-08-06)
+
+
+### Bug Fixes
+
+* removing debug logs ([3c0d019](https://github.com/James-Frowen/Mirage.Profiler/commit/3c0d01905c1c3b659a4e5453c79d63a3ba506bfe))
+
 # [1.0.0-beta.16](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.15...v1.0.0-beta.16) (2022-08-06)
 
 
