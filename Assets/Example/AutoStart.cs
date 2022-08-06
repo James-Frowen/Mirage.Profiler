@@ -62,7 +62,7 @@ namespace Mirage.NetworkProfiler.Example
             });
             client.Disconnected.AddListener(reason =>
             {
-                Debug.Log($"Disconnected[{i} {reason}");
+                Debug.Log($"Disconnected[{i}] {reason}");
                 // if closed locally, do nothing
                 if (reason == ClientStoppedReason.LocalConnectionClosed || reason == ClientStoppedReason.ConnectingCancel)
                     return;

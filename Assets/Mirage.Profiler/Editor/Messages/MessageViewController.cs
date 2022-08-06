@@ -170,7 +170,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             _messageView.Clear();
 
             var frameIndex = (int)ProfilerWindow.selectedFrameIndex;
-            Debug.Log($"ReloadMessages [selected {(int)ProfilerWindow.selectedFrameIndex}]");
+            // Debug.Log($"ReloadMessages [selected {(int)ProfilerWindow.selectedFrameIndex}]");
 
 
             if (!TryGetMessages(frameIndex, out var messages))
