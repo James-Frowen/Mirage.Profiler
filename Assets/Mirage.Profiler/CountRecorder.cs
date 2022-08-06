@@ -10,7 +10,7 @@ namespace Mirage.NetworkProfiler
         private readonly ProfilerCounter<int> _profilerBytes;
         private readonly ProfilerCounter<int> _profilerPerSecond;
         private readonly object _instance;
-        internal readonly Frame[] _frames;
+        internal readonly Frames _frames;
         private int _count;
         private int _bytes;
         private int _perSecond;
@@ -18,18 +18,14 @@ namespace Mirage.NetworkProfiler
         private int _frameIndex = -1;
 
 
-        public CountRecorder(int bufferSize, object instance, ProfilerCounter<int> profilerCount, ProfilerCounter<int> profilerBytes, ProfilerCounter<int> profilerPerSecond)
+        public CountRecorder(object instance, ProfilerCounter<int> profilerCount, ProfilerCounter<int> profilerBytes, ProfilerCounter<int> profilerPerSecond)
         {
             _instance = instance;
             _profilerCount = profilerCount;
             _profilerBytes = profilerBytes;
             _profilerPerSecond = profilerPerSecond;
-            _frames = new Frame[bufferSize];
-            for (var i = 0; i < _frames.Length; i++)
-                _frames[i] = new Frame();
+            _frames = new Frames();
         }
-
-
 
         public void OnMessage(NetworkDiagnostics.MessageInfo obj)
         {
@@ -39,11 +35,10 @@ namespace Mirage.NetworkProfiler
                 return;
 #endif
 
-            // Debug.Log($"{Time.frameCount % frames.Length} {NetworkProfilerModuleViewController.CreateTextForMessageInfo(obj)}");
-
             _count += obj.count;
             _bytes += obj.bytes * obj.count;
-            var frame = _frames[Time.frameCount % _frames.Length];
+
+            var frame = _frames.GetFrame(_frameIndex);
             frame.Messages.Add(new MessageInfo(obj, frame.Messages.Count));
             frame.Bytes++;
         }
@@ -56,7 +51,9 @@ namespace Mirage.NetworkProfiler
             _count = 0;
             _bytes = 0;
 
-            _frameIndex = frameIndex;
+            // +1 so that we set next frame
+            // otherwise we clear the frame that the savedata wants to grab
+            _frameIndex = frameIndex + 1;
             var frame = _frames.GetFrame(_frameIndex);
             frame.Messages.Clear();
             frame.Bytes = 0;

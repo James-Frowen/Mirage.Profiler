@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Mirage.NetworkProfiler.ModuleGUI.UITable;
 using Unity.Profiling;
 using Unity.Profiling.Editor;
@@ -13,9 +12,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 {
     internal sealed class MessageViewController : ProfilerModuleViewController
     {
-        private readonly string _saveDataPath;
         private readonly CounterNames _names;
-        private readonly ICountRecorderProvider _counterProvider;
         private readonly Columns _columns = new Columns();
         private Label _countLabel;
         private Label _bytesLabel;
@@ -26,20 +23,11 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         private MessageView _messageView;
         private readonly SavedData _savedData;
 
-        public MessageViewController(ProfilerWindow profilerWindow, CounterNames names, string name, ICountRecorderProvider counterProvider) : base(profilerWindow)
+        public MessageViewController(ProfilerWindow profilerWindow, CounterNames names, SavedData savedData)
+            : base(profilerWindow)
         {
             _names = names;
-            _counterProvider = counterProvider;
-
-            var userSettingsFolder = Path.GetFullPath("UserSettings");
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException(nameof(name));
-
-            _saveDataPath = Path.Join(userSettingsFolder, "Mirage.Profiler", $"{name}.json");
-            Debug.Log($"Load from {_saveDataPath}");
-            _savedData = SaveDataLoader.Load(_saveDataPath);
-
-            NetworkProfilerRecorder.AfterSample += AfterUpdate;
+            _savedData = savedData;
         }
 
         protected override VisualElement CreateView()
@@ -56,11 +44,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             }
         }
 
-        private void ProfilerDriver_profileCleared()
-        {
-            Debug.Log($"ProfilerDriver_profileCleared");
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (!disposing)
@@ -68,10 +51,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
             // Unsubscribe from the Profiler window event that we previously subscribed to.
             ProfilerWindow.SelectedFrameIndexChanged -= FrameIndexChanged;
-            ProfilerDriver.profileCleared -= ProfilerDriver_profileCleared;
-
-            Debug.Log($"Save to {_saveDataPath}");
-            SaveDataLoader.Save(_saveDataPath, _savedData);
 
             base.Dispose(disposing);
         }
@@ -139,8 +118,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
             // Be notified when the selected frame index in the Profiler Window changes, so we can update the label.
             ProfilerWindow.SelectedFrameIndexChanged += FrameIndexChanged;
-            ProfilerDriver.profileCleared += ProfilerDriver_profileCleared;
-
 
             return root;
         }
@@ -223,6 +200,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
                 return true;
             }
 
+            if (frameIndex == -1)
+            {
+                messages = null;
+                return false;
+            }
+
             messages = _savedData.Frames.GetFrame(frameIndex).Messages;
             return true;
         }
@@ -264,28 +247,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             var parent = _messageView.AddEmptyRow();
             var ele = AddLabelWithPadding(parent);
             ele.text = "No Messages";
-        }
-
-        private void AfterUpdate(int tick)
-        {
-            Debug.Assert(_savedData.Frames.Length == NetworkProfilerRecorder.FRAME_COUNT);
-
-            {
-                Debug.Log($"AfterUpdate [tick {tick}, selected {(int)ProfilerWindow.selectedFrameIndex}]");
-            }
-
-            var counter = _counterProvider.GetCountRecorder();
-            if (counter == null)
-            {
-                // no counter, no messages for this frame
-                // clear old data
-                _savedData.Frames[tick] = new Frame();
-
-                return;
-            }
-
-            // just save frame in save data to be the frame in counter
-            _savedData.Frames[tick] = counter._frames[tick];
         }
     }
 }
