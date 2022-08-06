@@ -1,3 +1,28 @@
+# [1.0.0-beta.16](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.15...v1.0.0-beta.16) (2022-08-06)
+
+
+### Bug Fixes
+
+* clearing byte count at end of frame ([d185ad4](https://github.com/James-Frowen/Mirage.Profiler/commit/d185ad43c9d716aa44bbb715b3eed89b16d19706))
+* enabling example bullet on server ([bc58f72](https://github.com/James-Frowen/Mirage.Profiler/commit/bc58f72ff2946b1f4a96821d36e3dfc88fed0f82))
+* fixing client spawn in example ([348e98b](https://github.com/James-Frowen/Mirage.Profiler/commit/348e98b4de4c36be9c118cfa6242827126422cd9))
+* fixing example auto connect ([65968de](https://github.com/James-Frowen/Mirage.Profiler/commit/65968ded4aa7ea2fd0c04739cb0e272709ff7d67))
+* fixing frame index for saved messages ([1204a1f](https://github.com/James-Frowen/Mirage.Profiler/commit/1204a1f4f32d497a260a4720937edde67d6cd9ed))
+* fixing profier behaviour ([bc91dc7](https://github.com/James-Frowen/Mirage.Profiler/commit/bc91dc78b71d9893adb48dac991433631fb7a34f))
+* fixing ProfilerCounter ([9a7f62a](https://github.com/James-Frowen/Mirage.Profiler/commit/9a7f62a4d4ce2ff42bfb1cd0ad0b712ac7b46ac7))
+* init array with non-null elements ([f69c268](https://github.com/James-Frowen/Mirage.Profiler/commit/f69c2684de2b242fe337b051d274d84b48577ebc))
+* making example clients auto reconnect ([8ca5eee](https://github.com/James-Frowen/Mirage.Profiler/commit/8ca5eeeb102e54e12a33490c878fd35156cb6ff0))
+* making message info fields serializable ([4cbc905](https://github.com/James-Frowen/Mirage.Profiler/commit/4cbc905e513a62ee17ddf660d524363464e080c8))
+
+
+### Features
+
+* adding option to run example outside of editor ([5de8073](https://github.com/James-Frowen/Mirage.Profiler/commit/5de80731e41513564ccf20ba67fb29eb4e01adf1))
+* adding shooting to example ([543374a](https://github.com/James-Frowen/Mirage.Profiler/commit/543374a94c0a65362fcabaf0ca190d49163e372d))
+* returning saved message instead of ones from counter ([541ec66](https://github.com/James-Frowen/Mirage.Profiler/commit/541ec663cda04fb2b10c73822a6e28bd221ac6b7))
+* saving message for frames ([519f256](https://github.com/James-Frowen/Mirage.Profiler/commit/519f25695ad0ca7b113a65de14c7feb93c42d4f0))
+* working save data for message table ([ffaaef9](https://github.com/James-Frowen/Mirage.Profiler/commit/ffaaef97e4ee05751be419e642f61b923857486f))
+
 # [1.0.0-beta.15](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.14...v1.0.0-beta.15) (2022-08-05)
 
 
