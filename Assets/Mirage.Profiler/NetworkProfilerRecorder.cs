@@ -129,7 +129,7 @@ namespace Mirage.NetworkProfiler
             {
                 lastProcessedFrame++;
 
-                Debug.Log($"Sample: [LateUpdate, enabled { ProfilerDriver.enabled}, first {ProfilerDriver.firstFrameIndex}, last {ProfilerDriver.lastFrameIndex}]");
+                //Debug.Log($"Sample: [LateUpdate, enabled { ProfilerDriver.enabled}, first {ProfilerDriver.firstFrameIndex}, last {ProfilerDriver.lastFrameIndex}, lastProcessed {lastProcessedFrame}]");
 
                 var lastFrame = lastProcessedFrame;
                 // not sure why frame is offset, but +2 fixes it
