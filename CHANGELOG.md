@@ -1,3 +1,11 @@
+# [1.0.0-beta.18](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.17...v1.0.0-beta.18) (2022-08-06)
+
+
+### Bug Fixes
+
+* fixing crash when closing unity ([eacc82c](https://github.com/James-Frowen/Mirage.Profiler/commit/eacc82ca37b4bce169ed03ae2336474af1936760))
+* fixing unity skipping profiler frames becuase unity is buggy ([4e23dff](https://github.com/James-Frowen/Mirage.Profiler/commit/4e23dffc07ed2d7f48dd9a0d4257806c93ba7c3f))
+
 # [1.0.0-beta.17](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.16...v1.0.0-beta.17) (2022-08-06)
 
 
