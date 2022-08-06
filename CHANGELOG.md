@@ -1,3 +1,10 @@
+# [1.0.0-beta.20](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.19...v1.0.0-beta.20) (2022-08-06)
+
+
+### Bug Fixes
+
+* fixing example where field was not being used ([1e6f605](https://github.com/James-Frowen/Mirage.Profiler/commit/1e6f605e8cd9953daf6f9482c72dabe069c7b300))
+
 # [1.0.0-beta.19](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.18...v1.0.0-beta.19) (2022-08-06)
 
 
