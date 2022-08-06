@@ -1,3 +1,10 @@
+# [1.0.0-beta.19](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.18...v1.0.0-beta.19) (2022-08-06)
+
+
+### Bug Fixes
+
+* removing verbose log ([fe0541a](https://github.com/James-Frowen/Mirage.Profiler/commit/fe0541a7859eadd5ce390c6449dd83694c058d08))
+
 # [1.0.0-beta.18](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.17...v1.0.0-beta.18) (2022-08-06)
 
 
