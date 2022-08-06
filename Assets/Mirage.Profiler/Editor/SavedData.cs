@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Mirage.NetworkProfiler.ModuleGUI.Messages;
 using Mirage.NetworkProfiler.ModuleGUI.UITable;
+using UnityEditor;
 using UnityEngine;
 
 namespace Mirage.NetworkProfiler.ModuleGUI
@@ -80,11 +81,27 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         private SaveDataLoader()
         {
             NetworkProfilerRecorder.AfterSample += AfterSample;
+            EditorApplication.quitting += quitting;
+        }
+
+        private void quitting()
+        {
+            Console.WriteLine("[Mirage.Profiler] quitting");
+            // save and clear references when quitting,
+            // this is needed because finialize is called after unity dll unloads so causes crash
+            SaveBoth();
+            _receiveData = null;
+            _sentData = null;
         }
 
         ~SaveDataLoader()
         {
             NetworkProfilerRecorder.AfterSample -= AfterSample;
+            SaveBoth();
+        }
+
+        private void SaveBoth()
+        {
             if (_receiveData != null)
                 Save(GetFullPath("Receive"), _receiveData);
 
@@ -158,7 +175,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         public static void Save(string path, SavedData data)
         {
-            // Debug.Log($"Save {path}");
+            Console.WriteLine($"[Mirage.Profiler] Save {path}");
             CheckDir(path);
 
             var text = JsonUtility.ToJson(data);
@@ -167,7 +184,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         public static SavedData Load(string path)
         {
-            // Debug.Log($"Load {path}");
+            Console.WriteLine($"[Mirage.Profiler] Load {path}");
             CheckDir(path);
 
             if (File.Exists(path))
