@@ -113,7 +113,7 @@ namespace Mirage.NetworkProfiler
 #if UNITY_EDITOR
         private void LateUpdate()
         {
-            Debug.Log($"Sample: [LateUpdate, first {ProfilerDriver.firstFrameIndex}, last {ProfilerDriver.lastFrameIndex}]");
+            // Debug.Log($"Sample: [LateUpdate, first {ProfilerDriver.firstFrameIndex}, last {ProfilerDriver.lastFrameIndex}]");
             var lastFrame = ProfilerDriver.lastFrameIndex;
             // not sure why frame is offset, but +2 fixes it
             Sample(lastFrame + 2);

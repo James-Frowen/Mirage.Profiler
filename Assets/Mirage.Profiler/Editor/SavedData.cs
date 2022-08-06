@@ -94,7 +94,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         private static void AfterSample(int tick)
         {
-            Debug.Log($"AfterSample {tick}");
+            // Debug.Log($"AfterSample {tick}");
             SetFrame(tick, ReceiveData, NetworkProfilerRecorder._receivedCounter);
             SetFrame(tick, SentData, NetworkProfilerRecorder._sentCounter);
         }
@@ -158,7 +158,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         public static void Save(string path, SavedData data)
         {
-            Debug.Log($"Save {path}");
+            // Debug.Log($"Save {path}");
             CheckDir(path);
 
             var text = JsonUtility.ToJson(data);
@@ -167,7 +167,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         public static SavedData Load(string path)
         {
-            Debug.Log($"Load {path}");
+            // Debug.Log($"Load {path}");
             CheckDir(path);
 
             if (File.Exists(path))
