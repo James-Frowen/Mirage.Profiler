@@ -228,9 +228,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
                 static MessageInfo NewInfo(int order, object msg, int bytes, int count)
                 {
 #if MIRAGE_DIAGNOSTIC_INSTANCE
-                        return new MessageInfo(null, msg, bytes, count);
+                    return new MessageInfo(new NetworkDiagnostics.MessageInfo(null, msg, bytes, count), provider, order);
 #else
-                    return new MessageInfo(new NetworkDiagnostics.MessageInfo(msg, bytes, count), order);
+                    return new MessageInfo(new NetworkDiagnostics.MessageInfo(msg, bytes, count), new NetworkInfoProvider(null), order);
 #endif
                 }
             }

@@ -2,9 +2,25 @@ using UnityEngine;
 
 namespace Mirage.NetworkProfiler
 {
-    public static class MessageHelper
+    /// <summary>
+    /// Returns information about NetworkMessage
+    /// </summary>
+    public interface INetworkInfoProvider
     {
-        public static uint? GetNetId(NetworkDiagnostics.MessageInfo info)
+        GameObject GetGameObject(uint? netId);
+        uint? GetNetId(NetworkDiagnostics.MessageInfo info);
+    }
+
+    public class NetworkInfoProvider : INetworkInfoProvider
+    {
+        private readonly NetworkWorld _world;
+
+        public NetworkInfoProvider(NetworkWorld world)
+        {
+            _world = world;
+        }
+
+        public uint? GetNetId(NetworkDiagnostics.MessageInfo info)
         {
             switch (info.message)
             {
@@ -20,36 +36,17 @@ namespace Mirage.NetworkProfiler
             }
         }
 
-        public static GameObject GetGameObject(uint? netId)
+        public GameObject GetGameObject(uint? netId)
         {
             if (!netId.HasValue)
                 return null;
 
-            var world = GetNetworkWorld();
-            if (world == null)
+            if (_world == null)
                 return null;
 
-            return world.TryGetIdentity(netId.Value, out var identity)
+            return _world.TryGetIdentity(netId.Value, out var identity)
                 ? identity.gameObject
                 : null;
-        }
-
-        private static NetworkWorld GetNetworkWorld()
-        {
-            // first try server, then if not active, then client
-            var server = GameObject.FindObjectOfType<NetworkServer>();
-            if (server != null && server.Active)
-            {
-                return server.World;
-            }
-
-            var client = GameObject.FindObjectOfType<NetworkClient>();
-            if (client != null && client.Active)
-            {
-                return client.World;
-            }
-
-            return null;
         }
     }
 }

@@ -25,16 +25,16 @@ namespace Mirage.NetworkProfiler
         public uint? NetId => _hasNetId ? _netId : default;
         public string ObjectName => _objectName;
 
-        public MessageInfo(NetworkDiagnostics.MessageInfo msg, int order)
+        public MessageInfo(NetworkDiagnostics.MessageInfo msg, INetworkInfoProvider provider, int order)
         {
             _order = order;
             _bytes = msg.bytes;
             _count = msg.count;
             _messageName = msg.message.GetType().FullName;
-            var id = MessageHelper.GetNetId(msg);
+            var id = provider.GetNetId(msg);
             _hasNetId = id.HasValue;
             _netId = id.GetValueOrDefault();
-            var obj = MessageHelper.GetGameObject(id);
+            var obj = provider.GetGameObject(id);
             _objectName = obj != null ? obj.name : null;
         }
     }
