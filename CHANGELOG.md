@@ -1,3 +1,22 @@
+# [1.0.0-beta.21](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.20...v1.0.0-beta.21) (2022-08-07)
+
+
+### Bug Fixes
+
+* fixing index out of range on first frame ([b1a4a6b](https://github.com/James-Frowen/Mirage.Profiler/commit/b1a4a6b7ca21154d32758fcb577ccd8c22c55d7e))
+* fixing player count sample being skipped ([04d7341](https://github.com/James-Frowen/Mirage.Profiler/commit/04d7341d0e3cbf7a91208a0b5f0df567644d7030))
+* setting max connections in example to 1000 ([94dc143](https://github.com/James-Frowen/Mirage.Profiler/commit/94dc14329c3c1799f85c210f11ece1879bb6fa47))
+
+
+### Features
+
+* adding object name column ([d3de7e3](https://github.com/James-Frowen/Mirage.Profiler/commit/d3de7e334530068cc7776fb000afbaaf21dd30b4))
+
+
+### Performance Improvements
+
+* replacing FindObjectOfType with reference given in setup ([df9141d](https://github.com/James-Frowen/Mirage.Profiler/commit/df9141df18139a1020222c60402c4fedd3259a38))
+
 # [1.0.0-beta.20](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.19...v1.0.0-beta.20) (2022-08-06)
 
 
