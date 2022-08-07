@@ -30,7 +30,7 @@ namespace Mirage.NetworkProfiler
         public delegate void FrameUpdate(int tick);
         public static event FrameUpdate AfterSample;
 
-        private int lastProcessedFrame = -1;
+        private int _lastProcessedFrame = -1;
 
         private void Start()
         {
@@ -40,7 +40,7 @@ namespace Mirage.NetworkProfiler
 #endif
 
 #if UNITY_EDITOR
-            lastProcessedFrame = ProfilerDriver.lastFrameIndex;
+            _lastProcessedFrame = ProfilerDriver.lastFrameIndex;
 #endif
 
 
@@ -125,13 +125,13 @@ namespace Mirage.NetworkProfiler
 
             // unity sometimes skips a profiler frame, because unity
             // so we have to check if that happens and then sample the missing frame
-            while (lastProcessedFrame < ProfilerDriver.lastFrameIndex)
+            while (_lastProcessedFrame < ProfilerDriver.lastFrameIndex)
             {
-                lastProcessedFrame++;
+                _lastProcessedFrame++;
 
                 //Debug.Log($"Sample: [LateUpdate, enabled { ProfilerDriver.enabled}, first {ProfilerDriver.firstFrameIndex}, last {ProfilerDriver.lastFrameIndex}, lastProcessed {lastProcessedFrame}]");
 
-                var lastFrame = lastProcessedFrame;
+                var lastFrame = _lastProcessedFrame;
                 // not sure why frame is offset, but +2 fixes it
                 Sample(lastFrame + 2);
             }
