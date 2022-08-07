@@ -1,3 +1,10 @@
+# [1.0.0-beta.22](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.21...v1.0.0-beta.22) (2022-08-07)
+
+
+### Features
+
+* saving group expanded in save data ([557538c](https://github.com/James-Frowen/Mirage.Profiler/commit/557538c6cf9d06b456def4e34c0b8add6683bd7b))
+
 # [1.0.0-beta.21](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.20...v1.0.0-beta.21) (2022-08-07)
 
 
