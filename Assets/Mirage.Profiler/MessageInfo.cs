@@ -16,6 +16,7 @@ namespace Mirage.NetworkProfiler
         [SerializeField] private bool _hasNetId;
         [SerializeField] private uint _netId;
         [SerializeField] private string _objectName;
+        [SerializeField] private string _rpcName;
 
         public int Order => _order;
         public string Name => _messageName;
@@ -24,6 +25,7 @@ namespace Mirage.NetworkProfiler
         public int TotalBytes => Bytes * Count;
         public uint? NetId => _hasNetId ? _netId : default;
         public string ObjectName => _objectName;
+        public string RpcName => _rpcName;
 
         public MessageInfo(NetworkDiagnostics.MessageInfo msg, INetworkInfoProvider provider, int order)
         {
@@ -34,8 +36,9 @@ namespace Mirage.NetworkProfiler
             var id = provider.GetNetId(msg);
             _hasNetId = id.HasValue;
             _netId = id.GetValueOrDefault();
-            var obj = provider.GetGameObject(id);
+            var obj = provider.GetNetworkIdentity(id);
             _objectName = obj != null ? obj.name : null;
+            _rpcName = provider.GetRpcName(msg);
         }
     }
 }
