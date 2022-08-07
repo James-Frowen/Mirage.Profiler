@@ -29,12 +29,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
         /// <param name="sortHeader"></param>
         public void SetSortHeader(SortHeader sortHeader)
         {
-            // current is new, so names should already be updated
-            if (_currentSort == sortHeader)
-                return;
-
             // not null or current
-            if (_currentSort != null)
+            if (_currentSort != null && _currentSort != sortHeader)
             {
                 _currentSort.SortMode = SortMode.None;
                 _currentSort.UpdateName();
