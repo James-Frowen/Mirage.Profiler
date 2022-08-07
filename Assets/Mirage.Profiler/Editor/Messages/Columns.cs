@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Mirage.NetworkProfiler.ModuleGUI.UITable;
 
@@ -9,6 +10,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         private const int NAME_WIDTH = 300;
         private const int OTHER_WIDTH = 100;
 
+        private readonly ColumnInfo[] _columns;
+
         public readonly ColumnInfo Expand;
         public readonly ColumnInfo FullName;
         public readonly ColumnInfo TotalBytes;
@@ -16,44 +19,48 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         public readonly ColumnInfo BytesPerMessage;
         public readonly ColumnInfo NetId;
         public readonly ColumnInfo ObjectName;
+        public readonly ColumnInfo RpcName;
 
         public Columns()
         {
-            Expand = new ColumnInfo("+", EXPAND_WIDTH);
+            Expand = new ColumnInfo("+", EXPAND_WIDTH, x => "");
 
-            FullName = new ColumnInfo("Message", NAME_WIDTH);
+            FullName = new ColumnInfo("Message", NAME_WIDTH, x => x.Name);
             FullName.AddSort(m => m.Name, m => m.Name);
 
-            TotalBytes = new ColumnInfo("Total Bytes", OTHER_WIDTH);
+            TotalBytes = new ColumnInfo("Total Bytes", OTHER_WIDTH, x => x.TotalBytes.ToString());
             TotalBytes.AddSort(m => m.TotalBytes, m => m.TotalBytes);
 
-            Count = new ColumnInfo("Count", OTHER_WIDTH);
+            Count = new ColumnInfo("Count", OTHER_WIDTH, x => x.Count.ToString());
             Count.AddSort(m => m.TotalCount, m => m.Count);
 
-            BytesPerMessage = new ColumnInfo("Bytes", OTHER_WIDTH);
+            BytesPerMessage = new ColumnInfo("Bytes", OTHER_WIDTH, x => x.Bytes.ToString());
             BytesPerMessage.AddSort(null, m => m.Bytes);
 
-            NetId = new ColumnInfo("Net id", OTHER_WIDTH);
+            NetId = new ColumnInfo("Net id", OTHER_WIDTH, x => x.NetId.HasValue ? x.NetId.ToString() : "");
             NetId.AddSort(null, m => m.NetId.GetValueOrDefault());
 
-            ObjectName = new ColumnInfo("GameObject Name", NAME_WIDTH);
+            ObjectName = new ColumnInfo("GameObject Name", NAME_WIDTH, x => x.ObjectName);
             ObjectName.AddSort(null, m => m.ObjectName);
+
+            RpcName = new ColumnInfo("RPC Name", NAME_WIDTH, x => x.RpcName);
+            RpcName.AddSort(null, m => m.RpcName);
+
+            _columns = new ColumnInfo[] {
+
+                Expand,
+                FullName,
+                TotalBytes,
+                Count,
+                BytesPerMessage,
+                NetId,
+                ObjectName,
+                RpcName,
+            };
         }
 
 
-        public IEnumerator<ColumnInfo> GetEnumerator()
-        {
-            yield return Expand;
-            yield return FullName;
-            yield return TotalBytes;
-            yield return Count;
-            yield return BytesPerMessage;
-            yield return NetId;
-            yield return ObjectName;
-        }
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        public IEnumerator<ColumnInfo> GetEnumerator() => ((IEnumerable<ColumnInfo>)_columns).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => _columns.GetEnumerator();
     }
 }

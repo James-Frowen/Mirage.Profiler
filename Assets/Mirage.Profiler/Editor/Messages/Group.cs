@@ -99,12 +99,10 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
         private void DrawMessage(Row row, MessageInfo info)
         {
-            row.SetText(_columns.FullName, info.Name);
-            row.SetText(_columns.TotalBytes, info.TotalBytes);
-            row.SetText(_columns.Count, info.Count);
-            row.SetText(_columns.BytesPerMessage, info.Bytes);
-            row.SetText(_columns.NetId, info.NetId.HasValue ? info.NetId.ToString() : "");
-            row.SetText(_columns.ObjectName, info.ObjectName);
+            foreach (var column in _columns)
+            {
+                row.SetText(column, column.GetText(info));
+            }
         }
 
         private static Color GetBackgroundColor()
