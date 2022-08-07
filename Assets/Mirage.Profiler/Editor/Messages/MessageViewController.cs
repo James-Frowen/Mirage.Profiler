@@ -82,10 +82,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             _toggleBox.style.unityTextAlign = TextAnchor.LowerLeft;
             summary.Add(_toggleBox);
 
-            _groupMsgToggle = new Toggle();
-            _groupMsgToggle.text = "Group Messages";
-            _groupMsgToggle.tooltip = "Groups Message by type";
-            _groupMsgToggle.value = true;
+            _groupMsgToggle = new Toggle
+            {
+                text = "Group Messages",
+                tooltip = "Groups Message by type",
+                value = true
+            };
             _groupMsgToggle.RegisterValueChangedCallback(_ => ReloadData());
             _toggleBox.Add(_groupMsgToggle);
 
@@ -97,10 +99,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             //frameSlider.RegisterValueChangedCallback(_ => Debug.Log(frameSlider.value));
             //_toggleBox.Add(frameSlider);
 
-            _debugToggle = new Toggle();
-            _debugToggle.text = "Show Fake Messages";
-            _debugToggle.tooltip = "Adds fakes message to table to debug layout of table";
-            _debugToggle.value = false;
+            _debugToggle = new Toggle
+            {
+                text = "Show Fake Messages",
+                tooltip = "Adds fakes message to table to debug layout of table",
+                value = false
+            };
             _debugToggle.RegisterValueChangedCallback(_ => ReloadData());
             _toggleBox.Add(_debugToggle);
 #if MIRAGE_PROFILER_DEBUG
