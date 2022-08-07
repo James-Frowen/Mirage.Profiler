@@ -65,6 +65,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
         private string RpcShortName(string fullName)
         {
+            if (string.IsNullOrEmpty(fullName))
+                return string.Empty;
+
             var split = fullName.Split('.');
             var count = split.Length;
             // full name should be atleast "className.methodName"
