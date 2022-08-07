@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Mirage.NetworkProfiler.ModuleGUI.UITable;
 using UnityEngine.UIElements;
@@ -14,6 +15,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         /// </summary>
         private readonly List<MessageInfo> _messages = new List<MessageInfo>();
         private readonly Dictionary<string, Group> _grouped = new Dictionary<string, Group>();
+
+        public event Action<Group, bool> OnGroupExpanded;
 
         public MessageView(Columns columns, TableSorter sorter, VisualElement parent)
         {
@@ -94,7 +97,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             expand.AddManipulator(new Clickable((evt) =>
             {
                 group.ToggleExpand();
-                group.Head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
+                OnGroupExpanded?.Invoke(group, group.Expanded);
             }));
 
             // will lazy create message if expanded
@@ -122,6 +125,17 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         {
             var row = _table.AddEmptyRow();
             return row.VisualElement;
+        }
+
+        public void ExpandMany(List<string> expanded)
+        {
+            foreach (var group in _grouped.Values)
+            {
+                if (expanded.Contains(group.Name))
+                {
+                    group.Expand(true);
+                }
+            }
         }
     }
 }

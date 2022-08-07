@@ -116,6 +116,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
             var sorter = new TableSorter(this);
             _messageView = new MessageView(_columns, sorter, root);
+            _messageView.OnGroupExpanded += OnGroupExpanded;
 
             // Populate the label with the current data for the selected frame. 
             ReloadData();
@@ -126,6 +127,13 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             return root;
         }
 
+        private void OnGroupExpanded(Group group, bool expanded)
+        {
+            if (expanded)
+                _savedData.Expanded.Add(group.Name);
+            else
+                _savedData.Expanded.Remove(group.Name);
+        }
 
         private void FrameIndexChanged(long selectedFrameIndex) => ReloadData();
 
@@ -193,6 +201,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
                 new Frame{ Messages = messages },
             };
             _messageView.Draw(frame, _groupMsgToggle.value);
+            _messageView.ExpandMany(_savedData.Expanded);
             SortFromSaveData();
         }
 
