@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0...v1.0.1) (2022-08-07)
+
+
+### Bug Fixes
+
+* fixing error when rpc name is empty ([5660db0](https://github.com/James-Frowen/Mirage.Profiler/commit/5660db058c522b0eaf39651ec5b33f9a444849c4))
+
 # 1.0.0 (2022-08-07)
 
 
