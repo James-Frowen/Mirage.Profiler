@@ -47,7 +47,7 @@ Download unity package from [release page](https://github.com/James-Frowen/Mirag
 - [x] Group by Message type
 - [x] Add Sort by column
 - [x] Saving messages so that they can be viewed outside of playmode
-- [ ] Add GameObject Name from netid
+- [x] Add GameObject Name from netid
 - [ ] Save expanded group settings (which which groups are expanded, apply when loading new frame)
 - [x] Fix crash on close
 

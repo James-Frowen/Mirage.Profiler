@@ -88,8 +88,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             head.SetText(_columns.FullName, group.Name);
             head.SetText(_columns.TotalBytes, group.TotalBytes);
             head.SetText(_columns.Count, group.TotalCount);
-            head.SetText(_columns.BytesPerMessage, "");
-            head.SetText(_columns.NetId, "");
             group.Head = head;
 
             var expand = head.GetLabel(_columns.Expand);

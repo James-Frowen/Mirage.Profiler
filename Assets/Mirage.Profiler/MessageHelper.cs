@@ -1,8 +1,10 @@
-﻿namespace Mirage.NetworkProfiler
+using UnityEngine;
+
+namespace Mirage.NetworkProfiler
 {
     public static class MessageHelper
     {
-        public static uint? GetNetId(this NetworkDiagnostics.MessageInfo info)
+        public static uint? GetNetId(NetworkDiagnostics.MessageInfo info)
         {
             switch (info.message)
             {
@@ -16,6 +18,38 @@
                 case UpdateVarsMessage msg: return msg.netId;
                 default: return default;
             }
+        }
+
+        public static GameObject GetGameObject(uint? netId)
+        {
+            if (!netId.HasValue)
+                return null;
+
+            var world = GetNetworkWorld();
+            if (world == null)
+                return null;
+
+            return world.TryGetIdentity(netId.Value, out var identity)
+                ? identity.gameObject
+                : null;
+        }
+
+        private static NetworkWorld GetNetworkWorld()
+        {
+            // first try server, then if not active, then client
+            var server = GameObject.FindObjectOfType<NetworkServer>();
+            if (server != null && server.Active)
+            {
+                return server.World;
+            }
+
+            var client = GameObject.FindObjectOfType<NetworkClient>();
+            if (client != null && client.Active)
+            {
+                return client.World;
+            }
+
+            return null;
         }
     }
 }

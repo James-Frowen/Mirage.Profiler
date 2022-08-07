@@ -15,6 +15,7 @@ namespace Mirage.NetworkProfiler
         // unity can't serialize nullable so store as 2 fields
         [SerializeField] private bool _hasNetId;
         [SerializeField] private uint _netId;
+        [SerializeField] private string _objectName;
 
         public int Order => _order;
         public string Name => _messageName;
@@ -22,6 +23,7 @@ namespace Mirage.NetworkProfiler
         public int Count => _count;
         public int TotalBytes => Bytes * Count;
         public uint? NetId => _hasNetId ? _netId : default;
+        public string ObjectName => _objectName;
 
         public MessageInfo(NetworkDiagnostics.MessageInfo msg, int order)
         {
@@ -29,9 +31,11 @@ namespace Mirage.NetworkProfiler
             _bytes = msg.bytes;
             _count = msg.count;
             _messageName = msg.message.GetType().FullName;
-            var id = msg.GetNetId();
+            var id = MessageHelper.GetNetId(msg);
             _hasNetId = id.HasValue;
             _netId = id.GetValueOrDefault();
+            var obj = MessageHelper.GetGameObject(id);
+            _objectName = obj != null ? obj.name : null;
         }
     }
 }
