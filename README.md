@@ -1,5 +1,6 @@
 [![Discord](https://img.shields.io/discord/809535064551456888.svg)](https://discordapp.com/invite/DTBPBYvexy)
-[![Releases](https://img.shields.io/github/release/James-Frowen/Mirage.Profiler.svg?include_prereleases&sort=semver)](https://github.com/James-Frowen/Mirage.Profiler/releases/latest)
+[![Releases](https://img.shields.io/github/release/James-Frowen/Mirage.Profiler.svg?sort=semver)](https://github.com/James-Frowen/Mirage.Profiler/releases/latest)
+[![Releases](https://img.shields.io/github/release/James-Frowen/Mirage.Profiler.svg?include_prereleases&sort=semver)](https://github.com/James-Frowen/Mirage.Profiler/releases?q=mirror&expanded=true)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/James-Frowen)](https://github.com/sponsors/James-Frowen)
 
 # Mirage.Profiler (work in progress)
@@ -38,21 +39,9 @@ Download unity package from [release page](https://github.com/James-Frowen/Mirag
 2) Open Unity's Profiler and select the "Network Profiler" module
 3) Press play, and start server or client
 
-## Development TODO
 
-- [x] Send and received counters
-- [x] Bytes per second
-- [x] Table for messages
-- [x] ScrollBar for table (height get squashed with no scrollbar)
-- [x] Group by Message type
-- [x] Add Sort by column
-- [x] Saving messages so that they can be viewed outside of playmode
-- [x] Add GameObject Name from netid
-- [x] Save expanded group settings (which which groups are expanded, apply when loading new frame)
-- [x] Fix crash on close
+## Future Development
 - [ ] Fix frames sometimes not lining up
-
-### Maybe Future
 - [ ] Add option to show message from multiple frames at same time
 - [ ] Flexable width of table
 - [ ] Multi-instance support for mirage (give option to pick which server/client NetworkDiagnostics uses)
