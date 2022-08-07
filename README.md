@@ -48,8 +48,9 @@ Download unity package from [release page](https://github.com/James-Frowen/Mirag
 - [x] Add Sort by column
 - [x] Saving messages so that they can be viewed outside of playmode
 - [x] Add GameObject Name from netid
-- [ ] Save expanded group settings (which which groups are expanded, apply when loading new frame)
+- [x] Save expanded group settings (which which groups are expanded, apply when loading new frame)
 - [x] Fix crash on close
+- [ ] Fix frames sometimes not lining up
 
 ### Maybe Future
 - [ ] Add option to show message from multiple frames at same time
