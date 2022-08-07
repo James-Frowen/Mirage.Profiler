@@ -44,6 +44,27 @@ namespace Mirage.NetworkProfiler.Example
             }
         }
 
+        private void CreateServer(NetworkIdentity prefabIdentity)
+        {
+            var serverGO = new GameObject("server");
+            serverGO.transform.parent = transform;
+            var server = serverGO.AddComponent<NetworkServer>();
+            var serverObjectManager = serverGO.AddComponent<ServerObjectManager>();
+            server.SocketFactory = serverGO.AddComponent<UdpSocketFactory>();
+            serverObjectManager.Server = server;
+            server.Connected.AddListener((player) =>
+            {
+                var clone = Instantiate(prefabIdentity);
+                clone.gameObject.SetActive(true);
+                serverObjectManager.AddCharacter(player, clone, prefabIdentity.name.GetStableHashCode());
+                clone.name = $"Player {clone.NetId}";
+                clone.transform.parent = serverGO.transform;
+            });
+            SetupProfiler(server);
+
+            server.StartServer();
+        }
+
         private async UniTask<NetworkClient> CreateClient(NetworkIdentity prefabIdentity, NetworkIdentity prefabBullet, int i)
         {
             var clientGO = new GameObject($"client {i}");
@@ -78,27 +99,6 @@ namespace Mirage.NetworkProfiler.Example
             client.Connect();
 
             return client;
-        }
-
-        private void CreateServer(NetworkIdentity prefabIdentity)
-        {
-            var serverGO = new GameObject("server");
-            serverGO.transform.parent = transform;
-            var server = serverGO.AddComponent<NetworkServer>();
-            var serverObjectManager = serverGO.AddComponent<ServerObjectManager>();
-            server.SocketFactory = serverGO.AddComponent<UdpSocketFactory>();
-            serverObjectManager.Server = server;
-            server.Connected.AddListener((player) =>
-            {
-                var clone = Instantiate(prefabIdentity);
-                clone.gameObject.SetActive(true);
-                serverObjectManager.AddCharacter(player, clone, prefabIdentity.name.GetStableHashCode());
-                clone.name = $"Player {clone.NetId}";
-                clone.transform.parent = serverGO.transform;
-            });
-            SetupProfiler(server);
-
-            server.StartServer();
         }
 
         private (NetworkIdentity, ExamplePlayer) CreatePlayerPrefab()
