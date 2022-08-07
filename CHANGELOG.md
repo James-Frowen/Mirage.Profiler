@@ -1,3 +1,10 @@
+# [1.0.0-beta.23](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.22...v1.0.0-beta.23) (2022-08-07)
+
+
+### Bug Fixes
+
+* fixing sort arrow not updated ([bf8cd9a](https://github.com/James-Frowen/Mirage.Profiler/commit/bf8cd9adeec12ca2898918e40c611e040e58013e))
+
 # [1.0.0-beta.22](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.21...v1.0.0-beta.22) (2022-08-07)
 
 
