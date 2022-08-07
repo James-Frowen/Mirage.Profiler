@@ -1,3 +1,17 @@
+# [1.0.0-beta.24](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.23...v1.0.0-beta.24) (2022-08-07)
+
+
+### Bug Fixes
+
+* making header scroll Horizontally ([7ba9d26](https://github.com/James-Frowen/Mirage.Profiler/commit/7ba9d2667afcf32269c979f3df4769e3e86a3d6c))
+
+
+### Features
+
+* adding rpc name to message info ([52a7bb4](https://github.com/James-Frowen/Mirage.Profiler/commit/52a7bb4927e009eec5839e30c94bee1345e4a4b9))
+* adding rpc name to table ([fd1e762](https://github.com/James-Frowen/Mirage.Profiler/commit/fd1e762a22e9ce5ec10f92105613f8f11f5aad6d))
+* only showing rpc short name, full name in tooltip ([e346a6f](https://github.com/James-Frowen/Mirage.Profiler/commit/e346a6f7d403113057fd067e89cb470e594fd4c3))
+
 # [1.0.0-beta.23](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0-beta.22...v1.0.0-beta.23) (2022-08-07)
 
 
