@@ -1,3 +1,10 @@
+# [1.1.0-mirror.3](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.2...v1.1.0-mirror.3) (2022-08-07)
+
+
+### Bug Fixes
+
+* adding missing meta file ([318e209](https://github.com/James-Frowen/Mirage.Profiler/commit/318e20989a7690ea886ab442e15141cdea96261b))
+
 # [1.1.0-mirror.2](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.1...v1.1.0-mirror.2) (2022-08-07)
 
 
