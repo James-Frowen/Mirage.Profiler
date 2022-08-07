@@ -81,8 +81,9 @@ namespace Mirage.NetworkProfiler
             }
             instance = Server;
 
-            _sentCounter = new CountRecorder(Server, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
-            _receivedCounter = new CountRecorder(Server, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
+            var provider = new NetworkInfoProvider(Server.World);
+            _sentCounter = new CountRecorder(Server, provider, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
+            _receivedCounter = new CountRecorder(Server, provider, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
             NetworkDiagnostics.InMessageEvent += _receivedCounter.OnMessage;
             NetworkDiagnostics.OutMessageEvent += _sentCounter.OnMessage;
         }
@@ -96,8 +97,9 @@ namespace Mirage.NetworkProfiler
             }
             instance = Client;
 
-            _sentCounter = new CountRecorder(Client, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
-            _receivedCounter = new CountRecorder(Client, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
+            var provider = new NetworkInfoProvider(Client.World);
+            _sentCounter = new CountRecorder(Client, provider, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
+            _receivedCounter = new CountRecorder(Client, provider, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
             NetworkDiagnostics.InMessageEvent += _receivedCounter.OnMessage;
             NetworkDiagnostics.OutMessageEvent += _sentCounter.OnMessage;
         }

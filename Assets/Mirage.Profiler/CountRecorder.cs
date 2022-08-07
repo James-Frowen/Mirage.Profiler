@@ -10,6 +10,7 @@ namespace Mirage.NetworkProfiler
         private readonly ProfilerCounter<int> _profilerBytes;
         private readonly ProfilerCounter<int> _profilerPerSecond;
         private readonly object _instance;
+        private readonly INetworkInfoProvider _provider;
         internal readonly Frames _frames;
         private int _count;
         private int _bytes;
@@ -17,9 +18,9 @@ namespace Mirage.NetworkProfiler
         private readonly Queue<(float time, int bytes)> _perSecondQueue = new Queue<(float time, int bytes)>();
         private int _frameIndex = -1;
 
-
-        public CountRecorder(object instance, ProfilerCounter<int> profilerCount, ProfilerCounter<int> profilerBytes, ProfilerCounter<int> profilerPerSecond)
+        public CountRecorder(object instance, INetworkInfoProvider provider, ProfilerCounter<int> profilerCount, ProfilerCounter<int> profilerBytes, ProfilerCounter<int> profilerPerSecond)
         {
+            _provider = provider;
             _instance = instance;
             _profilerCount = profilerCount;
             _profilerBytes = profilerBytes;
@@ -44,7 +45,7 @@ namespace Mirage.NetworkProfiler
             _bytes += obj.bytes * obj.count;
 
             var frame = _frames.GetFrame(_frameIndex);
-            frame.Messages.Add(new MessageInfo(obj, frame.Messages.Count));
+            frame.Messages.Add(new MessageInfo(obj, _provider, frame.Messages.Count));
             frame.Bytes++;
         }
 
