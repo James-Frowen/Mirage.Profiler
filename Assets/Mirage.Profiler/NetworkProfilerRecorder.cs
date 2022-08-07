@@ -123,6 +123,9 @@ namespace Mirage.NetworkProfiler
             if (!ProfilerDriver.enabled)
                 return;
 
+            // once a frame, ever frame, no matter what lastFrameIndex is
+            SampleCounts();
+
             // unity sometimes skips a profiler frame, because unity
             // so we have to check if that happens and then sample the missing frame
             while (_lastProcessedFrame < ProfilerDriver.lastFrameIndex)
@@ -133,21 +136,32 @@ namespace Mirage.NetworkProfiler
 
                 var lastFrame = _lastProcessedFrame;
                 // not sure why frame is offset, but +2 fixes it
-                Sample(lastFrame + 2);
+                SampleMessages(lastFrame + 2);
             }
         }
 #endif
-        private void Sample(int frame)
-        {
-            if (instance == null)
-                return;
 
+        /// <summary>
+        /// call this every frame to sample number of players and objects
+        /// </summary>
+        private void SampleCounts()
+        {
             if (instance == (object)Server)
             {
                 Counters.PlayerCount.Sample(Server.Players.Count);
                 Counters.PlayerCount.Sample(Server.NumberOfPlayers);
                 Counters.ObjectCount.Sample(Server.World.SpawnedIdentities.Count);
             }
+        }
+
+        /// <summary>
+        /// call this when ProfilerDriver shows it is next frame
+        /// </summary>
+        /// <param name="frame"></param>
+        private void SampleMessages(int frame)
+        {
+            if (instance == null)
+                return;
 
             _sentCounter.EndFrame(frame);
             _receivedCounter.EndFrame(frame);
