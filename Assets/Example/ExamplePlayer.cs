@@ -1,4 +1,5 @@
-using Cysharp.Threading.Tasks;
+using System.Threading.Tasks;
+using Mirror;
 using UnityEngine;
 
 namespace Mirage.NetworkProfiler.Example
@@ -17,22 +18,17 @@ namespace Mirage.NetworkProfiler.Example
         private Vector2Int _serverInputs;
         private int _serverCounter;
 
-        private void Awake()
+        public override void OnStartClient()
         {
-            Identity.OnStartClient.AddListener(OnStartClient);
-        }
-
-        private void OnStartClient()
-        {
-            name = $"Player {NetId}";
-            transform.parent = (Client as MonoBehaviour)?.transform;
+            name = $"Player {netId}";
+            transform.parent = NetworkManager.singleton.transform;
         }
 
         private void Update()
         {
-            if (IsServer)
+            if (NetworkServer.active)
                 ServerUpdate();
-            if (IsClient && HasAuthority)
+            if (NetworkClient.active)
                 ClientUpdate();
         }
 
@@ -70,7 +66,7 @@ namespace Mirage.NetworkProfiler.Example
             }
         }
 
-        [ServerRpc]
+        [Command]
         public void RpcShoot(int prefabIndex, Vector3 position, Quaternion rotation, float impluse, float lifeTime)
         {
             var prefab = BulletPrefabs[prefabIndex];
@@ -80,19 +76,20 @@ namespace Mirage.NetworkProfiler.Example
                 rb.AddForce(transform.forward * impluse, ForceMode.Impulse);
             }
             clone.gameObject.SetActive(true);
-            ServerObjectManager.Spawn(clone, prefab.name.GetStableHashCode());
+            // lol mirror doesn't take NetworkIdentity to spawn a NetworkIdentity
+            NetworkServer.Spawn(clone.gameObject);
 
             Despawn(clone, lifeTime).Forget();
         }
 
-        private async UniTaskVoid Despawn(NetworkIdentity clone, float time)
+        private async Task Despawn(NetworkIdentity clone, float time)
         {
-            await UniTask.Delay((int)(time * 1000));
-            ServerObjectManager.Destroy(clone, true);
+            await Task.Delay((int)(time * 1000));
+            NetworkServer.Destroy(clone.gameObject);
         }
 
 
-        [ServerRpc]
+        [Command]
         private void RpcSendInuts(Vector2Int clientInputs)
         {
             _serverInputs = clientInputs;
@@ -110,6 +107,21 @@ namespace Mirage.NetworkProfiler.Example
 
             transform.Translate((_serverInputs.y * _moveSpeed * Time.deltaTime) * transform.forward);
             transform.Rotate((_serverInputs.x * _rotateSpeed * Time.deltaTime) * Vector3.up);
+        }
+    }
+
+    internal static class TaskExtension
+    {
+        public static async void Forget(this Task task)
+        {
+            try
+            {
+                await task;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
     }
 }

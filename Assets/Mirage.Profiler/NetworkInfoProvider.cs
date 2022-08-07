@@ -1,3 +1,5 @@
+using Mirror;
+
 namespace Mirage.NetworkProfiler
 {
     /// <summary>
@@ -12,25 +14,17 @@ namespace Mirage.NetworkProfiler
 
     public class NetworkInfoProvider : INetworkInfoProvider
     {
-        private readonly NetworkWorld _world;
-
-        public NetworkInfoProvider(NetworkWorld world)
-        {
-            _world = world;
-        }
-
         public uint? GetNetId(NetworkDiagnostics.MessageInfo info)
         {
             switch (info.message)
             {
-                case ServerRpcMessage msg: return msg.netId;
-                case ServerRpcWithReplyMessage msg: return msg.netId;
+                case CommandMessage msg: return msg.netId;
                 case RpcMessage msg: return msg.netId;
                 case SpawnMessage msg: return msg.netId;
-                case RemoveAuthorityMessage msg: return msg.netId;
+                case ChangeOwnerMessage msg: return msg.netId;
                 case ObjectDestroyMessage msg: return msg.netId;
                 case ObjectHideMessage msg: return msg.netId;
-                case UpdateVarsMessage msg: return msg.netId;
+                case EntityStateMessage msg: return msg.netId;
                 default: return default;
             }
         }
@@ -40,37 +34,45 @@ namespace Mirage.NetworkProfiler
             if (!netId.HasValue)
                 return null;
 
-            if (_world == null)
-                return null;
+            if (NetworkServer.active)
+            {
+                NetworkServer.spawned.TryGetValue(netId.Value, out var identity);
+                return identity;
+            }
 
-            return _world.TryGetIdentity(netId.Value, out var identity)
-                ? identity
-                : null;
+            if (NetworkClient.active)
+            {
+                NetworkClient.spawned.TryGetValue(netId.Value, out var identity);
+                return identity;
+            }
+
+            return null;
         }
 
         public string GetRpcName(NetworkDiagnostics.MessageInfo info)
         {
             switch (info.message)
             {
-                case ServerRpcMessage msg:
-                    return GetRpcName(msg.netId, msg.componentIndex, msg.functionIndex);
-                case ServerRpcWithReplyMessage msg:
-                    return GetRpcName(msg.netId, msg.componentIndex, msg.functionIndex);
+                case CommandMessage msg:
+                    return GetRpcName(msg.netId, msg.componentIndex, msg.functionHash);
                 case RpcMessage msg:
-                    return GetRpcName(msg.netId, msg.componentIndex, msg.functionIndex);
+                    return GetRpcName(msg.netId, msg.componentIndex, msg.functionHash);
                 default: return string.Empty;
             }
         }
 
         private string GetRpcName(uint netId, int componentIndex, int functionIndex)
         {
-            var identity = GetNetworkIdentity(netId);
-            if (identity == null)
-                return string.Empty;
+            // todo find out if there is way to get this in mirror
+            return string.Empty;
 
-            var behaviour = identity.NetworkBehaviours[componentIndex];
-            var rpc = behaviour.RemoteCallCollection.Get(functionIndex);
-            return rpc.name;
+            //var identity = GetNetworkIdentity(netId);
+            //if (identity == null)
+            //    return string.Empty;
+
+            //var behaviour = identity.NetworkBehaviours[componentIndex];
+            //var rpc = behaviour.RemoteCallCollection.Get(functionIndex);
+            //return rpc.name;
         }
     }
 }

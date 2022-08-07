@@ -1,3 +1,4 @@
+using Mirror;
 using UnityEngine;
 
 namespace Mirage.NetworkProfiler

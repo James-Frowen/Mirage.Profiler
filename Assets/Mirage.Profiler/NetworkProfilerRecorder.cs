@@ -1,5 +1,5 @@
-using Mirage.Logging;
 using UnityEngine;
+using Mirror;
 
 #if UNITY_EDITOR
 using UnityEditorInternal;
@@ -10,18 +10,8 @@ namespace Mirage.NetworkProfiler
     [DefaultExecutionOrder(int.MaxValue)] // last
     public class NetworkProfilerRecorder : MonoBehaviour
     {
-        private static readonly ILogger logger = LogFactory.GetLogger<NetworkProfilerRecorder>();
-
         // singleton because unity only has 1 profiler
         public static NetworkProfilerRecorder Instance { get; private set; }
-
-        public NetworkServer Server;
-        public NetworkServer Client;
-
-        /// <summary>
-        /// instance being used for profiler
-        /// </summary>
-        private static object instance;
 
         internal static CountRecorder _sentCounter;
         internal static CountRecorder _receivedCounter;
@@ -43,22 +33,15 @@ namespace Mirage.NetworkProfiler
             _lastProcessedFrame = ProfilerDriver.lastFrameIndex;
 #endif
 
+            var provider = new NetworkInfoProvider();
+            _sentCounter = new CountRecorder(null, provider, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
+            _receivedCounter = new CountRecorder(null, provider, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
+            NetworkDiagnostics.InMessageEvent += _receivedCounter.OnMessage;
+            NetworkDiagnostics.OutMessageEvent += _sentCounter.OnMessage;
 
             Debug.Assert(Instance == null);
             Instance = this;
             DontDestroyOnLoad(this);
-
-            if (Server != null)
-            {
-                Server.Started.AddListener(ServerStarted);
-                Server.Stopped.AddListener(ServerStopped);
-            }
-
-            if (Client != null)
-            {
-                Client.Started.AddListener(ClientStarted);
-                Client.Disconnected.AddListener(ClientStopped);
-            }
         }
 
         private void OnDestroy()
@@ -72,56 +55,12 @@ namespace Mirage.NetworkProfiler
             Instance = null;
         }
 
-        private void ServerStarted()
-        {
-            if (instance != null)
-            {
-                logger.LogWarning($"Already started profiler for different Instance:{instance}");
-                return;
-            }
-            instance = Server;
-
-            var provider = new NetworkInfoProvider(Server.World);
-            _sentCounter = new CountRecorder(Server, provider, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
-            _receivedCounter = new CountRecorder(Server, provider, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
-            NetworkDiagnostics.InMessageEvent += _receivedCounter.OnMessage;
-            NetworkDiagnostics.OutMessageEvent += _sentCounter.OnMessage;
-        }
-
-        private void ClientStarted()
-        {
-            if (instance != null)
-            {
-                logger.LogWarning($"Already started profiler for different Instance:{instance}");
-                return;
-            }
-            instance = Client;
-
-            var provider = new NetworkInfoProvider(Client.World);
-            _sentCounter = new CountRecorder(Client, provider, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
-            _receivedCounter = new CountRecorder(Client, provider, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
-            NetworkDiagnostics.InMessageEvent += _receivedCounter.OnMessage;
-            NetworkDiagnostics.OutMessageEvent += _sentCounter.OnMessage;
-        }
-
-        private void ServerStopped()
-        {
-            if (instance == (object)Server)
-                instance = null;
-        }
-
-        private void ClientStopped(INetworkPlayer arg0)
-        {
-            if (instance == (object)Client)
-                instance = null;
-
-            _receivedCounter = null;
-            _sentCounter = null;
-        }
-
 #if UNITY_EDITOR
         private void LateUpdate()
         {
+            if (!NetworkServer.active && !NetworkClient.active)
+                return;
+
             if (!ProfilerDriver.enabled)
                 return;
 
@@ -148,12 +87,12 @@ namespace Mirage.NetworkProfiler
         /// </summary>
         private void SampleCounts()
         {
-            if (instance == (object)Server)
-            {
-                Counters.PlayerCount.Sample(Server.Players.Count);
-                Counters.PlayerCount.Sample(Server.NumberOfPlayers);
-                Counters.ObjectCount.Sample(Server.World.SpawnedIdentities.Count);
-            }
+            if (!NetworkServer.active)
+                return;
+
+            Counters.PlayerCount.Sample(NetworkServer.connections.Count);
+            Counters.PlayerCount.Sample(NetworkManager.singleton.numPlayers);
+            Counters.ObjectCount.Sample(NetworkServer.spawned.Count);
         }
 
         /// <summary>
@@ -162,9 +101,6 @@ namespace Mirage.NetworkProfiler
         /// <param name="frame"></param>
         private void SampleMessages(int frame)
         {
-            if (instance == null)
-                return;
-
             _sentCounter.EndFrame(frame);
             _receivedCounter.EndFrame(frame);
             AfterSample?.Invoke(frame);

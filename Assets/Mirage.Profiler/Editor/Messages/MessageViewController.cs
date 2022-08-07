@@ -207,11 +207,13 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
         private bool TryGetMessages(int frameIndex, out List<MessageInfo> messages)
         {
+#if MIRAGE_PROFILER_DEBUG
             if (_debugToggle.value)
             {
                 messages = GenerateDebugMessages();
                 return true;
             }
+#endif
 
             if (frameIndex == -1)
             {
@@ -223,6 +225,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             return true;
         }
 
+#if MIRAGE_PROFILER_DEBUG
         private static List<MessageInfo> GenerateDebugMessages()
         {
             var messages = new List<MessageInfo>();
@@ -246,6 +249,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
             return messages;
         }
+#endif
+
 
         private void AddCantLoadLabel()
         {
