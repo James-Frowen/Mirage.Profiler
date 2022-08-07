@@ -49,6 +49,7 @@ namespace Mirage.NetworkProfiler.Example
             var serverGO = new GameObject("server");
             serverGO.transform.parent = transform;
             var server = serverGO.AddComponent<NetworkServer>();
+            server.MaxConnections = 1000;
             var serverObjectManager = serverGO.AddComponent<ServerObjectManager>();
             server.SocketFactory = serverGO.AddComponent<UdpSocketFactory>();
             serverObjectManager.Server = server;
