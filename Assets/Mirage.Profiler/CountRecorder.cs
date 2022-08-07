@@ -35,6 +35,11 @@ namespace Mirage.NetworkProfiler
                 return;
 #endif
 
+            // dont record anything if frame index is -1
+            // this normally means the profiler has not been activated yet
+            if (_frameIndex == -1)
+                return;
+
             _count += obj.count;
             _bytes += obj.bytes * obj.count;
 
