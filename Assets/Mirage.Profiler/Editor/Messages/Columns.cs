@@ -15,6 +15,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         public readonly ColumnInfo Count = new ColumnInfo("Count", OTHER_WIDTH, true);
         public readonly ColumnInfo BytesPerMessage = new ColumnInfo("Bytes", OTHER_WIDTH, true);
         public readonly ColumnInfo NetId = new ColumnInfo("Net id", OTHER_WIDTH, true);
+        public readonly ColumnInfo ObjectName = new ColumnInfo("GameObject Name", NAME_WIDTH, true);
 
         public IEnumerator<ColumnInfo> GetEnumerator()
         {
@@ -24,6 +25,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             yield return Count;
             yield return BytesPerMessage;
             yield return NetId;
+            yield return ObjectName;
         }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {

@@ -87,17 +87,22 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
                 drawn.Row = row;
                 var info = drawn.Info;
-
-                row.SetText(_columns.FullName, info.Name);
-                row.SetText(_columns.TotalBytes, info.TotalBytes);
-                row.SetText(_columns.Count, info.Count);
-                row.SetText(_columns.BytesPerMessage, info.Bytes);
-                row.SetText(_columns.NetId, info.NetId.HasValue ? info.NetId.ToString() : "");
+                DrawMessage(row, info);
 
                 // set color of labels not whole row, otherwise color will be outside of table as well
                 foreach (var ele in row.GetChildren())
                     ele.style.backgroundColor = backgroundColor;
             }
+        }
+
+        private void DrawMessage(Row row, MessageInfo info)
+        {
+            row.SetText(_columns.FullName, info.Name);
+            row.SetText(_columns.TotalBytes, info.TotalBytes);
+            row.SetText(_columns.Count, info.Count);
+            row.SetText(_columns.BytesPerMessage, info.Bytes);
+            row.SetText(_columns.NetId, info.NetId.HasValue ? info.NetId.ToString() : "");
+            row.SetText(_columns.ObjectName, info.ObjectName);
         }
 
         private static Color GetBackgroundColor()
