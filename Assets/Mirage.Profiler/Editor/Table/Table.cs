@@ -21,16 +21,21 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
             HeaderInfo = new List<ColumnInfo>(columns);
 
             // create table root and scroll view
-            VisualElement = new VisualElement();
-            ScrollView = new ScrollView(ScrollViewMode.VerticalAndHorizontal);
+            // root can be Horizontal scroll
+            // Horizontal will also move header, but Vertical keeps header at top
+            VisualElement = new ScrollView(ScrollViewMode.Horizontal);
+            // seperate root for contents, so that Horizontal from scroll isn't applied
+            var root = new VisualElement();
+            VisualElement.Add(root);
+            ScrollView = new ScrollView(ScrollViewMode.Vertical);
 
             // add header to table root
             // header will initialize labels, but we need to set text
             Header = new SortHeaderRow(this, sorter);
 
             // add header and scroll to root
-            VisualElement.Add(Header.VisualElement);
-            VisualElement.Add(ScrollView);
+            root.Add(Header.VisualElement);
+            root.Add(ScrollView);
 
             // add headers
             foreach (var c in columns)
