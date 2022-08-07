@@ -1,3 +1,17 @@
+# [1.1.0-mirror.1](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0...v1.1.0-mirror.1) (2022-08-07)
+
+
+### Bug Fixes
+
+* fixing error when rpc name is empty ([2502325](https://github.com/James-Frowen/Mirage.Profiler/commit/25023256734cd730cc95b06d1ebad8f2677324e7))
+* fixing module names for mirror ([94d77b1](https://github.com/James-Frowen/Mirage.Profiler/commit/94d77b129964559a1f8e68b49d9b345768c81532))
+
+
+### Features
+
+* example scene for mirror ([c707be8](https://github.com/James-Frowen/Mirage.Profiler/commit/c707be8e9d2d5c71cf609a8f11d1174d4cd0c1af))
+* Mirror Support ([1675f77](https://github.com/James-Frowen/Mirage.Profiler/commit/1675f776264c10421802028f1a30b422fdb81215))
+
 # 1.0.0 (2022-08-07)
 
 
