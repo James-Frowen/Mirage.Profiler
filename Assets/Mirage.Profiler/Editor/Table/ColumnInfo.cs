@@ -5,16 +5,19 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
 {
     internal class ColumnInfo
     {
+        private readonly Func<MessageInfo, string> _textGetter;
+
         public string Header { get; private set; }
         public int Width { get; private set; }
         public bool AllowSort { get; private set; }
         public Func<Group, Group, int> SortGroup { get; private set; }
         public Func<MessageInfo, MessageInfo, int> SortMessages { get; private set; }
 
-        public ColumnInfo(string header, int width)
+        public ColumnInfo(string header, int width, Func<MessageInfo, string> textGetter)
         {
             Header = header;
             Width = width;
+            _textGetter = textGetter;
         }
 
         /// <summary>
@@ -48,6 +51,11 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
                 : null;
 
             AddSort(sortGroup, sortMessages);
+        }
+
+        internal string GetText(MessageInfo info)
+        {
+            return _textGetter.Invoke(info);
         }
     }
 }
