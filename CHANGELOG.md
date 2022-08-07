@@ -1,3 +1,10 @@
+# [1.1.0-mirror.2](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.1...v1.1.0-mirror.2) (2022-08-07)
+
+
+### Bug Fixes
+
+* adding runtime folder to fix package layout ([e606a0f](https://github.com/James-Frowen/Mirage.Profiler/commit/e606a0fa356c8a837dff5809dfa0fa85f0267d6f))
+
 # [1.1.0-mirror.1](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.0...v1.1.0-mirror.1) (2022-08-07)
 
 
