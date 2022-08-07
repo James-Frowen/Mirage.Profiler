@@ -9,13 +9,37 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         private const int NAME_WIDTH = 300;
         private const int OTHER_WIDTH = 100;
 
-        public readonly ColumnInfo Expand = new ColumnInfo("+", EXPAND_WIDTH, false);
-        public readonly ColumnInfo FullName = new ColumnInfo("Message", NAME_WIDTH, true);
-        public readonly ColumnInfo TotalBytes = new ColumnInfo("Total Bytes", OTHER_WIDTH, true);
-        public readonly ColumnInfo Count = new ColumnInfo("Count", OTHER_WIDTH, true);
-        public readonly ColumnInfo BytesPerMessage = new ColumnInfo("Bytes", OTHER_WIDTH, true);
-        public readonly ColumnInfo NetId = new ColumnInfo("Net id", OTHER_WIDTH, true);
-        public readonly ColumnInfo ObjectName = new ColumnInfo("GameObject Name", NAME_WIDTH, true);
+        public readonly ColumnInfo Expand;
+        public readonly ColumnInfo FullName;
+        public readonly ColumnInfo TotalBytes;
+        public readonly ColumnInfo Count;
+        public readonly ColumnInfo BytesPerMessage;
+        public readonly ColumnInfo NetId;
+        public readonly ColumnInfo ObjectName;
+
+        public Columns()
+        {
+            Expand = new ColumnInfo("+", EXPAND_WIDTH);
+
+            FullName = new ColumnInfo("Message", NAME_WIDTH);
+            FullName.AddSort(m => m.Name, m => m.Name);
+
+            TotalBytes = new ColumnInfo("Total Bytes", OTHER_WIDTH);
+            TotalBytes.AddSort(m => m.TotalBytes, m => m.TotalBytes);
+
+            Count = new ColumnInfo("Count", OTHER_WIDTH);
+            Count.AddSort(m => m.TotalCount, m => m.Count);
+
+            BytesPerMessage = new ColumnInfo("Bytes", OTHER_WIDTH);
+            BytesPerMessage.AddSort(null, m => m.Bytes);
+
+            NetId = new ColumnInfo("Net id", OTHER_WIDTH);
+            NetId.AddSort(null, m => m.NetId.GetValueOrDefault());
+
+            ObjectName = new ColumnInfo("GameObject Name", NAME_WIDTH);
+            ObjectName.AddSort(null, m => m.ObjectName);
+        }
+
 
         public IEnumerator<ColumnInfo> GetEnumerator()
         {

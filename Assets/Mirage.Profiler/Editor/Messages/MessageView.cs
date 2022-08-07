@@ -106,7 +106,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
         public void Sort(ColumnInfo sortHeader, SortMode sortMode)
         {
-            var sorter = new GroupSorter(_columns, _grouped, sortHeader, sortMode);
+            var sorter = new GroupSorter(_grouped, sortHeader, sortMode);
             sorter.Sort();
 
             if (sortHeader != null)

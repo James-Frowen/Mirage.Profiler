@@ -6,14 +6,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 {
     internal struct GroupSorter
     {
-        private readonly Columns _columns;
         private readonly Dictionary<string, Group> _grouped;
         private readonly ColumnInfo _sortHeader;
         private readonly SortMode _sortMode;
 
-        public GroupSorter(Columns columns, Dictionary<string, Group> grouped, ColumnInfo sortHeader, SortMode sortMode)
+        public GroupSorter(Dictionary<string, Group> grouped, ColumnInfo sortHeader, SortMode sortMode)
         {
-            _columns = columns;
             _grouped = grouped;
             _sortHeader = sortHeader;
             _sortMode = sortMode;
@@ -47,13 +45,13 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
         private int CompareGroupSortMode(Group x, Group y)
         {
-            var sort = CompareGroup(x, y);
+            var sort = _sortHeader.SortGroup.Invoke(x, y);
             return CheckSortMode(sort);
         }
 
         private int CompareDrawnSortMode(DrawnMessage x, DrawnMessage y)
         {
-            var sort = CompareDrawn(x, y);
+            var sort = _sortHeader.SortMessages.Invoke(x.Info, y.Info);
             return CheckSortMode(sort);
         }
 
@@ -66,65 +64,26 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             return sort;
         }
 
-        private int CompareGroup(Group x, Group y)
-        {
-            // find matching coloum and sort using it
-            if (IsHeader(_columns.FullName))
-                return Compare(x, y, m => m.Name);
-
-            if (IsHeader(_columns.TotalBytes))
-                return Compare(x, y, m => m.TotalBytes);
-
-            if (IsHeader(_columns.Count))
-                return Compare(x, y, m => m.TotalCount);
-
-            // else just use order
-            // for example if someone is sorting by netid
-            return x.Order.CompareTo(y.Order);
-        }
-
-        private int CompareDrawn(DrawnMessage x, DrawnMessage y)
-        {
-            return CompareMessage(x.Info, y.Info);
-        }
-        private int CompareMessage(MessageInfo x, MessageInfo y)
-        {
-            // find matching coloum and sort using it
-            if (IsHeader(_columns.FullName))
-                return Compare(x, y, m => m.Name);
-
-            if (IsHeader(_columns.TotalBytes))
-                return Compare(x, y, m => m.TotalBytes);
-
-            if (IsHeader(_columns.Count))
-                return Compare(x, y, m => m.Count);
-
-            if (IsHeader(_columns.BytesPerMessage))
-                return Compare(x, y, m => m.Bytes);
-
-            if (IsHeader(_columns.NetId))
-                return Compare(x, y, m => m.NetId.GetValueOrDefault());
-
-            // else, header not found just use order
-            return x.Order.CompareTo(y.Order);
-        }
-
-        private bool IsHeader(ColumnInfo info)
-        {
-            return _sortHeader != null && _sortHeader == info;
-        }
-
-        private int Compare<T>(Group x, Group y, Func<Group, T> func) where T : IComparable<T>
+        public static int Compare<T>(Group x, Group y, Func<Group, T> func) where T : IComparable<T>
         {
             var xValue = func.Invoke(x);
             var yValue = func.Invoke(y);
             return xValue.CompareTo(yValue);
         }
-        private int Compare<T>(MessageInfo x, MessageInfo y, Func<MessageInfo, T> func) where T : IComparable<T>
+        public static int Compare<T>(MessageInfo x, MessageInfo y, Func<MessageInfo, T> func) where T : IComparable<T>
         {
             var xValue = func.Invoke(x);
             var yValue = func.Invoke(y);
             return xValue.CompareTo(yValue);
+        }
+
+        public static int DefaultGroupSort(Group x, Group y)
+        {
+            return x.Order.CompareTo(y.Order);
+        }
+        public static int DefaultMessageSort(MessageInfo x, MessageInfo y)
+        {
+            return x.Order.CompareTo(y.Order);
         }
     }
 }
