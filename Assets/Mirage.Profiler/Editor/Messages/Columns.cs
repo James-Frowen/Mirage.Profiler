@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Mirage.NetworkProfiler.ModuleGUI.UITable;
 
 namespace Mirage.NetworkProfiler.ModuleGUI.Messages
@@ -7,7 +8,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
     internal sealed class Columns : IEnumerable<ColumnInfo>
     {
         private const int EXPAND_WIDTH = 25;
-        private const int NAME_WIDTH = 300;
+        private const int FULL_NAME_WIDTH = 300;
+        private const int NAME_WIDTH = 150;
         private const int OTHER_WIDTH = 100;
 
         private readonly ColumnInfo[] _columns;
@@ -25,7 +27,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         {
             Expand = new ColumnInfo("+", EXPAND_WIDTH, x => "");
 
-            FullName = new ColumnInfo("Message", NAME_WIDTH, x => x.Name);
+            FullName = new ColumnInfo("Message", FULL_NAME_WIDTH, x => x.Name);
             FullName.AddSort(m => m.Name, m => m.Name);
 
             TotalBytes = new ColumnInfo("Total Bytes", OTHER_WIDTH, x => x.TotalBytes.ToString());
@@ -43,8 +45,10 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             ObjectName = new ColumnInfo("GameObject Name", NAME_WIDTH, x => x.ObjectName);
             ObjectName.AddSort(null, m => m.ObjectName);
 
-            RpcName = new ColumnInfo("RPC Name", NAME_WIDTH, x => x.RpcName);
+            RpcName = new ColumnInfo("RPC Name (hover for full name)", FULL_NAME_WIDTH, x => RpcShortName(x.RpcName));
             RpcName.AddSort(null, m => m.RpcName);
+            // full name in tooltip
+            RpcName.AddToolTip(m => m.RpcName);
 
             _columns = new ColumnInfo[] {
 
@@ -57,6 +61,16 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
                 ObjectName,
                 RpcName,
             };
+        }
+
+        private string RpcShortName(string fullName)
+        {
+            var split = fullName.Split('.');
+            var count = split.Length;
+            // full name should be atleast "className.methodName"
+            Debug.Assert(count >= 2);
+
+            return $"{split[count - 2]}.{split[count - 1]}";
         }
 
 

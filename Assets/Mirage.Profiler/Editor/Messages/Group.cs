@@ -101,7 +101,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
         {
             foreach (var column in _columns)
             {
-                row.SetText(column, column.GetText(info));
+                row.SetText(column, column.TextGetter.Invoke(info));
+                if (column.HasToolTip)
+                {
+                    var label = row.GetLabel(column);
+                    label.tooltip = column.ToolTipGetter.Invoke(info);
+                }
             }
         }
 
