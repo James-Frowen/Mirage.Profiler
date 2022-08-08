@@ -1,3 +1,10 @@
+# [1.1.0-mirror.4](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.3...v1.1.0-mirror.4) (2022-08-08)
+
+
+### Bug Fixes
+
+* fixing version not being added by CI ([08d48cf](https://github.com/James-Frowen/Mirage.Profiler/commit/08d48cfae980798cda5e8334f0b225c3cc640dcc))
+
 # [1.1.0-mirror.3](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.2...v1.1.0-mirror.3) (2022-08-07)
 
 
