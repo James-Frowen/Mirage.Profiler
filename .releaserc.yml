@@ -11,7 +11,7 @@ plugins:
   - '@semantic-release/release-notes-generator'
   - '@semantic-release/commit-analyzer'
   - - '@semantic-release/changelog'
-    - changelogFile: 'CHANGELOG.md'
+    - changelogFile: 'Assets/Mirage.Profiler/CHANGELOG.md'
   - - '@semantic-release/npm'
     - npmPublish: false
       pkgRoot: "Assets/Mirage.Profiler"
@@ -24,7 +24,7 @@ plugins:
         - 'Assets/Mirage.Profiler/Runtime/AssemblyInfo.cs'
         - 'Assets/Mirage.Profiler/Editor/AssemblyInfo.cs'
         - 'Assets/Mirage.Profiler/package.json'
-        - 'CHANGELOG.md'
+        - 'Assets/Mirage.Profiler/CHANGELOG.md'
 publish:
   - path: "@semantic-release/github" 
     assets: 

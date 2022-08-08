@@ -8,7 +8,4 @@ sed -i -e '/AssemblyVersion/s/\".*\"/\"'$VER'\"/' \
     ${SOURCE_PATH}/Editor/AssemblyInfo.cs
 
 unity-packer pack Mirage.Profiler.unitypackage \
-    ${SOURCE_PATH} ${TARGET_PATH} \
-    LICENSE ${TARGET_PATH}/LICENSE \
-    README.md ${TARGET_PATH}/README.md \
-    CHANGELOG.md ${TARGET_PATH}/CHANGELOG.md
+    ${SOURCE_PATH} ${TARGET_PATH}
