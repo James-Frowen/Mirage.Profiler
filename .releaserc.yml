@@ -21,7 +21,7 @@ plugins:
     - prepareCmd: "sh ./.release.sh ${nextRelease.version}"
   - - '@semantic-release/git'
     - assets:
-        - 'Assets/Mirage.Profiler/AssemblyInfo.cs'
+        - 'Assets/Mirage.Profiler/Runtime/AssemblyInfo.cs'
         - 'Assets/Mirage.Profiler/Editor/AssemblyInfo.cs'
         - 'Assets/Mirage.Profiler/package.json'
         - 'CHANGELOG.md'
