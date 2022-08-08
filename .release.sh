@@ -4,8 +4,8 @@ echo "Running release script with [SOURCE_PATH=${SOURCE_PATH}, TARGET_PATH=${TAR
 
 VER=$(echo $1 | sed 's/-[a-z]*//g')
 sed -i -e '/AssemblyVersion/s/\".*\"/\"'$VER'\"/' \
-    Assets/Mirage.Profiler/Runtime/AssemblyInfo.cs \
-    Assets/Mirage.Profiler/Editor/AssemblyInfo.cs
+    ${SOURCE_PATH}/Runtime/AssemblyInfo.cs \
+    ${SOURCE_PATH}/Editor/AssemblyInfo.cs
 
 unity-packer pack Mirage.Profiler.unitypackage \
     ${SOURCE_PATH} ${TARGET_PATH} \
