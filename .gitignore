@@ -556,3 +556,5 @@ FodyWeavers.xsd
 # any folder ending with ~
 # used for Samples~ and weaver tests
 !Assets/**/*~
+!Packages/manifest.json
+!Packages/packages-lock.json
