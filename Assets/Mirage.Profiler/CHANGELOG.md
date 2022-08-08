@@ -1,3 +1,10 @@
+# [1.1.0-mirror.5](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.4...v1.1.0-mirror.5) (2022-08-08)
+
+
+### Bug Fixes
+
+* movng files into package ([b1d50bf](https://github.com/James-Frowen/Mirage.Profiler/commit/b1d50bf7137083e0c071277f6880b67455ef1761))
+
 # [1.1.0-mirror.4](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.3...v1.1.0-mirror.4) (2022-08-08)
 
 
