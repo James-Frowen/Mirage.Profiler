@@ -17,15 +17,16 @@ Thanks to https://github.com/JesusLuvsYooh/MirrorNetworkProfiler for some refere
 Add Required package: `"com.unity.profiling.core": "1.0.2"` if using package manager this will be done automatically
 
 ### Unity package manager (Mirage only)
-use package manager to get the latest version, or replace `#master` with the full hash of the commit.
+use package manager to get versions easily, or replace `#v1.0.3` with the tag, branch or full hash of the commit.
 
-branch:
+**IMPORTANT: update `v1.0.3` with latest version on release page**
+#### Mirage
 ```
-"com.james-frowen.mirage-profiler": "https://github.com/James-Frowen/Mirage.Profiler.git?path=/Assets/Mirage.Profiler#master",
+"com.james-frowen.mirage-profiler": "https://github.com/James-Frowen/Mirage.Profiler.git?path=/Assets/Mirage.Profiler#v1.0.3",
 ```
-commit hash:
+#### Mirror
 ```
-"com.james-frowen.mirage-profiler": "https://github.com/James-Frowen/Mirage.Profiler.git?path=/Assets/Mirage.Profiler#bfb3edbf5b70cc91700ddcb434e8883019282b3e",
+"com.james-frowen.mirage-profiler": "https://github.com/James-Frowen/Mirage.Profiler.git?path=/Assets/Mirage.Profiler#v1.1.0-mirror.5",
 ```
 
 ### Unity package
