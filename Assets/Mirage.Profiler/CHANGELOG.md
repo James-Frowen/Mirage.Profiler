@@ -1,3 +1,10 @@
+# [1.1.0-mirror.6](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.5...v1.1.0-mirror.6) (2022-08-19)
+
+
+### Bug Fixes
+
+* removing mirage from paackage.json ([0b0032b](https://github.com/James-Frowen/Mirage.Profiler/commit/0b0032b8b449214c20b1836ecb21e70b3696eebb))
+
 # [1.1.0-mirror.5](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.4...v1.1.0-mirror.5) (2022-08-08)
 
 
