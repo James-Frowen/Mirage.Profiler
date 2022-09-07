@@ -28,31 +28,35 @@ namespace Mirage.NetworkProfiler
             Debug.LogWarning("NetworkProfilerBehaviour only works in editor");
             return;
 #endif
-
+            
+            if (Instance == null)
+            {
 #if UNITY_EDITOR
-            _lastProcessedFrame = ProfilerDriver.lastFrameIndex;
+                _lastProcessedFrame = ProfilerDriver.lastFrameIndex;
 #endif
+                
+                var provider = new NetworkInfoProvider();
+                _sentCounter = new CountRecorder(null, provider, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
+                _receivedCounter = new CountRecorder(null, provider, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
+                NetworkDiagnostics.InMessageEvent += _receivedCounter.OnMessage;
+                NetworkDiagnostics.OutMessageEvent += _sentCounter.OnMessage;
 
-            var provider = new NetworkInfoProvider();
-            _sentCounter = new CountRecorder(null, provider, Counters.SentCount, Counters.SentBytes, Counters.SentPerSecond);
-            _receivedCounter = new CountRecorder(null, provider, Counters.ReceiveCount, Counters.ReceiveBytes, Counters.ReceivePerSecond);
-            NetworkDiagnostics.InMessageEvent += _receivedCounter.OnMessage;
-            NetworkDiagnostics.OutMessageEvent += _sentCounter.OnMessage;
-
-            Debug.Assert(Instance == null);
-            Instance = this;
-            DontDestroyOnLoad(this);
+                Instance = this;
+                DontDestroyOnLoad(this);
+            }
         }
 
         private void OnDestroy()
         {
-            if (_receivedCounter != null)
-                NetworkDiagnostics.InMessageEvent -= _receivedCounter.OnMessage;
-            if (_sentCounter != null)
-                NetworkDiagnostics.OutMessageEvent -= _sentCounter.OnMessage;
-
-            Debug.Assert(Instance == this);
-            Instance = null;
+            if (Instance == this)
+            {
+                if (_receivedCounter != null)
+                    NetworkDiagnostics.InMessageEvent -= _receivedCounter.OnMessage;
+                if (_sentCounter != null)
+                    NetworkDiagnostics.OutMessageEvent -= _sentCounter.OnMessage;
+                
+                Instance = null;
+            }
         }
 
 #if UNITY_EDITOR
