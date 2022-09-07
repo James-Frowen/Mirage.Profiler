@@ -1,3 +1,10 @@
+# [1.1.0-mirror.7](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.6...v1.1.0-mirror.7) (2022-09-07)
+
+
+### Bug Fixes
+
+* only add NetworkDiagnostics events for first static instance ([#2](https://github.com/James-Frowen/Mirage.Profiler/issues/2)) ([d827c4d](https://github.com/James-Frowen/Mirage.Profiler/commit/d827c4d4296915ac237d10540b7daf4ece5442fd))
+
 # [1.1.0-mirror.6](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.5...v1.1.0-mirror.6) (2022-08-19)
 
 
