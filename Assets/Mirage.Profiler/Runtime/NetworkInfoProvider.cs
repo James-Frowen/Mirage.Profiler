@@ -1,4 +1,6 @@
 using Mirror;
+using Mirror.RemoteCalls;
+using UnityEngine.Assertions;
 
 namespace Mirage.NetworkProfiler
 {
@@ -61,18 +63,17 @@ namespace Mirage.NetworkProfiler
             }
         }
 
-        private string GetRpcName(uint netId, int componentIndex, int functionIndex)
+        private string GetRpcName(uint netId, int componentIndex, ushort functionIndex)
         {
-            // todo find out if there is way to get this in mirror
+            ushort hash = functionIndex;
+            var remoteCallDelegate = RemoteProcedureCalls.GetDelegate(hash);
+            if (remoteCallDelegate != null)
+            {
+                return remoteCallDelegate.Method.Name;
+            }
+
+            // todo some error maybe
             return string.Empty;
-
-            //var identity = GetNetworkIdentity(netId);
-            //if (identity == null)
-            //    return string.Empty;
-
-            //var behaviour = identity.NetworkBehaviours[componentIndex];
-            //var rpc = behaviour.RemoteCallCollection.Get(functionIndex);
-            //return rpc.name;
         }
     }
 }
