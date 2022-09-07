@@ -1,5 +1,7 @@
+using System.Text.RegularExpressions;
 using Mirror;
 using Mirror.RemoteCalls;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace Mirage.NetworkProfiler
@@ -69,11 +71,31 @@ namespace Mirage.NetworkProfiler
             var remoteCallDelegate = RemoteProcedureCalls.GetDelegate(hash);
             if (remoteCallDelegate != null)
             {
-                return remoteCallDelegate.Method.Name;
+                string fixedMethodName = MirrorMethodNameTrimmer.FixMethodName(remoteCallDelegate.Method.Name);
+                string methodFullName = $"{remoteCallDelegate.Method.DeclaringType?.FullName}.{fixedMethodName}";
+                return methodFullName;
             }
 
             // todo some error maybe
             return string.Empty;
+        }
+        
+        
+        /// <summary>
+        /// Some stuff from Mirror.Weaver
+        /// </summary>
+        private static class MirrorMethodNameTrimmer
+        {
+            private static readonly Regex regex1 = new Regex($"^InvokeUserCode_", RegexOptions.Compiled);
+            private static readonly Regex regex2 = new Regex("__[A-Z][\\w`]*$", RegexOptions.Compiled);
+
+            public static string FixMethodName(string methodName)
+            {
+                methodName = regex1.Replace(methodName, "");
+                methodName = regex2.Replace(methodName, "");
+
+                return methodName;
+            }
         }
     }
 }
