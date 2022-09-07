@@ -36,7 +36,7 @@ Download unity package from [release page](https://github.com/James-Frowen/Mirag
 
 ## How to use:
 
-1) Add NetworkProfilerBehaviour to NetworkManager
+1) Add NetworkProfilerRecorder to NetworkManager
 2) Open Unity's Profiler and select the "Network Profiler" module
 3) Press play, and start server or client
 
