@@ -1,3 +1,10 @@
+# [1.1.0-mirror.9](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.8...v1.1.0-mirror.9) (2022-09-08)
+
+
+### Features
+
+* names for mirror rpcs ([#5](https://github.com/James-Frowen/Mirage.Profiler/issues/5)) ([6bd5fa5](https://github.com/James-Frowen/Mirage.Profiler/commit/6bd5fa5b24084fc8a7a0f043e1c5f083ce1a00e2))
+
 # [1.1.0-mirror.8](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.7...v1.1.0-mirror.8) (2022-09-08)
 
 
