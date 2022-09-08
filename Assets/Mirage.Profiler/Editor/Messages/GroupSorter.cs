@@ -7,14 +7,19 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
     internal struct GroupSorter
     {
         private readonly Dictionary<string, Group> _grouped;
-        private readonly ColumnInfo _sortHeader;
+        private readonly Func<Group, Group, int> _sortGroupFunc;
+        private readonly Func<MessageInfo, MessageInfo, int> _sortMessageFunc;
+
         private readonly SortMode _sortMode;
 
         public GroupSorter(Dictionary<string, Group> grouped, ColumnInfo sortHeader, SortMode sortMode)
         {
             _grouped = grouped;
-            _sortHeader = sortHeader;
             _sortMode = sortMode;
+
+            // if header or sort is null, use default
+            _sortGroupFunc = sortHeader?.SortGroup ?? DefaultGroupSort;
+            _sortMessageFunc = sortHeader?.SortMessages ?? DefaultMessageSort;
         }
 
         public void Sort()
@@ -45,13 +50,13 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
         private int CompareGroupSortMode(Group x, Group y)
         {
-            var sort = _sortHeader.SortGroup.Invoke(x, y);
+            var sort = _sortGroupFunc.Invoke(x, y);
             return CheckSortMode(sort);
         }
 
         private int CompareDrawnSortMode(DrawnMessage x, DrawnMessage y)
         {
-            var sort = _sortHeader.SortMessages.Invoke(x.Info, y.Info);
+            var sort = _sortMessageFunc.Invoke(x.Info, y.Info);
             return CheckSortMode(sort);
         }
 
