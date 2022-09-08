@@ -86,9 +86,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             {
                 text = "Group Messages",
                 tooltip = "Groups Message by type",
-                value = true
+                value = _savedData.GroupMessages,
             };
-            _groupMsgToggle.RegisterValueChangedCallback(_ => ReloadData());
+            _groupMsgToggle.RegisterValueChangedCallback(GroupToggled);
             _toggleBox.Add(_groupMsgToggle);
 
             // todo allow selection of multiple frames
@@ -125,6 +125,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             ProfilerWindow.SelectedFrameIndexChanged += FrameIndexChanged;
 
             return root;
+        }
+
+        private void GroupToggled(ChangeEvent<bool> evt)
+        {
+            _savedData.GroupMessages = evt.newValue;
+            ReloadData();
         }
 
         private void OnGroupExpanded(Group group, bool expanded)
