@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Mirage.NetworkProfiler.ModuleGUI.UITable;
 
 namespace Mirage.NetworkProfiler.ModuleGUI.Messages
@@ -76,10 +75,10 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
                 var count = split.Length;
                 if (count >= 2)
                 {
-	                return $"{split[count - 2]}.{split[count - 1]}";
+                    return $"{split[count - 2]}.{split[count - 1]}";
                 }
             }
-            
+
             return fullName;
         }
 
