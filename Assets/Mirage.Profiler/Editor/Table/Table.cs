@@ -27,7 +27,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
             // seperate root for contents, so that Horizontal from scroll isn't applied
             var root = new VisualElement();
             VisualElement.Add(root);
-            ScrollView = new ScrollView(ScrollViewMode.Vertical);
+            // using VerticalAndHorizontal fixes header being squashed, not sure why, or if it'll cause future problems
+            ScrollView = new ScrollView(ScrollViewMode.VerticalAndHorizontal);
 
             // add header to table root
             // header will initialize labels, but we need to set text
