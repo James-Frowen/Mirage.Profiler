@@ -56,7 +56,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
                 row.VisualElement.style.display = expanded ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
-            Head.SetText(_columns.Expand, Expanded ? "-" : "+");
+            // head can be null if ungrouped
+            Head?.SetText(_columns.Expand, Expanded ? "-" : "+");
         }
 
         public void LazyCreateRows()
