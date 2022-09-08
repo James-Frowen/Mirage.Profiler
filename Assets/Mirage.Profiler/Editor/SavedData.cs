@@ -28,6 +28,8 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         /// </summary>
         public List<string> Expanded;
 
+        public bool GroupMessages = true;
+
         public SavedData()
         {
             Frames = new Frames();
