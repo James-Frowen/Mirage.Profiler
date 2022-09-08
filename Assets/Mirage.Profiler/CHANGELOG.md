@@ -1,3 +1,18 @@
+# [1.1.0](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.4...v1.1.0) (2022-09-08)
+
+
+### Bug Fixes
+
+* fixes null ref when sort header is null ([d233036](https://github.com/James-Frowen/Mirage.Profiler/commit/d233036255497a8c49f61a657ed61022ed671020)), closes [#4](https://github.com/James-Frowen/Mirage.Profiler/issues/4)
+* fixing header being squashed if vertical scroll is full ([ad29f2e](https://github.com/James-Frowen/Mirage.Profiler/commit/ad29f2ee756793d15f2701b6d06fccac7d78b950))
+* fixing null ref when group message is false ([004ba4e](https://github.com/James-Frowen/Mirage.Profiler/commit/004ba4e26ea9ff0dfeacba3e7f6440a85497ddc3)), closes [#6](https://github.com/James-Frowen/Mirage.Profiler/issues/6)
+* stopping exception if rpc name does not contain dot ([#3](https://github.com/James-Frowen/Mirage.Profiler/issues/3)) ([324a374](https://github.com/James-Frowen/Mirage.Profiler/commit/324a374800b784595cf752f5d3943efe9ff91c6d))
+
+
+### Features
+
+* adding group message to save data ([3061381](https://github.com/James-Frowen/Mirage.Profiler/commit/306138196805e949e68a8b7517f2c846506b32ad))
+
 ## [1.0.4](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.3...v1.0.4) (2022-08-08)
 
 
