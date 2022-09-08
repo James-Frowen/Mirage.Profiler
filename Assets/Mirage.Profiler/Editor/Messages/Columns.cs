@@ -68,12 +68,19 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             if (string.IsNullOrEmpty(fullName))
                 return string.Empty;
 
-            var split = fullName.Split('.');
-            var count = split.Length;
-            // full name should be atleast "className.methodName"
-            Debug.Assert(count >= 2);
+            const char separator = '.';
 
-            return $"{split[count - 2]}.{split[count - 1]}";
+            if (fullName.Contains(separator))
+            {
+                var split = fullName.Split(separator);
+                var count = split.Length;
+                if (count >= 2)
+                {
+	                return $"{split[count - 2]}.{split[count - 1]}";
+                }
+            }
+            
+            return fullName;
         }
 
 
