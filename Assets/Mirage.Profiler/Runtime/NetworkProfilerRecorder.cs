@@ -24,11 +24,6 @@ namespace Mirage.NetworkProfiler
 
         private void Start()
         {
-#if !UNITY_EDITOR
-            Debug.LogWarning("NetworkProfilerBehaviour only works in editor");
-            return;
-#endif
-            
             if (Instance == null)
             {
 #if UNITY_EDITOR
@@ -59,12 +54,12 @@ namespace Mirage.NetworkProfiler
             }
         }
 
-#if UNITY_EDITOR
         private void LateUpdate()
         {
             if (!NetworkServer.active && !NetworkClient.active)
                 return;
 
+#if UNITY_EDITOR
             if (!ProfilerDriver.enabled)
                 return;
 
@@ -83,8 +78,12 @@ namespace Mirage.NetworkProfiler
                 // not sure why frame is offset, but +2 fixes it
                 SampleMessages(lastFrame + 2);
             }
-        }
+#else
+            // in player, just use ProfilerCounter (frameCount only used by messages) 
+            SampleCounts();
+            SampleMessages(0);
 #endif
+        }
 
         /// <summary>
         /// call this every frame to sample number of players and objects
