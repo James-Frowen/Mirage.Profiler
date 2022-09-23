@@ -185,21 +185,29 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
         private void ReloadMessages()
         {
+            const int EditorID = -1;
+
             _messageView.Clear();
 
             var frameIndex = (int)ProfilerWindow.selectedFrameIndex;
             // Debug.Log($"ReloadMessages [selected {(int)ProfilerWindow.selectedFrameIndex}]");
 
 
+            if (ProfilerDriver.connectedProfiler != EditorID)
+            {
+                AddErrorLabel("Can't read message from player");
+                return;
+            }
+
             if (!TryGetMessages(frameIndex, out var messages))
             {
-                AddCantLoadLabel();
+                AddErrorLabel("Can not load messages! (Message list only visible in play mode)\nIMPORTANT: make sure NetworkProfilerBehaviour is setup in starting scene");
                 return;
             }
 
             if (messages.Count == 0)
             {
-                AddNoMessagesLabel();
+                AddInfoLabel("No Messages");
                 return;
             }
 
@@ -253,19 +261,19 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             return messages;
         }
 
-        private void AddCantLoadLabel()
+        private void AddErrorLabel(string message)
         {
             var parent = _messageView.AddEmptyRow();
             var ele = AddLabelWithPadding(parent);
             ele.style.color = Color.red;
-            ele.text = "Can not load messages! (Message list only visible in play mode)\nIMPORTANT: make sure NetworkProfilerBehaviour is setup in starting scene";
+            ele.text = message;
         }
 
-        private void AddNoMessagesLabel()
+        private void AddInfoLabel(string message)
         {
             var parent = _messageView.AddEmptyRow();
             var ele = AddLabelWithPadding(parent);
-            ele.text = "No Messages";
+            ele.text = message;
         }
     }
 }
