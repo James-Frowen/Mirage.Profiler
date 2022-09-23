@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0...v1.2.0) (2022-09-23)
+
+
+### Features
+
+* adding support for counter in built player ([fdcf4bb](https://github.com/James-Frowen/Mirage.Profiler/commit/fdcf4bbb65044c4bc7c3ea0ecef39e81a9db3940))
+
 # [1.1.0](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.0.4...v1.1.0) (2022-09-08)
 
 
