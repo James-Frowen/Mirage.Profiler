@@ -1,3 +1,10 @@
+# [1.1.0-mirror.10](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.9...v1.1.0-mirror.10) (2022-09-23)
+
+
+### Features
+
+* adding support for counter in built player ([506e904](https://github.com/James-Frowen/Mirage.Profiler/commit/506e9048571ba3e75ec9561ca1144db5685245c5))
+
 # [1.1.0-mirror.9](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.8...v1.1.0-mirror.9) (2022-09-08)
 
 
