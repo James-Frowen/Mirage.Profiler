@@ -14,7 +14,10 @@ Thanks to https://github.com/JesusLuvsYooh/MirrorNetworkProfiler for some refere
 
 ## How to install
 
-Add Required package: `"com.unity.profiling.core": "1.0.2"` if using package manager this will be done automatically
+Add Required package: **Unity Profiling Core API**
+- If Installing Mirage Profiler via package manager this prerequisite will be added automatically.
+
+![image](https://user-images.githubusercontent.com/9826063/205904431-f371c605-4bd3-4bb5-bd44-b9d6d5a2f17e.png)
 
 ### Unity package manager (Mirage only)
 use package manager to get versions easily, or replace `#v1.0.3` with the tag, branch or full hash of the commit.
