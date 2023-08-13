@@ -65,9 +65,13 @@ namespace Mirage.NetworkProfiler
             }
         }
 
+#if !MIRROR_2022_9_OR_NEWER
+        private string GetRpcName(uint netId, int componentIndex, int functionIndex)
+#else
         private string GetRpcName(uint netId, int componentIndex, ushort functionIndex)
+#endif
         {
-            ushort hash = functionIndex;
+            var hash = functionIndex;
             var remoteCallDelegate = RemoteProcedureCalls.GetDelegate(hash);
             if (remoteCallDelegate != null)
             {
