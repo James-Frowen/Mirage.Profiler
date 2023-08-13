@@ -1,3 +1,10 @@
+# [1.1.0-mirror.11](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.10...v1.1.0-mirror.11) (2023-08-13)
+
+
+### Bug Fixes
+
+* adding define to support older versions of mirror ([86c29cd](https://github.com/James-Frowen/Mirage.Profiler/commit/86c29cd70ca57913d7ec5678cb126abd3737beac))
+
 # [1.1.0-mirror.10](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.9...v1.1.0-mirror.10) (2022-09-23)
 
 
