@@ -1,3 +1,10 @@
+// mirror removes defines (for some reason) so need to check if any of the defines exist
+// if they any do it is new version so set MIRROR_RPC_USHORT so the code below can use it
+#if MIRROR_2022_9_OR_NEWER || MIRROR_70_OR_NEWER || MIRROR_85_OR_NEWER
+#define MIRROR_RPC_USHORT
+#endif
+
+
 using System.Text.RegularExpressions;
 using Mirror;
 using Mirror.RemoteCalls;
@@ -65,10 +72,10 @@ namespace Mirage.NetworkProfiler
             }
         }
 
-#if !MIRROR_2022_9_OR_NEWER
-        private string GetRpcName(uint netId, int componentIndex, int functionIndex)
-#else
+#if MIRROR_RPC_USHORT
         private string GetRpcName(uint netId, int componentIndex, ushort functionIndex)
+#else
+        private string GetRpcName(uint netId, int componentIndex, int functionIndex)
 #endif
         {
             var hash = functionIndex;

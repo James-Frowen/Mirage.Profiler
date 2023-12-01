@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Mirage.NetworkProfiler.Example
 {
     [RequireComponent(typeof(NetworkIdentity))]
-    [RequireComponent(typeof(NetworkTransform))]
+    [RequireComponent(typeof(NetworkTransformUnreliable))]
     public class ExamplePlayer : NetworkBehaviour
     {
         [SerializeField] private float _moveSpeed = 10;
