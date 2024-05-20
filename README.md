@@ -29,7 +29,7 @@ use package manager to get versions easily, or replace `#v1.0.3` with the tag, b
 ```
 #### Mirror
 ```
-"com.james-frowen.mirage-profiler": "https://github.com/James-Frowen/Mirage.Profiler.git?path=/Assets/Mirage.Profiler#v1.1.0-mirror.5",
+"com.james-frowen.mirage-profiler": "https://github.com/James-Frowen/Mirage.Profiler.git?path=/Assets/Mirage.Profiler#v1.1.0-mirror.12",
 ```
 
 ### Unity package
