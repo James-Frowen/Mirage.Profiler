@@ -1,3 +1,11 @@
+## [1.2.1](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.2.0...v1.2.1) (2024-08-21)
+
+
+### Bug Fixes
+
+* fixing recorder not taking reference to client ([21693d1](https://github.com/James-Frowen/Mirage.Profiler/commit/21693d10fbec7cd5acf86cd7e77592af77939c43))
+* stopping message name from overflowing ([3a151c1](https://github.com/James-Frowen/Mirage.Profiler/commit/3a151c1d2c68872bedc1f9602dab0a69fdcf56ec))
+
 # [1.2.0](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0...v1.2.0) (2022-09-23)
 
 
