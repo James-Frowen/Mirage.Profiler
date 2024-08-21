@@ -8,8 +8,9 @@ namespace Mirage.NetworkProfiler
         private const ProfilerMarkerDataUnit COUNT = ProfilerMarkerDataUnit.Count;
         private const ProfilerMarkerDataUnit BYTES = ProfilerMarkerDataUnit.Bytes;
 
-        public static readonly ProfilerCounter<int> PlayerCount = new ProfilerCounter<int>(Category, Names.PLAYER_COUNT, COUNT);
-        public static readonly ProfilerCounter<int> CharCount = new ProfilerCounter<int>(Category, Names.CHARACTER_COUNT, COUNT);
+        public static readonly ProfilerCounter<int> AllPlayersCount = new ProfilerCounter<int>(Category, Names.PLAYER_COUNT, COUNT);
+        public static readonly ProfilerCounter<int> AuthenticatedPlayersCount = new ProfilerCounter<int>(Category, Names.AUTHENTICATED_COUNT, COUNT);
+        public static readonly ProfilerCounter<int> CharacterCount = new ProfilerCounter<int>(Category, Names.CHARACTER_COUNT, COUNT);
         public static readonly ProfilerCounter<int> ObjectCount = new ProfilerCounter<int>(Category, Names.OBJECT_COUNT, COUNT);
 
         public static readonly ProfilerCounter<int> SentCount = new ProfilerCounter<int>(Category, Names.SENT_COUNT, COUNT);

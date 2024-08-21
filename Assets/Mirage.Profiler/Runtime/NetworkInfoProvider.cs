@@ -1,3 +1,5 @@
+using Mirage.RemoteCalls;
+
 namespace Mirage.NetworkProfiler
 {
     /// <summary>
@@ -23,14 +25,13 @@ namespace Mirage.NetworkProfiler
         {
             switch (info.message)
             {
-                case ServerRpcMessage msg: return msg.netId;
-                case ServerRpcWithReplyMessage msg: return msg.netId;
-                case RpcMessage msg: return msg.netId;
-                case SpawnMessage msg: return msg.netId;
-                case RemoveAuthorityMessage msg: return msg.netId;
-                case ObjectDestroyMessage msg: return msg.netId;
-                case ObjectHideMessage msg: return msg.netId;
-                case UpdateVarsMessage msg: return msg.netId;
+                case RpcMessage msg: return msg.NetId;
+                case RpcWithReplyMessage msg: return msg.NetId;
+                case SpawnMessage msg: return msg.NetId;
+                case RemoveAuthorityMessage msg: return msg.NetId;
+                case ObjectDestroyMessage msg: return msg.NetId;
+                case ObjectHideMessage msg: return msg.NetId;
+                case UpdateVarsMessage msg: return msg.NetId;
                 default: return default;
             }
         }
@@ -52,25 +53,22 @@ namespace Mirage.NetworkProfiler
         {
             switch (info.message)
             {
-                case ServerRpcMessage msg:
-                    return GetRpcName(msg.netId, msg.componentIndex, msg.functionIndex);
-                case ServerRpcWithReplyMessage msg:
-                    return GetRpcName(msg.netId, msg.componentIndex, msg.functionIndex);
                 case RpcMessage msg:
-                    return GetRpcName(msg.netId, msg.componentIndex, msg.functionIndex);
+                    return GetRpcName(msg.NetId, msg.FunctionIndex);
+                case RpcWithReplyMessage msg:
+                    return GetRpcName(msg.NetId, msg.FunctionIndex);
                 default: return string.Empty;
             }
         }
 
-        private string GetRpcName(uint netId, int componentIndex, int functionIndex)
+        private string GetRpcName(uint netId, int functionIndex)
         {
             var identity = GetNetworkIdentity(netId);
             if (identity == null)
                 return string.Empty;
 
-            var behaviour = identity.NetworkBehaviours[componentIndex];
-            var rpc = behaviour.RemoteCallCollection.Get(functionIndex);
-            return rpc.name;
+            var rpc = identity.RemoteCallCollection.GetAbsolute(functionIndex);
+            return rpc.Name;
         }
     }
 }

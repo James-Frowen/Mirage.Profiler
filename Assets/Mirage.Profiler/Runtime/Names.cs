@@ -2,10 +2,13 @@ namespace Mirage.NetworkProfiler
 {
     public static class Names
     {
-        public const string PLAYER_COUNT = "Player Count";
+        public const string PLAYER_COUNT = "All Players Count";
         public const string PLAYER_COUNT_TOOLTIP = "Number of players connected to the server";
+        public const string AUTHENTICATED_COUNT = "Authenticated Players Count";
+        public const string AUTHENTICATED_COUNT_TOOLTIP = "Number of Authenticated players connected to the server, This should be same as total players most of the time";
         public const string CHARACTER_COUNT = "Character Count";
         public const string CHARACTER_COUNT_TOOLTIP = "Number of players with spawned GameObjects";
+
 
         public const string OBJECT_COUNT = "Object Count";
         public const string OBJECT_COUNT_TOOLTIP = "Number of NetworkIdentities spawned on the server";

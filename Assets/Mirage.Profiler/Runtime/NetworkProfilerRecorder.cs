@@ -1,5 +1,7 @@
 using Mirage.Logging;
 using UnityEngine;
+using System.Linq;
+
 
 #if UNITY_EDITOR
 using UnityEditorInternal;
@@ -149,8 +151,9 @@ namespace Mirage.NetworkProfiler
         {
             if (instance == (object)Server)
             {
-                Counters.PlayerCount.Sample(Server.Players.Count);
-                Counters.PlayerCount.Sample(Server.NumberOfPlayers);
+                Counters.AllPlayersCount.Sample(Server.AllPlayers.Count);
+                Counters.AuthenticatedPlayersCount.Sample(Server.AuthenticatedPlayers.Count);
+                Counters.CharacterCount.Sample(Server.AuthenticatedPlayers.Count(x => x.Identity != null));
                 Counters.ObjectCount.Sample(Server.World.SpawnedIdentities.Count);
             }
         }

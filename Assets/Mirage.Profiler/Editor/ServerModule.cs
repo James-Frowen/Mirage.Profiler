@@ -13,6 +13,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         private static readonly ProfilerCounterDescriptor[] counters = new ProfilerCounterDescriptor[]
         {
             new ProfilerCounterDescriptor(Names.PLAYER_COUNT, Counters.Category),
+            new ProfilerCounterDescriptor(Names.AUTHENTICATED_COUNT, Counters.Category),
             new ProfilerCounterDescriptor(Names.CHARACTER_COUNT, Counters.Category),
             new ProfilerCounterDescriptor(Names.OBJECT_COUNT, Counters.Category),
         };
@@ -50,6 +51,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
     public sealed class ServerViewController : BaseViewController
     {
         private Label PlayerLabel;
+        private Label AuthenticatedLabel;
         private Label CharacterLabel;
         private Label ObjectLabel;
 
@@ -60,10 +62,12 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             var root = new VisualElement();
 
             PlayerLabel = AddLabelWithPadding(root);
+            AuthenticatedLabel = AddLabelWithPadding(root);
             CharacterLabel = AddLabelWithPadding(root);
             ObjectLabel = AddLabelWithPadding(root);
 
             PlayerLabel.tooltip = Names.PLAYER_COUNT_TOOLTIP;
+            AuthenticatedLabel.tooltip = Names.AUTHENTICATED_COUNT_TOOLTIP;
             CharacterLabel.tooltip = Names.CHARACTER_COUNT_TOOLTIP;
             ObjectLabel.tooltip = Names.OBJECT_COUNT_TOOLTIP;
 
@@ -96,6 +100,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         private void ReloadData()
         {
             SetText(PlayerLabel, Names.PLAYER_COUNT);
+            SetText(AuthenticatedLabel, Names.AUTHENTICATED_COUNT);
             SetText(CharacterLabel, Names.CHARACTER_COUNT);
             SetText(ObjectLabel, Names.OBJECT_COUNT);
         }

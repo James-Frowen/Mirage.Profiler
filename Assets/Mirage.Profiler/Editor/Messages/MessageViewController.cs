@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Mirage.NetworkProfiler.ModuleGUI.UITable;
+using Mirage.RemoteCalls;
 using Unity.Profiling;
 using Unity.Profiling.Editor;
 using UnityEditor;
@@ -243,9 +244,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             var order = 0;
             for (var i = 0; i < 5; i++)
             {
-                messages.Add(NewInfo(order++, new RpcMessage { netId = (uint)i }, 20 + i, 5));
-                messages.Add(NewInfo(order++, new SpawnMessage { netId = (uint)i }, 80 + i, 1));
-                messages.Add(NewInfo(order++, new SpawnMessage { netId = (uint)i }, 60 + i, 4));
+                messages.Add(NewInfo(order++, new RpcMessage { NetId = (uint)i }, 20 + i, 5));
+                messages.Add(NewInfo(order++, new SpawnMessage { NetId = (uint)i }, 80 + i, 1));
+                messages.Add(NewInfo(order++, new SpawnMessage { NetId = (uint)i }, 60 + i, 4));
                 messages.Add(NewInfo(order++, new NetworkPingMessage { }, 4, 1));
 
                 static MessageInfo NewInfo(int order, object msg, int bytes, int count)
