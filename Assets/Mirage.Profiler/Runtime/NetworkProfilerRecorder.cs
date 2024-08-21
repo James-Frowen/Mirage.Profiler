@@ -18,7 +18,7 @@ namespace Mirage.NetworkProfiler
         public static NetworkProfilerRecorder Instance { get; private set; }
 
         public NetworkServer Server;
-        public NetworkServer Client;
+        public NetworkClient Client;
 
         /// <summary>
         /// instance being used for profiler
@@ -107,7 +107,7 @@ namespace Mirage.NetworkProfiler
                 instance = null;
         }
 
-        private void ClientStopped(INetworkPlayer arg0)
+        private void ClientStopped(ClientStoppedReason _)
         {
             if (instance == (object)Client)
                 instance = null;
