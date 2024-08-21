@@ -38,6 +38,9 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
             style.borderBottomColor = Color.white * .4f;
             style.borderBottomWidth = 1;
             style.borderRightWidth = 2;
+
+            style.overflow = Overflow.Hidden;
+            style.textOverflow = TextOverflow.Ellipsis;
         }
 
         public override Label GetLabel(ColumnInfo column)

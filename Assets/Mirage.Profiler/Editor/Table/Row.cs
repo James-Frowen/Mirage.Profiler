@@ -40,6 +40,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
         {
             var label = GetLabel(column);
             label.text = text;
+            label.tooltip = text;
         }
     }
 }
