@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.2.1...v1.2.2) (2024-08-21)
+
+
+### Bug Fixes
+
+* setting new mirage version in package ([23db36c](https://github.com/James-Frowen/Mirage.Profiler/commit/23db36cf3a55aaeb29a5695a8fc5f6a57326afc3))
+
 ## [1.2.1](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.2.0...v1.2.1) (2024-08-21)
 
 
