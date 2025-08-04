@@ -1,3 +1,10 @@
+# [1.1.0-mirror.13](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.12...v1.1.0-mirror.13) (2025-08-04)
+
+
+### Bug Fixes
+
+* fixing Mirror's bad versioning  ([3a2153d](https://github.com/James-Frowen/Mirage.Profiler/commit/3a2153d1e78863f0f19b079abd63f377ad6f6d23))
+
 # [1.1.0-mirror.12](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.1.0-mirror.11...v1.1.0-mirror.12) (2023-12-01)
 
 
