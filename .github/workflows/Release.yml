@@ -12,7 +12,8 @@ jobs:
     env:
       SOURCE_PATH: Assets/Mirage.Profiler
       TARGET_PATH: Assets/Mirage.Profiler
-    runs-on: ubuntu-latest
+
+    runs-on: windows-latest
     steps:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v2
@@ -31,7 +32,7 @@ jobs:
       - name: Release
         # id so output can be used by other steps
         id: semantic 
-        uses: cycjimmy/semantic-release-action@v3
+        uses: cycjimmy/semantic-release-action@v4
         with:          
           extra_plugins: |
             @semantic-release/exec
