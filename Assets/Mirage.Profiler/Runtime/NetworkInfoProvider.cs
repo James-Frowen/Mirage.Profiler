@@ -1,6 +1,6 @@
 // mirror removes defines (for some reason) so need to check if any of the defines exist
 // if they any do it is new version so set MIRROR_RPC_USHORT so the code below can use it
-#if MIRROR_2022_9_OR_NEWER || MIRROR_70_OR_NEWER || MIRROR_85_OR_NEWER
+#if MIRROR_2022_9_OR_NEWER || MIRROR_70_OR_NEWER || MIRROR_85_OR_NEWER || MIRROR_96_OR_NEWER
 #define MIRROR_RPC_USHORT
 #endif
 
