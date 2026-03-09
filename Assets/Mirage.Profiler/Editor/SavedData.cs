@@ -85,17 +85,42 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         {
             NetworkProfilerRecorder.AfterSample += AfterSample;
             EditorApplication.quitting += Quitting;
+
+            // Clear data from this session if it's the first time we load in this session
+            // Unity doesn't always clear Temp if it crashed, so we do it ourselves once per session
+            if (!SessionState.GetBool("Mirage.Profiler.SessionStarted", false))
+            {
+                SessionState.SetBool("Mirage.Profiler.SessionStarted", true);
+                DeleteData();
+            }
         }
 
         private void Quitting()
         {
             Console.WriteLine("[Mirage.Profiler] quitting");
-            // save and clear references when quitting,
-            // this is needed because finialize is called after unity dll unloads so causes crash
-            SaveBoth();
+            
+            // Clear data when closing as we don't need it after the editor closes
+            DeleteData();
+
             _receiveData = null;
             _sentData = null;
             isQuitting = true;
+        }
+
+        private static void DeleteData()
+        {
+            var tempPath = Path.GetFullPath(Path.Join("Temp", "Mirage.Profiler"));
+            if (Directory.Exists(tempPath))
+            {
+                try { Directory.Delete(tempPath, true); } catch { }
+            }
+
+            // Also clean up legacy folder if it still exists
+            var oldPath = Path.GetFullPath(Path.Join("UserSettings", "Mirage.Profiler"));
+            if (Directory.Exists(oldPath))
+            {
+                try { Directory.Delete(oldPath, true); } catch { }
+            }
         }
 
         ~SaveDataLoader()
@@ -181,11 +206,11 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
         public static string GetFullPath(string name)
         {
-            var userSettingsFolder = Path.GetFullPath("UserSettings");
+            var folder = Path.GetFullPath("Temp");
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
-            return Path.Join(userSettingsFolder, "Mirage.Profiler", $"{name}.json");
+            return Path.Join(folder, "Mirage.Profiler", $"{name}.json");
         }
 
         public static void Save(string path, SavedData data)
