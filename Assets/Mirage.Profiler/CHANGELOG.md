@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.2.3...v1.3.0) (2026-03-09)
+
+
+### Bug Fixes
+
+* fixing example new mirage version ([48b7977](https://github.com/James-Frowen/Mirage.Profiler/commit/48b7977a5f641b7dcdaf9ca4e6bcdaa4757b3b9a))
+
+
+### Features
+
+* adding HumanReadableByteFormatter to make profiler easier to read ([fa4f640](https://github.com/James-Frowen/Mirage.Profiler/commit/fa4f64049a1bcb6c80d8629a292dde036f16ea9b))
+
 ## [1.2.3](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.2.2...v1.2.3) (2026-03-09)
 
 
