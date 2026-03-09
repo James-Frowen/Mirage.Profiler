@@ -29,14 +29,16 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             FullName = new ColumnInfo("Message", FULL_NAME_WIDTH, x => x.Name);
             FullName.AddSort(m => m.Name, m => m.Name);
 
-            TotalBytes = new ColumnInfo("Total Bytes", OTHER_WIDTH, x => x.TotalBytes.ToString());
+            TotalBytes = new ColumnInfo("Total Bytes", OTHER_WIDTH, x => HumanReadableByteFormatter.Format(x.TotalBytes));
             TotalBytes.AddSort(m => m.TotalBytes, m => m.TotalBytes);
+            TotalBytes.AddToolTip(x => x.TotalBytes.ToString());
 
             Count = new ColumnInfo("Count", OTHER_WIDTH, x => x.Count.ToString());
             Count.AddSort(m => m.TotalCount, m => m.Count);
 
-            BytesPerMessage = new ColumnInfo("Bytes", OTHER_WIDTH, x => x.Bytes.ToString());
+            BytesPerMessage = new ColumnInfo("Bytes", OTHER_WIDTH, x => HumanReadableByteFormatter.Format(x.Bytes));
             BytesPerMessage.AddSort(null, m => m.Bytes);
+            BytesPerMessage.AddToolTip(x => x.Bytes.ToString());
 
             NetId = new ColumnInfo("Net id", OTHER_WIDTH, x => x.NetId.HasValue ? x.NetId.ToString() : "");
             NetId.AddSort(null, m => m.NetId.GetValueOrDefault());

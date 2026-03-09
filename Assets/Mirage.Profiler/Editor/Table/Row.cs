@@ -32,15 +32,15 @@ namespace Mirage.NetworkProfiler.ModuleGUI.UITable
         public abstract Label GetLabel(ColumnInfo column);
         public abstract IEnumerable<VisualElement> GetChildren();
 
-        public void SetText(ColumnInfo column, object obj)
+        public void SetText(ColumnInfo column, object obj, string tooltip = null)
         {
-            SetText(column, obj.ToString());
+            SetText(column, obj.ToString(), tooltip);
         }
-        public void SetText(ColumnInfo column, string text)
+        public void SetText(ColumnInfo column, string text, string tooltip = null)
         {
             var label = GetLabel(column);
             label.text = text;
-            label.tooltip = text;
+            label.tooltip = tooltip ?? text;
         }
     }
 }

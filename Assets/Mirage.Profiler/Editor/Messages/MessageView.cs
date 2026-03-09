@@ -89,7 +89,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
             var head = _table.AddRow();
             head.SetText(_columns.Expand, group.Expanded ? "-" : "+");
             head.SetText(_columns.FullName, group.Name);
-            head.SetText(_columns.TotalBytes, group.TotalBytes);
+            head.SetText(_columns.TotalBytes, HumanReadableByteFormatter.Format(group.TotalBytes), group.TotalBytes.ToString());
             head.SetText(_columns.Count, group.TotalCount);
             group.Head = head;
 
