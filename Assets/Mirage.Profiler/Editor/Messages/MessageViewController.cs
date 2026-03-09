@@ -202,7 +202,7 @@ namespace Mirage.NetworkProfiler.ModuleGUI.Messages
 
             if (!TryGetMessages(frameIndex, out var messages))
             {
-                AddErrorLabel("Can not load messages! (Message list only visible in play mode)\nIMPORTANT: make sure NetworkProfilerBehaviour is setup in starting scene");
+                AddErrorLabel($"Can not load messages! (Message list only visible in play mode)\nIMPORTANT: make sure {nameof(NetworkProfilerRecorder)} is setup in starting scene");
                 return;
             }
 
