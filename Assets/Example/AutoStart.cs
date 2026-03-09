@@ -52,7 +52,7 @@ namespace Mirage.NetworkProfiler.Example
             server.MaxConnections = 1000;
             var serverObjectManager = serverGO.AddComponent<ServerObjectManager>();
             server.SocketFactory = serverGO.AddComponent<UdpSocketFactory>();
-            serverObjectManager.Server = server;
+            server.ObjectManager = serverObjectManager;
             server.Connected.AddListener((player) =>
             {
                 var clone = Instantiate(prefabIdentity);
@@ -72,8 +72,7 @@ namespace Mirage.NetworkProfiler.Example
             clientGO.transform.parent = transform;
             var client = clientGO.AddComponent<NetworkClient>();
             var clientObjectManager = clientGO.AddComponent<ClientObjectManager>();
-            clientObjectManager.Client = client;
-
+            client.ObjectManager = clientObjectManager;
             client.SocketFactory = clientGO.AddComponent<UdpSocketFactory>();
             await UniTask.Delay(100);
 
