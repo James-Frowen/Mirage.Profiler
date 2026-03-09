@@ -1,3 +1,11 @@
+## [1.2.3](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.2.2...v1.2.3) (2026-03-09)
+
+
+### Bug Fixes
+
+* clearing save data when unity closes ([c5da681](https://github.com/James-Frowen/Mirage.Profiler/commit/c5da6811c37cd6c274445b23ee2837245a93a2b4))
+* fixing name of script in warning message ([e599984](https://github.com/James-Frowen/Mirage.Profiler/commit/e5999843dc9191472249bb146a0ffd6fb92d873f))
+
 ## [1.2.2](https://github.com/James-Frowen/Mirage.Profiler/compare/v1.2.1...v1.2.2) (2024-08-21)
 
 
