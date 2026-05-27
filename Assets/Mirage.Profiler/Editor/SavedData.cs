@@ -67,7 +67,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI
         {
             foreach (var frame in Frames)
             {
-                frame.Bytes = 0;
                 frame.Messages.Clear();
             }
         }
@@ -154,7 +153,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI
             var saveFrame = data.Frames.GetFrame(tick);
 
             // clear old data
-            saveFrame.Bytes = 0;
             saveFrame.Messages.Clear();
 
             if (counter == null)
@@ -162,7 +160,6 @@ namespace Mirage.NetworkProfiler.ModuleGUI
 
             var counterFrame = counter._frames.GetFrame(tick);
 
-            saveFrame.Bytes = counterFrame.Bytes;
             saveFrame.Messages.AddRange(counterFrame.Messages);
         }
 

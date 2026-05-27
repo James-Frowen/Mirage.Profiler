@@ -46,7 +46,6 @@ namespace Mirage.NetworkProfiler
 
             var frame = _frames.GetFrame(_frameIndex);
             frame.Messages.Add(new MessageInfo(obj, _provider, frame.Messages.Count));
-            frame.Bytes++;
         }
 
         public void EndFrame(int frameIndex)
@@ -62,7 +61,6 @@ namespace Mirage.NetworkProfiler
             _frameIndex = frameIndex + 1;
             var frame = _frames.GetFrame(_frameIndex);
             frame.Messages.Clear();
-            frame.Bytes = 0;
         }
 
         private void CaclulatePerSecond(float now, int bytes)

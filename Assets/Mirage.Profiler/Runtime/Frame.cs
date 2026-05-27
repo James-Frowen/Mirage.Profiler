@@ -39,6 +39,5 @@ namespace Mirage.NetworkProfiler
     public class Frame
     {
         public List<MessageInfo> Messages = new List<MessageInfo>();
-        public int Bytes;
     }
 }
